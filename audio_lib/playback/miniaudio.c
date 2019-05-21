@@ -9,14 +9,14 @@
 
 #include "../miniaudio.h"
 
-typedef struct BackendStream
+struct BackendStream
 {
 	void (*user_callback)(void*, float*, unsigned long);
 	void *user_data;
 
 	ma_device device;
 	float volume;
-} BackendStream;
+};
 
 static void Callback(ma_device *device, void *output_buffer_void, const void *input_buffer, ma_uint32 frames_to_do)
 {

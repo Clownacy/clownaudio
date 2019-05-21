@@ -12,19 +12,19 @@
 #include "common.h"
 #include "memory_file.h"
 
-typedef struct DecoderData_libVorbis
+struct DecoderData_libVorbis
 {
 	unsigned char *file_buffer;
 	size_t file_size;
-} DecoderData_libVorbis;
+};
 
-typedef struct Decoder_libVorbis
+struct Decoder_libVorbis
 {
 	DecoderData_libVorbis *data;
 	OggVorbis_File vorbis_file;
 	bool loops;
 	unsigned int channel_count;
-} Decoder_libVorbis;
+};
 
 static size_t MemoryFile_fread_wrapper(void *output, size_t size, size_t count, void *file)
 {

@@ -13,7 +13,7 @@ USE_PXTONE = true
 BACKEND = miniaudio
 
 CFLAGS = -O2 -s -flto
-ALL_CFLAGS = -std=c11 -MMD -MP -MF $@.d $(CFLAGS)
+ALL_CFLAGS = -std=c99 -MMD -MP -MF $@.d $(CFLAGS)
 
 CXXFLAGS = -O2 -s -flto
 ALL_CXXFLAGS = -std=c++11 -MMD -MP -MF $@.d $(CXXFLAGS)

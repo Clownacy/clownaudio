@@ -11,13 +11,13 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-typedef struct BackendStream
+struct BackendStream
 {
 	void (*user_callback)(void*, float*, unsigned long);
 	void *user_data;
 
 	float volume;
-} BackendStream;
+};
 
 static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_do)
 {

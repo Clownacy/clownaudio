@@ -13,13 +13,13 @@
 #include "common.h"
 #include "memory_file.h"
 
-typedef struct DecoderData_libSndfile
+struct DecoderData_libSndfile
 {
 	unsigned char *file_buffer;
 	size_t file_size;
-} DecoderData_libSndfile;
+};
 
-typedef struct Decoder_libSndfile
+struct Decoder_libSndfile
 {
 	DecoderData_libSndfile *data;
 	MemoryFile *file;
@@ -27,7 +27,7 @@ typedef struct Decoder_libSndfile
 	DecoderFormat format;
 	bool loops;
 	unsigned int channel_count;
-} Decoder_libSndfile;
+};
 
 static sf_count_t MemoryFile_fread_wrapper(void *output, sf_count_t count, void *user)
 {

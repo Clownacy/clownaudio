@@ -16,16 +16,16 @@
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
-typedef struct DecoderData_libOpenMPT
+struct DecoderData_libOpenMPT
 {
 	unsigned char *file_buffer;
 	size_t file_size;
-} DecoderData_libOpenMPT;
+};
 
-typedef struct Decoder_libOpenMPT
+struct Decoder_libOpenMPT
 {
 	openmpt_module *module;
-} Decoder_libOpenMPT;
+};
 
 DecoderData_libOpenMPT* Decoder_libOpenMPT_LoadData(const char *file_path, LinkedBackend *linked_backend)
 {

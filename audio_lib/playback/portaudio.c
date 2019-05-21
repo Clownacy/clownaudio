@@ -9,14 +9,14 @@
 
 #include "portaudio.h"
 
-typedef struct BackendStream
+struct BackendStream
 {
 	void (*user_callback)(void*, float*, unsigned long);
 	void *user_data;
 
 	PaStream *pa_stream;
 	float volume;
-} BackendStream;
+};
 
 static int Callback(const void *input_buffer, void *output_buffer_void, unsigned long frames_to_do, const PaStreamCallbackTimeInfo *time_info, PaStreamCallbackFlags status_flags, void *user_data)
 {

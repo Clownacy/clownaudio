@@ -16,13 +16,13 @@
 #undef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-typedef struct DecoderData_libFLAC
+struct DecoderData_libFLAC
 {
 	unsigned char *file_buffer;
 	size_t file_size;
-} DecoderData_libFLAC;
+};
 
-typedef struct Decoder_libFLAC
+struct Decoder_libFLAC
 {
 	DecoderData_libFLAC *data;
 
@@ -40,7 +40,7 @@ typedef struct Decoder_libFLAC
 	unsigned char *block_buffer;
 	unsigned long block_buffer_index;
 	unsigned long block_buffer_size;
-} Decoder_libFLAC;
+};
 
 static FLAC__StreamDecoderReadStatus MemoryFile_fread_wrapper(const FLAC__StreamDecoder *decoder, FLAC__byte *output, size_t *count, void *user)
 {

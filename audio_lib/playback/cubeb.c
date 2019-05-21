@@ -12,13 +12,13 @@
 
 #include <cubeb/cubeb.h>
 
-typedef struct BackendStream
+struct BackendStream
 {
 	void (*user_callback)(void*, float*, unsigned long);
 	void *user_data;
 
 	cubeb_stream *cubeb_stream_pointer;
-} BackendStream;
+};
 
 static cubeb *cubeb_context;
 

@@ -13,18 +13,18 @@
 #include "common.h"
 #include "memory_file.h"
 
-typedef struct DecoderData_SNES_SPC
+struct DecoderData_SNES_SPC
 {
 	unsigned char *file_buffer;
 	size_t file_size;
-} DecoderData_SNES_SPC;
+};
 
-typedef struct Decoder_SNES_SPC
+struct Decoder_SNES_SPC
 {
 	DecoderData_SNES_SPC *data;
 	SNES_SPC *snes_spc;
 //	SPC_Filter *filter;
-} Decoder_SNES_SPC;
+};
 
 DecoderData_SNES_SPC* Decoder_SNES_SPC_LoadData(const char *file_path, LinkedBackend *linked_backend)
 {

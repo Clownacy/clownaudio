@@ -15,18 +15,18 @@
 #include "common.h"
 #include "memory_file.h"
 
-typedef struct DecoderData_DR_WAV
+struct DecoderData_DR_WAV
 {
 	unsigned char *file_buffer;
 	size_t file_size;
-} DecoderData_DR_WAV;
+};
 
-typedef struct Decoder_DR_WAV
+struct Decoder_DR_WAV
 {
 	DecoderData_DR_WAV *data;
 	drwav *instance;
 	bool loops;
-} Decoder_DR_WAV;
+};
 
 DecoderData_DR_WAV* Decoder_DR_WAV_LoadData(const char *file_path, LinkedBackend *linked_backend)
 {
