@@ -1,6 +1,3 @@
-// Alternate music mod for 2004 Cave Story
-// Copyright © 2018 Clownacy
-
 #include "../playback.h"
 
 #include <stdbool.h>
@@ -18,6 +15,8 @@ struct BackendStream
 	float volume;
 };
 
+static bool sdl_already_init;
+
 static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_do)
 {
 	BackendStream *stream = user_data;
@@ -34,14 +33,18 @@ static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_d
 
 bool Backend_Init(void)
 {
-	SDL_Init(SDL_INIT_AUDIO);
+	sdl_already_init = SDL_WasInit(SDL_INIT_AUDIO);
+
+	if (!sdl_already_init)
+		SDL_InitSubSystem(SDL_INIT_AUDIO);
 
 	return true;
 }
 
 void Backend_Deinit(void)
 {
-	SDL_Quit();
+	if (!sdl_already_init)
+		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigned long), void *user_data)
