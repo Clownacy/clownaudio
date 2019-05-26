@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "SDL.h"
 
@@ -18,6 +19,19 @@ struct BackendStream
 
 	float volume;
 };
+
+static unsigned int NextPowerOfTwo(unsigned int value)
+{
+	value--;
+	value |= value >> 1;
+	value |= value >> 2;
+	value |= value >> 4;
+	value |= value >> 8;
+	value |= value >> 16;
+	value++;
+
+	return value;
+}
 
 static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_do)
 {
@@ -68,7 +82,7 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 	want.freq = STREAM_SAMPLE_RATE;
 	want.format = AUDIO_S16;
 	want.channels = STREAM_CHANNEL_COUNT;
-	want.samples = (STREAM_SAMPLE_RATE * 25) / 1000;
+	want.samples = NextPowerOfTwo(((STREAM_SAMPLE_RATE * 25) / 1000) * STREAM_CHANNEL_COUNT);	// A low-latency buffer of 25 milliseconds
 	want.callback = Callback;
 	want.userdata = stream;
 
