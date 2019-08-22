@@ -7,9 +7,9 @@
 
 (Ran through Google Translate)
 
-<License thing>
+<License>
 
-    · You can use the source code (within pxtone folder) necessary for playback free of charge. Modification is also OK.
-    · No particular permission is required.
-    · We will leave about the usage statement.
-    · We can not assume the responsibility when there is something wrong due to use.
+    ・The source code required for playback (in the pxtone folder) can be used free of charge. Modification is also OK.
+    ・No special permission is required.
+    ・I will leave it to you regarding usage. [an earlier Google Translate translation was "We will leave about the usage statement."]
+    ・We are not responsible for any problems caused by use.
