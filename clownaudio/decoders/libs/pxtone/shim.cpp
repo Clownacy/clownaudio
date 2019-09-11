@@ -23,7 +23,7 @@ static bool _load_ptcop(pxtnService* pxtn, const char* path_src)
 	return success;
 }
 
-extern "C" pxtnService* Pxtone_Open(const char *file_path, bool loop, unsigned int sample_rate, unsigned int channel_count)
+extern "C" pxtnService* PxTone_Open(const char *file_path, bool loop, unsigned int sample_rate, unsigned int channel_count)
 {
 	pxtnService *pxtn = new pxtnService();
 	if (pxtn->init() == pxtnOK)
@@ -51,12 +51,12 @@ extern "C" pxtnService* Pxtone_Open(const char *file_path, bool loop, unsigned i
 	return NULL;
 }
 
-extern "C" void Pxtone_Close(pxtnService *pxtn)
+extern "C" void PxTone_Close(pxtnService *pxtn)
 {
 	delete pxtn;
 }
 
-extern "C" void Pxtone_Rewind(pxtnService *pxtn, bool loop)
+extern "C" void PxTone_Rewind(pxtnService *pxtn, bool loop)
 {
 	pxtnVOMITPREPARATION prep = {};
 	if (loop)
@@ -67,7 +67,7 @@ extern "C" void Pxtone_Rewind(pxtnService *pxtn, bool loop)
 	pxtn->moo_preparation( &prep );
 }
 
-extern "C" unsigned long Pxtone_GetSamples(pxtnService *pxtn, void *buffer, unsigned long bytes_to_do)
+extern "C" unsigned long PxTone_GetSamples(pxtnService *pxtn, void *buffer, unsigned long bytes_to_do)
 {
 	pxtn->Moo(buffer, bytes_to_do);
 

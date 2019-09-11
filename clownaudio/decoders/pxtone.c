@@ -13,42 +13,42 @@
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
-struct DecoderData_Pxtone
+struct DecoderData_PxTone
 {
 	const char *file_path;
 };
 
-struct Decoder_Pxtone
+struct Decoder_PxTone
 {
-	DecoderData_Pxtone *data;
+	DecoderData_PxTone *data;
 	pxtnService *pxtn;
 	bool loop;
 };
 
-DecoderData_Pxtone* Decoder_Pxtone_LoadData(const char *file_path, LinkedBackend *linked_backend)
+DecoderData_PxTone* Decoder_PxTone_LoadData(const char *file_path, LinkedBackend *linked_backend)
 {
 	(void)linked_backend;
 
-	DecoderData_Pxtone *data = malloc(sizeof(DecoderData_Pxtone));
+	DecoderData_PxTone *data = malloc(sizeof(DecoderData_PxTone));
 	data->file_path = file_path;
 
 	return data;
 }
 
-void Decoder_Pxtone_UnloadData(DecoderData_Pxtone *data)
+void Decoder_PxTone_UnloadData(DecoderData_PxTone *data)
 {
 	if (data)
 		free(data);
 }
 
-Decoder_Pxtone* Decoder_Pxtone_Create(DecoderData_Pxtone *data, bool loop, DecoderInfo *info)
+Decoder_PxTone* Decoder_PxTone_Create(DecoderData_PxTone *data, bool loop, DecoderInfo *info)
 {
-	Decoder_Pxtone *decoder = NULL;
+	Decoder_PxTone *decoder = NULL;
 
-	pxtnService *pxtn = Pxtone_Open(data->file_path, loop, SAMPLE_RATE, CHANNEL_COUNT);
+	pxtnService *pxtn = PxTone_Open(data->file_path, loop, SAMPLE_RATE, CHANNEL_COUNT);
 	if (pxtn)
 	{
-		decoder = malloc(sizeof(Decoder_Pxtone));
+		decoder = malloc(sizeof(Decoder_PxTone));
 		decoder->pxtn = pxtn;
 		decoder->data = data;
 		decoder->loop = loop;
@@ -61,26 +61,26 @@ Decoder_Pxtone* Decoder_Pxtone_Create(DecoderData_Pxtone *data, bool loop, Decod
 	return decoder;
 }
 
-void Decoder_Pxtone_Destroy(Decoder_Pxtone *decoder)
+void Decoder_PxTone_Destroy(Decoder_PxTone *decoder)
 {
 	if (decoder)
 	{
-		Pxtone_Close(decoder->pxtn);
+		PxTone_Close(decoder->pxtn);
 		free(decoder);
 	}
 }
 
-void Decoder_Pxtone_Rewind(Decoder_Pxtone *decoder)
+void Decoder_PxTone_Rewind(Decoder_PxTone *decoder)
 {
-	Pxtone_Rewind(decoder->pxtn, decoder->loop);
+	PxTone_Rewind(decoder->pxtn, decoder->loop);
 }
 
-unsigned long Decoder_Pxtone_GetSamples(Decoder_Pxtone *decoder, void *buffer, unsigned long frames_to_do)
+unsigned long Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, unsigned long frames_to_do)
 {
 	const unsigned long bytes_to_do = frames_to_do * sizeof(short) * 2;
 
 	memset(buffer, 0, bytes_to_do);
-	Pxtone_GetSamples(decoder->pxtn, buffer, bytes_to_do);
+	PxTone_GetSamples(decoder->pxtn, buffer, bytes_to_do);
 
 	return frames_to_do;
 }

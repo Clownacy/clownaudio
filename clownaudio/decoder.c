@@ -104,7 +104,7 @@ static const struct
 	{(const char*[]){".spc", NULL}, BACKEND_FUNCTIONS(SNES_SPC), false, false},
 #endif
 #ifdef USE_PXTONE
-	{(const char*[]){".ptcop", ".pttune", NULL}, BACKEND_FUNCTIONS(Pxtone), false, false},
+	{(const char*[]){".ptcop", ".pttune", NULL}, BACKEND_FUNCTIONS(PxTone), false, false},
 #endif
 };
 
