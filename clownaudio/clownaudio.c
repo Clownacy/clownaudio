@@ -1,4 +1,4 @@
-#include "audio_lib.h"
+#include "clownaudio.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -18,7 +18,7 @@ static void CallbackStream(void *user_data, float *output_buffer, unsigned long 
 	Mixer_MixSamples(output_buffer, frames_to_do);
 }
 
-bool AudioLib_Init(void)
+bool ClownAudio_Init(void)
 {
 	bool success = false;
 
@@ -33,7 +33,7 @@ bool AudioLib_Init(void)
 			if (Backend_ResumeStream(stream))
 				success = true;
 			else
-				AudioLib_Deinit();
+				ClownAudio_Deinit();
 		}
 		else
 		{
@@ -44,64 +44,64 @@ bool AudioLib_Init(void)
 	return success;
 }
 
-void AudioLib_Deinit(void)
+void ClownAudio_Deinit(void)
 {
 	Backend_DestroyStream(stream);
 	Backend_Deinit();
 	Mixer_Deinit();
 }
 
-void AudioLib_Pause(void)
+void ClownAudio_Pause(void)
 {
 	Backend_PauseStream(stream);
 }
 
-void AudioLib_Unpause(void)
+void ClownAudio_Unpause(void)
 {
 	Backend_ResumeStream(stream);
 }
 
-AudioLib_Sound* AudioLib_LoadSound(const char *file_path, bool predecode)
+ClownAudio_Sound* ClownAudio_LoadSound(const char *file_path, bool predecode)
 {
-	return (AudioLib_Sound*)Mixer_LoadSound(file_path, predecode);
+	return (ClownAudio_Sound*)Mixer_LoadSound(file_path, predecode);
 }
 
-void AudioLib_UnloadSound(AudioLib_Sound *sound)
+void ClownAudio_UnloadSound(ClownAudio_Sound *sound)
 {
 	Mixer_UnloadSound((Mixer_Sound*)sound);
 }
 
-AudioLib_SoundInstanceID AudioLib_PlaySound(AudioLib_Sound *sound, bool loop)
+ClownAudio_SoundInstanceID ClownAudio_PlaySound(ClownAudio_Sound *sound, bool loop)
 {
 	return Mixer_PlaySound((Mixer_Sound*)sound, loop);
 }
 
-void AudioLib_StopSound(AudioLib_SoundInstanceID instance)
+void ClownAudio_StopSound(ClownAudio_SoundInstanceID instance)
 {
 	Mixer_StopSound(instance);
 }
 
-void AudioLib_PauseSound(AudioLib_SoundInstanceID instance)
+void ClownAudio_PauseSound(ClownAudio_SoundInstanceID instance)
 {
 	Mixer_PauseSound(instance);
 }
 
-void AudioLib_UnpauseSound(AudioLib_SoundInstanceID instance)
+void ClownAudio_UnpauseSound(ClownAudio_SoundInstanceID instance)
 {
 	Mixer_UnpauseSound(instance);
 }
 
-void AudioLib_FadeOutSound(AudioLib_SoundInstanceID instance, unsigned int duration)
+void ClownAudio_FadeOutSound(ClownAudio_SoundInstanceID instance, unsigned int duration)
 {
 	Mixer_FadeOutSound(instance, duration);
 }
 
-void AudioLib_FadeInSound(AudioLib_SoundInstanceID instance, unsigned int duration)
+void ClownAudio_FadeInSound(ClownAudio_SoundInstanceID instance, unsigned int duration)
 {
 	Mixer_FadeInSound(instance, duration);
 }
 
-void AudioLib_SetSoundVolume(AudioLib_SoundInstanceID instance, float volume)
+void ClownAudio_SetSoundVolume(ClownAudio_SoundInstanceID instance, float volume)
 {
 	Mixer_SetSoundVolume(instance, volume);
 }

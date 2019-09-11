@@ -32,95 +32,95 @@ SDL2_LIBS = `pkg-config sdl2 --libs --static`
 
 SOURCES = \
 	main \
-	audio_lib/audio_lib \
-	audio_lib/mixer \
-	audio_lib/decoder \
-	audio_lib/miniaudio \
-	audio_lib/decoders/split \
-	audio_lib/decoders/predecode \
-	audio_lib/decoders/memory_file \
-	audio_lib/decoders/misc_utilities
+	clownaudio/clownaudio \
+	clownaudio/mixer \
+	clownaudio/decoder \
+	clownaudio/miniaudio \
+	clownaudio/decoders/split \
+	clownaudio/decoders/predecode \
+	clownaudio/decoders/memory_file \
+	clownaudio/decoders/misc_utilities
 
 ifeq ($(USE_LIBVORBIS), true)
-SOURCES += audio_lib/decoders/libvorbis
+SOURCES += clownaudio/decoders/libvorbis
 ALL_CFLAGS += -DUSE_LIBVORBIS `pkg-config vorbisfile --cflags`
 ALL_LIBS += `pkg-config vorbisfile --libs --static`
 endif
 
 ifeq ($(USE_TREMOR), true)
-SOURCES += audio_lib/decoders/tremor
+SOURCES += clownaudio/decoders/tremor
 ALL_CFLAGS += -DUSE_TREMOR `pkg-config vorbisidec --cflags`
 ALL_LIBS += `pkg-config vorbisidec --libs --static`
 endif
 
 ifeq ($(USE_STB_VORBIS), true)
-SOURCES += audio_lib/decoders/stb_vorbis
+SOURCES += clownaudio/decoders/stb_vorbis
 ALL_CFLAGS += -DUSE_STB_VORBIS
 endif
 
 ifeq ($(USE_LIBFLAC), true)
-SOURCES += audio_lib/decoders/libflac
+SOURCES += clownaudio/decoders/libflac
 ALL_CFLAGS += -DUSE_LIBFLAC `pkg-config flac --cflags`
 ALL_LIBS += `pkg-config flac --libs --static`
 endif
 
 ifeq ($(USE_DR_FLAC), true)
-SOURCES += audio_lib/decoders/dr_flac
+SOURCES += clownaudio/decoders/dr_flac
 ALL_CFLAGS += -DUSE_DR_FLAC
 endif
 
 ifeq ($(USE_DR_WAV), true)
-SOURCES += audio_lib/decoders/dr_wav
+SOURCES += clownaudio/decoders/dr_wav
 ALL_CFLAGS += -DUSE_DR_WAV
 endif
 
 ifeq ($(USE_LIBSNDFILE), true)
-SOURCES += audio_lib/decoders/libsndfile
+SOURCES += clownaudio/decoders/libsndfile
 ALL_CFLAGS += -DUSE_LIBSNDFILE `pkg-config sndfile --cflags`
 ALL_LIBS += `pkg-config sndfile --libs --static`
 endif
 
 ifeq ($(USE_LIBOPENMPT), true)
-SOURCES += audio_lib/decoders/libopenmpt
+SOURCES += clownaudio/decoders/libopenmpt
 ALL_CFLAGS += -DUSE_LIBOPENMPT `pkg-config libopenmpt --cflags`
 ALL_LIBS += `pkg-config libopenmpt --libs --static`
 endif
 
 ifeq ($(USE_LIBXMPLITE), true)
-SOURCES += audio_lib/decoders/libxmp-lite
+SOURCES += clownaudio/decoders/libxmp-lite
 ALL_CFLAGS += -DUSE_LIBXMPLITE `pkg-config libxmp-lite --cflags`
 ALL_LIBS += `pkg-config libxmp-lite --libs --static`
 endif
 
 ifeq ($(USE_SNES_SPC), true)
-SOURCES += audio_lib/decoders/snes_spc
+SOURCES += clownaudio/decoders/snes_spc
 ALL_CFLAGS += -DUSE_SNES_SPC
 ALL_LIBS += -lstdc++
 endif
 
 ifeq ($(USE_PXTONE), true)
-SOURCES += audio_lib/decoders/pxtone
+SOURCES += clownaudio/decoders/pxtone
 ALL_CFLAGS += -DUSE_PXTONE
 ALL_LIBS += -lstdc++
 endif
 
 ifeq ($(BACKEND), miniaudio)
-SOURCES += audio_lib/playback/miniaudio
+SOURCES += clownaudio/playback/miniaudio
 ALL_CFLAGS += -DMINIAUDIO_ENABLE_DEVICE_IO
 ALL_LIBS += -ldl -lpthread -lm
 else ifeq ($(BACKEND), SDL1)
-SOURCES += audio_lib/playback/sdl1
+SOURCES += clownaudio/playback/sdl1
 ALL_CFLAGS += $(SDL1_CFLAGS)
 ALL_LIBS += $(SDL1_LIBS)
 else ifeq ($(BACKEND), SDL2)
-SOURCES += audio_lib/playback/sdl2
+SOURCES += clownaudio/playback/sdl2
 ALL_CFLAGS += $(SDL2_CFLAGS)
 ALL_LIBS += $(SDL2_LIBS)
 else ifeq ($(BACKEND), Cubeb)
-SOURCES += audio_lib/playback/cubeb
+SOURCES += clownaudio/playback/cubeb
 ALL_LIBS += -lcubeb -lole32
 else ifeq ($(BACKEND), PortAudio)
-SOURCES += audio_lib/playback/portaudio
+SOURCES += clownaudio/playback/portaudio
 ALL_CFLAGS += `pkg-config portaudio-2.0 --cflags`
 ALL_LIBS += `pkg-config portaudio-2.0 --libs --static`
 endif
@@ -174,11 +174,11 @@ obj/main/%.o: %.c
 	@mkdir -p $(@D)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
 
-obj/spc/%.o: audio_lib/decoders/libs/snes_spc-0.9.0/snes_spc/%.cpp
+obj/spc/%.o: clownaudio/decoders/libs/snes_spc-0.9.0/snes_spc/%.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ -c
 
-obj/pxtone/%.o: audio_lib/decoders/libs/pxtone/%.cpp
+obj/pxtone/%.o: clownaudio/decoders/libs/pxtone/%.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -Wno-switch -Wno-tautological-compare -Wno-sign-compare -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-missing-field-initializers -Wno-misleading-indentation -Wno-strict-aliasing $< -o $@ -c
 
