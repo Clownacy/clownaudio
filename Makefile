@@ -31,7 +31,7 @@ SDL2_CFLAGS = `pkg-config sdl2 --cflags`
 SDL2_LIBS = `pkg-config sdl2 --libs --static`
 
 SOURCES = \
-	main \
+	test \
 	clownaudio/clownaudio \
 	clownaudio/mixer \
 	clownaudio/decoder \

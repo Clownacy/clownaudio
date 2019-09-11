@@ -23,7 +23,7 @@ endif()
 project(clownaudio LANGUAGES C CXX)
 
 add_executable(test
-	"main.c"
+	"test.c"
 	"clownaudio/clownaudio.c"
 	"clownaudio/clownaudio.h"
 	"clownaudio/decoder.c"
