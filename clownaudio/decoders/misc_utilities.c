@@ -1,6 +1,3 @@
-// Misc utilities
-// Public domain
-
 #include "misc_utilities.h"
 
 #include <stdarg.h>

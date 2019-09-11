@@ -1,6 +1,3 @@
-// Alternate music mod for 2004 Cave Story
-// Copyright © 2018 Clownacy
-
 #pragma once
 
 #include <stdbool.h>

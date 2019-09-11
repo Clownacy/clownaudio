@@ -1,6 +1,3 @@
-// sprintfMalloc (because I'm lazy)
-// Public domain
-
 #pragma once
 
 #include <stdarg.h>
