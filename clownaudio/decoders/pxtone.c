@@ -9,13 +9,15 @@
 #include "libs/pxtone/shim.h"
 
 #include "common.h"
+#include "memory_file.h"
 
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
 struct DecoderData_PxTone
 {
-	const char *file_path;
+	unsigned char *file_buffer;
+	size_t file_size;
 };
 
 struct Decoder_PxTone
@@ -29,8 +31,17 @@ DecoderData_PxTone* Decoder_PxTone_LoadData(const char *file_path, LinkedBackend
 {
 	(void)linked_backend;
 
-	DecoderData_PxTone *data = malloc(sizeof(DecoderData_PxTone));
-	data->file_path = file_path;
+	DecoderData_PxTone *data = NULL;
+
+	size_t file_size;
+	unsigned char *file_buffer = MemoryFile_fopen_to(file_path, &file_size);
+
+	if (file_buffer)
+	{
+		data = malloc(sizeof(DecoderData_PxTone));
+		data->file_buffer = file_buffer;
+		data->file_size = file_size;
+	}
 
 	return data;
 }
@@ -38,14 +49,17 @@ DecoderData_PxTone* Decoder_PxTone_LoadData(const char *file_path, LinkedBackend
 void Decoder_PxTone_UnloadData(DecoderData_PxTone *data)
 {
 	if (data)
+	{
+		free(data->file_buffer);
 		free(data);
+	}
 }
 
 Decoder_PxTone* Decoder_PxTone_Create(DecoderData_PxTone *data, bool loop, DecoderInfo *info)
 {
 	Decoder_PxTone *decoder = NULL;
 
-	pxtnService *pxtn = PxTone_Open(data->file_path, loop, SAMPLE_RATE, CHANNEL_COUNT);
+	pxtnService *pxtn = PxTone_Open(data->file_buffer, data->file_size, loop, SAMPLE_RATE, CHANNEL_COUNT);
 	if (pxtn)
 	{
 		decoder = malloc(sizeof(Decoder_PxTone));

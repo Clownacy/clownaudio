@@ -1,36 +1,29 @@
 #include <cstddef>
-#include <cstdio>
-#include <cstdlib>
 
 #include "pxtnService.h"
 #include "pxtnError.h"
 
-static bool _load_ptcop(pxtnService* pxtn, const char* path_src)
+static bool _load_ptcop(pxtnService* pxtn, unsigned char *file_buffer, size_t file_size)
 {
 	bool success = false;
 
 	pxtnDescriptor desc;
-	FILE *fp = fopen(path_src, "rb");
-
-	if (fp && desc.set_file_r(fp) && pxtn->read(&desc) == pxtnOK && pxtn->tones_ready() == pxtnOK)
+	if (desc.set_memory_r(file_buffer, file_size) && pxtn->read(&desc) == pxtnOK && pxtn->tones_ready() == pxtnOK)
 		success = true;
 	else
 		pxtn->evels->Release();
 
-	if(fp)
-		fclose(fp);
-
 	return success;
 }
 
-extern "C" pxtnService* PxTone_Open(const char *file_path, bool loop, unsigned int sample_rate, unsigned int channel_count)
+extern "C" pxtnService* PxTone_Open(unsigned char *file_buffer, size_t file_size, bool loop, unsigned int sample_rate, unsigned int channel_count)
 {
 	pxtnService *pxtn = new pxtnService();
 	if (pxtn->init() == pxtnOK)
 	{
 		if (pxtn->set_destination_quality(channel_count, sample_rate))
 		{
-			if( _load_ptcop( pxtn, file_path ) )
+			if( _load_ptcop( pxtn, file_buffer, file_size ) )
 			{
 				pxtnVOMITPREPARATION prep = {};
 				if (loop)
