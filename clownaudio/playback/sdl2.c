@@ -70,7 +70,7 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 	want.freq = STREAM_SAMPLE_RATE;
 	want.format = AUDIO_F32;
 	want.channels = STREAM_CHANNEL_COUNT;
-	want.samples = NextPowerOfTwo(((STREAM_SAMPLE_RATE * 25) / 1000) * STREAM_CHANNEL_COUNT);	// A low-latency buffer of 25 milliseconds
+	want.samples = NextPowerOfTwo(((STREAM_SAMPLE_RATE * 10) / 1000) * STREAM_CHANNEL_COUNT);	// A low-latency buffer of 10 milliseconds
 	want.callback = Callback;
 	want.userdata = stream;
 
