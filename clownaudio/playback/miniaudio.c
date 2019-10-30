@@ -49,6 +49,7 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 	config.playback.format = ma_format_f32;
 	config.playback.channels = STREAM_CHANNEL_COUNT;
 	config.sampleRate = STREAM_SAMPLE_RATE;
+	config.noPreZeroedOutputBuffer = MA_TRUE;
 	config.dataCallback = Callback;
 	config.pUserData = stream;
 
