@@ -15,10 +15,7 @@ option(LIBOPENMPT "Enable the libopenmpt decoder backend" OFF)
 option(LIBXMPLITE "Enable the libxmp-lite decoder backend" OFF)
 option(SNES_SPC "Enable the snes_spc decoder backend" OFF)
 option(PXTONE "Enable the PxTone decoder backend" OFF)
-
-if(NOT BACKEND)
-	set(BACKEND "miniaudio")
-endif()
+set(BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
 
 project(clownaudio LANGUAGES C CXX)
 
