@@ -47,12 +47,15 @@ static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_d
 
 bool Backend_Init(void)
 {
+	bool success = true;
+
 	sdl_already_init = SDL_WasInit(SDL_INIT_AUDIO);
 
 	if (!sdl_already_init)
-		SDL_InitSubSystem(SDL_INIT_AUDIO);
+		if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
+			success = false;
 
-	return true;
+	return success;
 }
 
 void Backend_Deinit(void)
