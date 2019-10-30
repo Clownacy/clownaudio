@@ -12,13 +12,13 @@ USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
 
-CFLAGS = -O2 -s -flto
+CFLAGS = -O2 -flto
 ALL_CFLAGS = -std=c99 -MMD -MP -MF $@.d $(CFLAGS)
 
-CXXFLAGS = -O2 -s -flto
+CXXFLAGS = -O2 -flto
 ALL_CXXFLAGS = -std=c++11 -MMD -MP -MF $@.d $(CXXFLAGS)
 
-LDFLAGS =
+LDFLAGS = -s
 ALL_LDFLAGS = $(LDFLAGS)
 
 LIBS =
