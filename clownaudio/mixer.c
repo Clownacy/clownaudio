@@ -24,7 +24,7 @@ typedef struct Channel
 	bool paused;
 	float volume;
 	Decoder *decoder;
-	ma_pcm_converter dsp;
+	ma_pcm_converter converter;
 	Mixer_SoundInstanceID instance;
 
 	unsigned int fade_out_counter_max;
@@ -93,9 +93,9 @@ static Channel* FindChannel(Mixer_SoundInstanceID instance)
 	return NULL;
 }
 
-static ma_uint32 CallbackDSP(ma_pcm_converter *dsp, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
+static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
 {
-	(void)dsp;
+	(void)converter;
 
 	return Decoder_GetSamples((Decoder*)user_data, output_buffer, frames_to_do);
 }
@@ -153,8 +153,8 @@ Mixer_SoundInstanceID Mixer_PlaySound(Mixer_Sound *sound, bool loop)
 		else //if (info.format == DECODER_FORMAT_F32)
 			format = ma_format_f32;
 
-		const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, output_channel_count, output_sample_rate, CallbackDSP, channel->decoder);
-		ma_pcm_converter_init(&config, &channel->dsp);
+		const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, output_channel_count, output_sample_rate, PCMConverterCallback, channel->decoder);
+		ma_pcm_converter_init(&config, &channel->converter);
 
 		MutexLock(&mixer_mutex);
 		channel->next = channel_list_head;
@@ -291,7 +291,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 				float read_buffer[0x1000];
 
 				const unsigned long sub_frames_to_do = MIN(0x1000 / output_channel_count, frames_to_do - frames_done);
-				sub_frames_done = (unsigned long)ma_pcm_converter_read(&channel->dsp, read_buffer, sub_frames_to_do);
+				sub_frames_done = (unsigned long)ma_pcm_converter_read(&channel->converter, read_buffer, sub_frames_to_do);
 
 				float *read_buffer_pointer = read_buffer;
 
