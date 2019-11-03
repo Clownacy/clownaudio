@@ -1,20 +1,21 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
-typedef struct Mixer_Sound Mixer_Sound;
-typedef unsigned int Mixer_SoundInstanceID;
+typedef struct Mixer_SoundData Mixer_SoundData;
+typedef unsigned int Mixer_Sound;
 
 void Mixer_Init(unsigned int sample_rate, unsigned int channel_count);
 void Mixer_Deinit(void);
-Mixer_Sound* Mixer_LoadSound(const char *file_path, bool predecode);
-void Mixer_UnloadSound(Mixer_Sound *sound);
-Mixer_SoundInstanceID Mixer_PlaySound(Mixer_Sound *sound, bool loop);
-void Mixer_StopSound(Mixer_SoundInstanceID instance);
-void Mixer_PauseSound(Mixer_SoundInstanceID instance);
-void Mixer_UnpauseSound(Mixer_SoundInstanceID instance);
-void Mixer_FadeOutSound(Mixer_SoundInstanceID instance, unsigned int duration);
-void Mixer_FadeInSound(Mixer_SoundInstanceID instance, unsigned int duration);
-void Mixer_CancelFade(Mixer_SoundInstanceID instance);
-void Mixer_SetSoundVolume(Mixer_SoundInstanceID instance, float volume);
+Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/);
+void Mixer_UnloadSoundData(Mixer_SoundData *sound);
+Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop);
+void Mixer_DestroySound(Mixer_Sound instance);
+void Mixer_PauseSound(Mixer_Sound instance);
+void Mixer_UnpauseSound(Mixer_Sound instance);
+void Mixer_FadeOutSound(Mixer_Sound instance, unsigned int duration);
+void Mixer_FadeInSound(Mixer_Sound instance, unsigned int duration);
+void Mixer_CancelFade(Mixer_Sound instance);
+void Mixer_SetSoundVolume(Mixer_Sound instance, float volume);
 void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do);

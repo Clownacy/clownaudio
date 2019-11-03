@@ -1,20 +1,21 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
-typedef struct ClownAudio_Sound ClownAudio_Sound;
-typedef unsigned int ClownAudio_SoundInstanceID;
+typedef struct ClownAudio_SoundData ClownAudio_SoundData;
+typedef unsigned int ClownAudio_Sound;
 
 bool ClownAudio_Init(void);
 void ClownAudio_Deinit(void);
 void ClownAudio_Pause(void);
 void ClownAudio_Unpause(void);
-ClownAudio_Sound* ClownAudio_LoadSound(const char *file_path, bool predecode);
-void ClownAudio_UnloadSound(ClownAudio_Sound *sound);
-ClownAudio_SoundInstanceID ClownAudio_PlaySound(ClownAudio_Sound *sound, bool loop);
-void ClownAudio_StopSound(ClownAudio_SoundInstanceID instance);
-void ClownAudio_PauseSound(ClownAudio_SoundInstanceID instance);
-void ClownAudio_UnpauseSound(ClownAudio_SoundInstanceID instance);
-void ClownAudio_FadeOutSound(ClownAudio_SoundInstanceID instance, unsigned int duration);
-void ClownAudio_FadeInSound(ClownAudio_SoundInstanceID instance, unsigned int duration);
-void ClownAudio_SetSoundVolume(ClownAudio_SoundInstanceID instance, float volume);
+ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/);
+void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound);
+ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop);
+void ClownAudio_DestroySound(ClownAudio_Sound instance);
+void ClownAudio_PauseSound(ClownAudio_Sound instance);
+void ClownAudio_UnpauseSound(ClownAudio_Sound instance);
+void ClownAudio_FadeOutSound(ClownAudio_Sound instance, unsigned int duration);
+void ClownAudio_FadeInSound(ClownAudio_Sound instance, unsigned int duration);
+void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume);

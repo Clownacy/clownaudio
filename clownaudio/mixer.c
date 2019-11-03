@@ -13,7 +13,8 @@
 
 #include "miniaudio.h"
 
-#include "decoder.h"
+//#include "decoder.h"
+#include "decoders/dr_flac.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -23,9 +24,9 @@ typedef struct Channel
 
 	bool paused;
 	float volume;
-	Decoder *decoder;
+	Decoder_DR_FLAC *decoder;
 	ma_pcm_converter converter;
-	Mixer_SoundInstanceID instance;
+	Mixer_Sound instance;
 
 	unsigned int fade_out_counter_max;
 	unsigned int fade_in_counter_max;
@@ -84,7 +85,7 @@ static void MutexUnlock(Mutex *mutex)
 #endif
 }
 
-static Channel* FindChannel(Mixer_SoundInstanceID instance)
+static Channel* FindChannel(Mixer_Sound instance)
 {
 	for (Channel *channel = channel_list_head; channel != NULL; channel = channel->next)
 		if (channel->instance == instance)
@@ -97,7 +98,7 @@ static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_
 {
 	(void)converter;
 
-	return Decoder_GetSamples((Decoder*)user_data, output_buffer, frames_to_do);
+	return Decoder_DR_FLAC_GetSamples((Decoder_DR_FLAC*)user_data, output_buffer, frames_to_do);
 }
 
 void Mixer_Init(unsigned int sample_rate, unsigned int channel_count)
@@ -113,26 +114,26 @@ void Mixer_Deinit(void)
 	MutexDeinit(&mixer_mutex);
 }
 
-Mixer_Sound* Mixer_LoadSound(const char *file_path, bool predecode)
+Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/)
 {
-	return (Mixer_Sound*)Decoder_LoadData(file_path, predecode);
+	return (Mixer_SoundData*)Decoder_DR_FLAC_LoadData(file_buffer, file_size);
 }
 
-void Mixer_UnloadSound(Mixer_Sound *sound)
+void Mixer_UnloadSoundData(Mixer_SoundData *sound)
 {
-	Decoder_UnloadData((DecoderData*)sound);
+	Decoder_DR_FLAC_UnloadData((DecoderData_DR_FLAC*)sound);
 }
 
-Mixer_SoundInstanceID Mixer_PlaySound(Mixer_Sound *sound, bool loop)
+Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
 {
-	static Mixer_SoundInstanceID instance_allocator;
+	static Mixer_Sound instance_allocator;
 
-	Mixer_SoundInstanceID instance = 0;
+	Mixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
 	DecoderInfo info;
-	Decoder *decoder = Decoder_Create((DecoderData*)sound, loop, &info);
+	Decoder_DR_FLAC *decoder = Decoder_DR_FLAC_Create((DecoderData_DR_FLAC*)sound, loop, &info);	// TODO: Format-negotiation
 
-	if (decoder)
+	if (decoder != NULL)
 	{
 		instance = ++instance_allocator;
 
@@ -165,7 +166,7 @@ Mixer_SoundInstanceID Mixer_PlaySound(Mixer_Sound *sound, bool loop)
 	return instance;
 }
 
-void Mixer_StopSound(Mixer_SoundInstanceID instance)
+void Mixer_DestroySound(Mixer_Sound instance)
 {
 	Channel *channel = NULL;
 
@@ -183,44 +184,44 @@ void Mixer_StopSound(Mixer_SoundInstanceID instance)
 
 	MutexUnlock(&mixer_mutex);
 
-	if (channel)
+	if (channel != NULL)
 	{
-		Decoder_Destroy(channel->decoder);
+		Decoder_DR_FLAC_Destroy(channel->decoder);
 		free(channel);
 	}
 }
 
-void Mixer_PauseSound(Mixer_SoundInstanceID instance)
+void Mixer_PauseSound(Mixer_Sound instance)
 {
 	MutexLock(&mixer_mutex);
 
 	Channel *channel = FindChannel(instance);
 
-	if (channel)
+	if (channel != NULL)
 		channel->paused = true;
 
 	MutexUnlock(&mixer_mutex);
 }
 
-void Mixer_UnpauseSound(Mixer_SoundInstanceID instance)
+void Mixer_UnpauseSound(Mixer_Sound instance)
 {
 	MutexLock(&mixer_mutex);
 
 	Channel *channel = FindChannel(instance);
 
-	if (channel)
+	if (channel != NULL)
 		channel->paused = false;
 
 	MutexUnlock(&mixer_mutex);
 }
 
-void Mixer_FadeOutSound(Mixer_SoundInstanceID instance, unsigned int duration)
+void Mixer_FadeOutSound(Mixer_Sound instance, unsigned int duration)
 {
 	MutexLock(&mixer_mutex);
 
 	Channel *channel = FindChannel(instance);
 
-	if (channel)
+	if (channel != NULL)
 	{
 		channel->fade_out_counter_max = (output_sample_rate * duration) / 1000;
 		channel->fade_counter = channel->fade_in_counter_max ? (((unsigned long long)channel->fade_in_counter_max - channel->fade_counter) * channel->fade_out_counter_max) / channel->fade_in_counter_max : channel->fade_out_counter_max;
@@ -230,13 +231,13 @@ void Mixer_FadeOutSound(Mixer_SoundInstanceID instance, unsigned int duration)
 	MutexUnlock(&mixer_mutex);
 }
 
-void Mixer_FadeInSound(Mixer_SoundInstanceID instance, unsigned int duration)
+void Mixer_FadeInSound(Mixer_Sound instance, unsigned int duration)
 {
 	MutexLock(&mixer_mutex);
 
 	Channel *channel = FindChannel(instance);
 
-	if (channel)
+	if (channel != NULL)
 	{
 		channel->fade_in_counter_max = (output_sample_rate * duration) / 1000;
 		channel->fade_counter = channel->fade_out_counter_max ? (((unsigned long long)channel->fade_out_counter_max - channel->fade_counter) * channel->fade_in_counter_max) / channel->fade_out_counter_max : channel->fade_in_counter_max;
@@ -246,13 +247,13 @@ void Mixer_FadeInSound(Mixer_SoundInstanceID instance, unsigned int duration)
 	MutexUnlock(&mixer_mutex);
 }
 
-void Mixer_CancelFade(Mixer_SoundInstanceID instance)
+void Mixer_CancelFade(Mixer_Sound instance)
 {
 	MutexLock(&mixer_mutex);
 
 	Channel *channel = FindChannel(instance);
 
-	if (channel)
+	if (channel != NULL)
 	{
 		channel->fade_in_counter_max = 0;
 		channel->fade_out_counter_max = 0;
@@ -261,13 +262,13 @@ void Mixer_CancelFade(Mixer_SoundInstanceID instance)
 	MutexUnlock(&mixer_mutex);
 }
 
-void Mixer_SetSoundVolume(Mixer_SoundInstanceID instance, float volume)
+void Mixer_SetSoundVolume(Mixer_Sound instance, float volume)
 {
 	MutexLock(&mixer_mutex);
 
 	Channel *channel = FindChannel(instance);
 
-	if (channel)
+	if (channel != NULL)
 		channel->volume = volume * volume;
 
 	MutexUnlock(&mixer_mutex);
@@ -276,6 +277,7 @@ void Mixer_SetSoundVolume(Mixer_SoundInstanceID instance, float volume)
 void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 {
 	MutexLock(&mixer_mutex);
+
 	Channel **channel_pointer = &channel_list_head;
 	while (*channel_pointer != NULL)
 	{
@@ -332,7 +334,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 
 			if (frames_done < frames_to_do)	// Sound finished
 			{
-				Decoder_Destroy(channel->decoder);
+				Decoder_DR_FLAC_Destroy(channel->decoder);
 				*channel_pointer = channel->next;
 				free(channel);
 				continue;
@@ -341,5 +343,6 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 
 		channel_pointer = &(*channel_pointer)->next;
 	}
+
 	MutexUnlock(&mixer_mutex);
 }

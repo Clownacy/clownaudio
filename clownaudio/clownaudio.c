@@ -26,7 +26,7 @@ bool ClownAudio_Init(void)
 	{
 		stream = Backend_CreateStream(CallbackStream, NULL);
 
-		if (stream)
+		if (stream != NULL)
 		{
 			Mixer_Init(STREAM_SAMPLE_RATE, STREAM_CHANNEL_COUNT);
 
@@ -61,47 +61,47 @@ void ClownAudio_Unpause(void)
 	Backend_ResumeStream(stream);
 }
 
-ClownAudio_Sound* ClownAudio_LoadSound(const char *file_path, bool predecode)
+ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/)
 {
-	return (ClownAudio_Sound*)Mixer_LoadSound(file_path, predecode);
+	return (ClownAudio_SoundData*)Mixer_LoadSoundData(file_buffer, file_size);
 }
 
-void ClownAudio_UnloadSound(ClownAudio_Sound *sound)
+void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
 {
-	Mixer_UnloadSound((Mixer_Sound*)sound);
+	Mixer_UnloadSoundData((Mixer_SoundData*)sound);
 }
 
-ClownAudio_SoundInstanceID ClownAudio_PlaySound(ClownAudio_Sound *sound, bool loop)
+ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop)
 {
-	return Mixer_PlaySound((Mixer_Sound*)sound, loop);
+	return Mixer_CreateSound((Mixer_SoundData*)sound, loop);
 }
 
-void ClownAudio_StopSound(ClownAudio_SoundInstanceID instance)
+void ClownAudio_DestroySound(ClownAudio_Sound instance)
 {
-	Mixer_StopSound(instance);
+	Mixer_DestroySound(instance);
 }
 
-void ClownAudio_PauseSound(ClownAudio_SoundInstanceID instance)
+void ClownAudio_PauseSound(ClownAudio_Sound instance)
 {
 	Mixer_PauseSound(instance);
 }
 
-void ClownAudio_UnpauseSound(ClownAudio_SoundInstanceID instance)
+void ClownAudio_UnpauseSound(ClownAudio_Sound instance)
 {
 	Mixer_UnpauseSound(instance);
 }
 
-void ClownAudio_FadeOutSound(ClownAudio_SoundInstanceID instance, unsigned int duration)
+void ClownAudio_FadeOutSound(ClownAudio_Sound instance, unsigned int duration)
 {
 	Mixer_FadeOutSound(instance, duration);
 }
 
-void ClownAudio_FadeInSound(ClownAudio_SoundInstanceID instance, unsigned int duration)
+void ClownAudio_FadeInSound(ClownAudio_Sound instance, unsigned int duration)
 {
 	Mixer_FadeInSound(instance, duration);
 }
 
-void ClownAudio_SetSoundVolume(ClownAudio_SoundInstanceID instance, float volume)
+void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume)
 {
 	Mixer_SetSoundVolume(instance, volume);
 }

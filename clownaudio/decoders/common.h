@@ -18,23 +18,15 @@ typedef struct
 	DecoderFormat format;
 } DecoderInfo;
 
-struct LinkedBackend;
-
 typedef struct DecoderBackend
 {
-	void* (*LoadData)(const char *file_path, struct LinkedBackend *linked_backend);
+	void* (*LoadData)(const unsigned char *file_buffer, size_t file_size);
 	void (*UnloadData)(void *data);
 	void* (*Create)(void *data, bool loops, DecoderInfo *info);
 	void (*Destroy)(void *this);
 	void (*Rewind)(void *this);
 	unsigned long (*GetSamples)(void *this, void *buffer_void, unsigned long frames_to_do);
 } DecoderBackend;
-
-typedef struct LinkedBackend
-{
-	struct LinkedBackend *next;
-	const DecoderBackend *backend;
-} LinkedBackend;
 
 static inline unsigned int GetSizeOfFrame(DecoderInfo *info)
 {

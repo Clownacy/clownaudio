@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 //#define STB_LEAKCHECK_IMPLEMENTATION
 //#include "stb_leakcheck.h"
@@ -14,7 +15,25 @@ int main(int argc, char *argv[])
 		printf("Couldn't init mixer\n");
 	fflush(stdout);
 
-	ClownAudio_Sound *sound = ClownAudio_LoadSound(argc > 1 ? argv[1] : "test.ogg", false);
+	unsigned char *file_buffer = NULL;
+	size_t file_size = 0;
+
+	FILE *file = fopen(argc > 1 ? argv[1] : "../audio_lib/test_intro.flac", "rb");
+	if (file != NULL)
+	{
+		fseek(file, 0, SEEK_END);
+		file_size = ftell(file);
+		rewind(file);
+
+		file_buffer = malloc(file_size);
+
+		if (file_buffer != NULL)
+			fread(file_buffer, 1, file_size, file);
+
+		fclose(file);
+	}
+
+	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffer, file_size);
 
 	if (sound)
 		printf("Loaded sound\n");
@@ -22,7 +41,7 @@ int main(int argc, char *argv[])
 		printf("Couldn't load sound\n");
 	fflush(stdout);
 
-	ClownAudio_SoundInstanceID instance = ClownAudio_PlaySound(sound, true);
+	ClownAudio_Sound instance = ClownAudio_CreateSound(sound, true);
 	ClownAudio_UnpauseSound(instance);
 
 	if (instance)
@@ -39,11 +58,11 @@ int main(int argc, char *argv[])
 
 	printf("Stopping sound\n");
 	fflush(stdout);
-	ClownAudio_StopSound(instance);
+	ClownAudio_DestroySound(instance);
 
 	printf("Unloading sound\n");
 	fflush(stdout);
-	ClownAudio_UnloadSound(sound);
+	ClownAudio_UnloadSoundData(sound);
 
 	printf("Deiniting mixer\n");
 	fflush(stdout);
