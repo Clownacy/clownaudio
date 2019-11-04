@@ -7,15 +7,7 @@
 #define DR_FLAC_IMPLEMENTATION
 #define DR_FLAC_NO_STDIO
 #define DR_FLAC_NO_OGG
-
-/*#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
-#endif*/
 #include "libs/dr_flac.h"
-/*#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif*/
 
 #include "common.h"
 
@@ -26,8 +18,11 @@ struct Decoder_DR_FLAC
 	bool loop;
 };
 
-Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, DecoderInfo *info)
+Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
+	(void)sample_rate;
+	(void)channel_count;
+
 	Decoder_DR_FLAC *decoder = NULL;
 
 	if (data != NULL)

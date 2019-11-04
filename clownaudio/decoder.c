@@ -56,7 +56,7 @@ Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned int sample_rate, 
 	if (decoder != NULL)
 	{
 		DecoderInfo info;
-		decoder->backend = Decoder_DR_FLAC_Create(data, loop, &info);	// TODO: Format-negotiation
+		decoder->backend = Decoder_DR_FLAC_Create(data, loop, sample_rate, channel_count, &info);	// TODO: Format-negotiation
 
 		if (decoder->backend != NULL)
 		{
