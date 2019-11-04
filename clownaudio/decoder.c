@@ -3,221 +3,86 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
+
+#include "miniaudio.h"
 
 #include "decoders/common.h"
-#include "decoders/misc_utilities.h"
-#include "decoders/predecode.h"
-#include "decoders/split.h"
-
-#ifdef USE_LIBVORBIS
-#include "decoders/libvorbis.h"
-#endif
-#ifdef USE_TREMOR
-#include "decoders/tremor.h"
-#endif
-#ifdef USE_STB_VORBIS
-#include "decoders/stb_vorbis.h"
-#endif
-#ifdef USE_LIBFLAC
-#include "decoders/libflac.h"
-#endif
-#ifdef USE_DR_FLAC
 #include "decoders/dr_flac.h"
-#endif
-#ifdef USE_DR_WAV
-#include "decoders/dr_wav.h"
-#endif
-#ifdef USE_LIBSNDFILE
-#include "decoders/libsndfile.h"
-#endif
-#ifdef USE_LIBXMPLITE
-#include "decoders/libxmp-lite.h"
-#endif
-#ifdef USE_LIBOPENMPT
-#include "decoders/libopenmpt.h"
-#endif
-#ifdef USE_SNES_SPC
-#include "decoders/snes_spc.h"
-#endif
-#ifdef USE_PXTONE
-#include "decoders/pxtone.h"
-#endif
-
-#define BACKEND_FUNCTIONS(name) \
-{ \
-	(void*(*)(const char*,LinkedBackend*))Decoder_##name##_LoadData, \
-	(void(*)(void*))Decoder_##name##_UnloadData, \
-	(void*(*)(void*,bool,DecoderInfo*))Decoder_##name##_Create, \
-	(void(*)(void*))Decoder_##name##_Destroy, \
-	(void(*)(void*))Decoder_##name##_Rewind, \
-	(unsigned long(*)(void*,void*,unsigned long))Decoder_##name##_GetSamples \
-}
-
-struct DecoderData
-{
-	LinkedBackend *linked_backend;
-	void *backend_data;
-};
 
 struct Decoder
 {
-	void *backend_object;
-	DecoderData *data;
+	Decoder_DR_FLAC *backend;
+	ma_pcm_converter converter;
 };
 
-static const struct
+static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
 {
-	const char **file_extensions;
-	const DecoderBackend decoder;
-	bool can_be_predecoded;
-	bool can_be_split;
-} backends[] = {
-#ifdef USE_LIBVORBIS
-	{(const char*[]){".ogg", NULL}, BACKEND_FUNCTIONS(libVorbis), true, true},
-#endif
-#ifdef USE_TREMOR
-	{(const char*[]){".ogg", NULL}, BACKEND_FUNCTIONS(Tremor), true, true},
-#endif
-#ifdef USE_STB_VORBIS
-	{(const char*[]){".ogg", NULL}, BACKEND_FUNCTIONS(STB_Vorbis), true, true},
-#endif
-#ifdef USE_LIBFLAC
-	{(const char*[]){".flac", NULL}, BACKEND_FUNCTIONS(libFLAC), true, true},
-#endif
-#ifdef USE_DR_FLAC
-	{(const char*[]){".flac", NULL}, BACKEND_FUNCTIONS(DR_FLAC), true, true},
-#endif
-#ifdef USE_DR_WAV
-	{(const char*[]){".wav", NULL}, BACKEND_FUNCTIONS(DR_WAV), true, true},
-#endif
-#ifdef USE_LIBSNDFILE
-	{(const char*[]){".ogg", ".flac", ".wav", ".aiff", NULL}, BACKEND_FUNCTIONS(libSndfile), true, true},
-#endif
-#ifdef USE_LIBOPENMPT
-	{(const char*[]){".mod", ".s3m", ".xm", ".it", ".mptm", NULL}, BACKEND_FUNCTIONS(libOpenMPT), false, false},
-#endif
-#ifdef USE_LIBXMPLITE
-	{(const char*[]){".mod", ".s3m", ".xm", ".it", NULL}, BACKEND_FUNCTIONS(libXMPLite), false, false},
-#endif
-#ifdef USE_SNES_SPC
-	{(const char*[]){".spc", NULL}, BACKEND_FUNCTIONS(SNES_SPC), false, false},
-#endif
-#ifdef USE_PXTONE
-	{(const char*[]){".ptcop", ".pttune", NULL}, BACKEND_FUNCTIONS(PxTone), false, false},
-#endif
-};
+	(void)converter;
 
-static void* TryOpen(const DecoderBackend *backend, LinkedBackend **out_linked_backend, const char *file_path, bool predecode, bool split)
-{
-	LinkedBackend *last_backend;
-	LinkedBackend *linked_backend = malloc(sizeof(LinkedBackend));
-	linked_backend->next = NULL;
-	linked_backend->backend = backend;
-
-	if (predecode)
-	{
-		static const DecoderBackend backend = BACKEND_FUNCTIONS(Predecode);
-
-		last_backend = linked_backend;
-		linked_backend = malloc(sizeof(LinkedBackend));
-		linked_backend->next = last_backend;
-		linked_backend->backend = &backend;
-	}
-
-	if (split)
-	{
-		static const DecoderBackend backend = BACKEND_FUNCTIONS(Split);
-
-		last_backend = linked_backend;
-		linked_backend = malloc(sizeof(LinkedBackend));
-		linked_backend->next = last_backend;
-		linked_backend->backend = &backend;
-	}
-
-	void *backend_object = linked_backend->backend->LoadData(file_path, linked_backend->next);
-
-	if (backend_object == NULL)
-	{
-		for (LinkedBackend *current_backend = linked_backend, *next_backend; current_backend != NULL; current_backend = next_backend)
-		{
-			next_backend = current_backend->next;
-			free(current_backend);
-		}
-	}
-	else
-	{
-		*out_linked_backend = linked_backend;
-	}
-
-	return backend_object;
+	return Decoder_DR_FLAC_GetSamples((Decoder_DR_FLAC*)user_data, output_buffer, frames_to_do);
 }
 
-DecoderData* Decoder_LoadData(const char *file_path, bool predecode)
+DecoderData* Decoder_LoadData(const unsigned char *file_buffer, size_t file_size)
 {
-	void *backend_data = NULL;
-	for (unsigned int i = 0; i < sizeof(backends) / sizeof(backends[0]); ++i)
+	DecoderData *data = NULL;
+
+	if (file_buffer != NULL)
 	{
-		char *extension;
-		DecoderUtil_SplitFileExtension(file_path, NULL, &extension);
+		data = malloc(sizeof(DecoderData));
 
-		for (unsigned int j = 0; backends[i].file_extensions[j] != NULL; ++j)
+		if (data != NULL)
 		{
-			if (!strcmp(extension, backends[i].file_extensions[j]))
-			{
-				free(extension);
-
-				LinkedBackend *linked_backend = NULL;
-				backend_data = TryOpen(&backends[i].decoder, &linked_backend, file_path, predecode && backends[i].can_be_predecoded, backends[i].can_be_split);
-
-				DecoderData *this = NULL;
-
-				if (backend_data)
-				{
-					this = malloc(sizeof(DecoderData));
-					this->backend_data = backend_data;
-					this->linked_backend = linked_backend;
-				}
-
-				return this;
-			}
+			data->file_buffer = file_buffer;
+			data->file_size = file_size;
 		}
-
-		free(extension);
 	}
 
-	return NULL;
+	return data;
 }
 
 void Decoder_UnloadData(DecoderData *data)
 {
-	if (data)
-	{
-		data->linked_backend->backend->UnloadData(data->backend_data);
-
-		for (LinkedBackend *current_backend = data->linked_backend, *next_backend; current_backend != NULL; current_backend = next_backend)
-		{
-			next_backend = current_backend->next;
-			free(current_backend);
-		}
-
+	//if (data != NULL)
+	//{
+	//	free(data->file_buffer);
 		free(data);
-	}
+	//}
 }
 
-Decoder* Decoder_Create(DecoderData *data, bool loop, DecoderInfo *info)
+Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count)
 {
-	Decoder *decoder = NULL;
+	Decoder *decoder = malloc(sizeof(Decoder));
 
-	if (data && data->backend_data)
+	if (decoder != NULL)
 	{
-		void *backend_object = data->linked_backend->backend->Create(data->backend_data, loop, info);
+		DecoderInfo info;
+		decoder->backend = Decoder_DR_FLAC_Create(data, loop, &info);	// TODO: Format-negotiation
 
-		if (backend_object)
+		if (decoder->backend != NULL)
 		{
-			decoder = malloc(sizeof(Decoder));
-			decoder->backend_object = backend_object;
-			decoder->data = data;
+			ma_format format;
+			switch (info.format)
+			{
+				case DECODER_FORMAT_S16:
+					format = ma_format_s16;
+					break;
+
+				case DECODER_FORMAT_S32:
+					format = ma_format_s32;
+					break;
+
+				case DECODER_FORMAT_F32:
+					format = ma_format_f32;
+					break;
+			}
+
+			const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, channel_count, sample_rate, PCMConverterCallback, decoder->backend);
+			ma_pcm_converter_init(&config, &decoder->converter);
+		}
+		else
+		{
+			free(decoder);
+			decoder = NULL;
 		}
 	}
 
@@ -226,19 +91,19 @@ Decoder* Decoder_Create(DecoderData *data, bool loop, DecoderInfo *info)
 
 void Decoder_Destroy(Decoder *decoder)
 {
-	if (decoder)
+	if (decoder != NULL)
 	{
-		decoder->data->linked_backend->backend->Destroy(decoder->backend_object);
+		Decoder_DR_FLAC_Destroy(decoder->backend);
 		free(decoder);
 	}
 }
 
 void Decoder_Rewind(Decoder *decoder)
 {
-	decoder->data->linked_backend->backend->Rewind(decoder->backend_object);
+	Decoder_DR_FLAC_Rewind(decoder->backend);
 }
 
-unsigned long Decoder_GetSamples(Decoder *decoder, void *output_buffer, unsigned long frames_to_do)
+unsigned long Decoder_GetSamples(Decoder *decoder, void *buffer_void, unsigned long frames_to_do)
 {
-	return decoder->data->linked_backend->backend->GetSamples(decoder->backend_object, output_buffer, frames_to_do);
+	return (unsigned long)ma_pcm_converter_read(&decoder->converter, buffer_void, frames_to_do);
 }

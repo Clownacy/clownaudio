@@ -33,6 +33,7 @@ SDL2_LIBS = `pkg-config sdl2 --libs --static`
 SOURCES = \
 	test \
 	clownaudio/clownaudio \
+	clownaudio/decoder \
 	clownaudio/mixer \
 	clownaudio/miniaudio \
 	clownaudio/decoders/memory_file \

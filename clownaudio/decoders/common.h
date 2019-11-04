@@ -3,14 +3,20 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef enum
+typedef enum DecoderFormat
 {
 	DECODER_FORMAT_S16,
 	DECODER_FORMAT_S32,
 	DECODER_FORMAT_F32
 } DecoderFormat;
 
-typedef struct
+typedef struct DecoderData
+{
+	const unsigned char *file_buffer;
+	size_t file_size;
+} DecoderData;
+
+typedef struct DecoderInfo
 {
 	unsigned int sample_rate;
 	unsigned int channel_count;

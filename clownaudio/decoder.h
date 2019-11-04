@@ -1,15 +1,15 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "decoders/common.h"
 
-typedef struct DecoderData DecoderData;
 typedef struct Decoder Decoder;
 
-DecoderData* Decoder_LoadData(const char *file_path, bool predecode);
+DecoderData* Decoder_LoadData(const unsigned char *file_buffer, size_t file_size);
 void Decoder_UnloadData(DecoderData *data);
-Decoder* Decoder_Create(DecoderData *data, bool loop, DecoderInfo *info);
-void Decoder_Destroy(Decoder *this);
-void Decoder_Rewind(Decoder *this);
-unsigned long Decoder_GetSamples(Decoder *this, void *output_buffer, unsigned long frames_to_do);
+Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count);
+void Decoder_Destroy(Decoder *decoder);
+void Decoder_Rewind(Decoder *decoder);
+unsigned long Decoder_GetSamples(Decoder *decoder, void *buffer_void, unsigned long frames_to_do);

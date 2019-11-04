@@ -11,10 +11,7 @@
 #include <pthread.h>
 #endif
 
-#include "miniaudio.h"
-
-//#include "decoder.h"
-#include "decoders/dr_flac.h"
+#include "decoder.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -24,8 +21,7 @@ typedef struct Channel
 
 	bool paused;
 	float volume;
-	Decoder_DR_FLAC *decoder;
-	ma_pcm_converter converter;
+	Decoder *decoder;
 	Mixer_Sound instance;
 
 	unsigned int fade_out_counter_max;
@@ -94,13 +90,6 @@ static Channel* FindChannel(Mixer_Sound instance)
 	return NULL;
 }
 
-static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
-{
-	(void)converter;
-
-	return Decoder_DR_FLAC_GetSamples((Decoder_DR_FLAC*)user_data, output_buffer, frames_to_do);
-}
-
 void Mixer_Init(unsigned int sample_rate, unsigned int channel_count)
 {
 	output_sample_rate = sample_rate;
@@ -116,12 +105,12 @@ void Mixer_Deinit(void)
 
 Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/)
 {
-	return (Mixer_SoundData*)Decoder_DR_FLAC_LoadData(file_buffer, file_size);
+	return (Mixer_SoundData*)Decoder_LoadData(file_buffer, file_size);
 }
 
 void Mixer_UnloadSoundData(Mixer_SoundData *sound)
 {
-	Decoder_DR_FLAC_UnloadData((DecoderData_DR_FLAC*)sound);
+	Decoder_UnloadData((DecoderData*)sound);
 }
 
 Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
@@ -130,8 +119,7 @@ Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
 
 	Mixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
-	DecoderInfo info;
-	Decoder_DR_FLAC *decoder = Decoder_DR_FLAC_Create((DecoderData_DR_FLAC*)sound, loop, &info);	// TODO: Format-negotiation
+	Decoder *decoder = Decoder_Create((DecoderData*)sound, loop, output_sample_rate, output_channel_count);	// TODO: Format-negotiation
 
 	if (decoder != NULL)
 	{
@@ -145,17 +133,6 @@ Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
 		channel->paused = true;
 		channel->fade_out_counter_max = 0;
 		channel->fade_in_counter_max = 0;
-
-		ma_format format;
-		if (info.format == DECODER_FORMAT_S16)
-			format = ma_format_s16;
-		else if (info.format == DECODER_FORMAT_S32)
-			format = ma_format_s32;
-		else //if (info.format == DECODER_FORMAT_F32)
-			format = ma_format_f32;
-
-		const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, output_channel_count, output_sample_rate, PCMConverterCallback, channel->decoder);
-		ma_pcm_converter_init(&config, &channel->converter);
 
 		MutexLock(&mixer_mutex);
 		channel->next = channel_list_head;
@@ -186,7 +163,7 @@ void Mixer_DestroySound(Mixer_Sound instance)
 
 	if (channel != NULL)
 	{
-		Decoder_DR_FLAC_Destroy(channel->decoder);
+		Decoder_Destroy(channel->decoder);
 		free(channel);
 	}
 }
@@ -293,7 +270,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 				float read_buffer[0x1000];
 
 				const unsigned long sub_frames_to_do = MIN(0x1000 / output_channel_count, frames_to_do - frames_done);
-				sub_frames_done = (unsigned long)ma_pcm_converter_read(&channel->converter, read_buffer, sub_frames_to_do);
+				sub_frames_done = Decoder_GetSamples(channel->decoder, read_buffer, sub_frames_to_do);
 
 				float *read_buffer_pointer = read_buffer;
 
@@ -334,7 +311,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 
 			if (frames_done < frames_to_do)	// Sound finished
 			{
-				Decoder_DR_FLAC_Destroy(channel->decoder);
+				Decoder_Destroy(channel->decoder);
 				*channel_pointer = channel->next;
 				free(channel);
 				continue;

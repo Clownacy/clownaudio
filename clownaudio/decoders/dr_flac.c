@@ -18,92 +18,62 @@
 #endif*/
 
 #include "common.h"
-#include "memory_file.h"
-
-struct DecoderData_DR_FLAC
-{
-	const unsigned char *file_buffer;
-	size_t file_size;
-};
 
 struct Decoder_DR_FLAC
 {
-	DecoderData_DR_FLAC *data;
+	DecoderData *data;
 	drflac *backend;
-	bool loops;
+	bool loop;
 };
 
-DecoderData_DR_FLAC* Decoder_DR_FLAC_LoadData(const unsigned char *file_buffer, size_t file_size)
+Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
-	DecoderData_DR_FLAC *data = NULL;
-
-	if (file_buffer != NULL)
-	{
-		data = malloc(sizeof(DecoderData_DR_FLAC));
-
-		if (data != NULL)
-		{
-			data->file_buffer = file_buffer;
-			data->file_size = file_size;
-		}
-	}
-
-	return data;
-}
-
-void Decoder_DR_FLAC_UnloadData(DecoderData_DR_FLAC *data)
-{
-	if (data != NULL)
-	{
-	//	free(data->file_buffer);
-		free(data);
-	}
-}
-
-Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData_DR_FLAC *data, bool loops, DecoderInfo *info)
-{
-	Decoder_DR_FLAC *this = NULL;
+	Decoder_DR_FLAC *decoder = NULL;
 
 	if (data != NULL)
 	{
-		drflac *backend = drflac_open_memory(data->file_buffer, data->file_size);
+		decoder = malloc(sizeof(Decoder_DR_FLAC));
 
-		if (backend != NULL)
+		if (decoder != NULL)
 		{
-			this = malloc(sizeof(Decoder_DR_FLAC));
+			decoder->backend = drflac_open_memory(data->file_buffer, data->file_size);
 
-			if (this != NULL)
+			if (decoder->backend != NULL)
 			{
-				this->backend = backend;
-				this->data = data;
-				this->loops = loops;
+				decoder->data = data;
+				decoder->loop = loop;
 
-				info->sample_rate = backend->sampleRate;
-				info->channel_count = backend->channels;
-				info->decoded_size = (unsigned long)backend->totalSampleCount * sizeof(drflac_int32);
+				info->sample_rate = decoder->backend->sampleRate;
+				info->channel_count = decoder->backend->channels;
+				info->decoded_size = (unsigned long)decoder->backend->totalSampleCount * sizeof(drflac_int32);
 				info->format = DECODER_FORMAT_S32;
+			}
+			else
+			{
+				free(decoder);
+				decoder = NULL;
 			}
 		}
 	}
 
-	return this;
+	return decoder;
 }
 
-void Decoder_DR_FLAC_Destroy(Decoder_DR_FLAC *this)
+void Decoder_DR_FLAC_Destroy(Decoder_DR_FLAC *decoder)
 {
-	if (this != NULL)
+	if (decoder != NULL)
 	{
-		drflac_close(this->backend);
-		free(this);
+		drflac_close(decoder->backend);
+		free(decoder);
 	}
 }
 
-void Decoder_DR_FLAC_Rewind(Decoder_DR_FLAC *this)
+void Decoder_DR_FLAC_Rewind(Decoder_DR_FLAC *decoder)
 {
-	drflac_seek_to_pcm_frame(this->backend, 0);
+	drflac_seek_to_pcm_frame(decoder->backend, 0);
 }
 
-unsigned long Decoder_DR_FLAC_GetSamples(Decoder_DR_FLAC *this, void *buffer_void, unsigned long frames_to_do)
+unsigned long Decoder_DR_FLAC_GetSamples(Decoder_DR_FLAC *decoder, void *buffer_void, unsigned long frames_to_do)
 {
 	drflac_int32 *buffer = buffer_void;
 
@@ -111,12 +81,12 @@ unsigned long Decoder_DR_FLAC_GetSamples(Decoder_DR_FLAC *this, void *buffer_voi
 
 	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
 	{
-		frames_done = (unsigned long)drflac_read_pcm_frames_s32(this->backend, frames_to_do - frames_done_total, buffer + (frames_done_total * this->backend->channels));
+		frames_done = (unsigned long)drflac_read_pcm_frames_s32(decoder->backend, frames_to_do - frames_done_total, buffer + (frames_done_total * decoder->backend->channels));
 
 		if (frames_done < frames_to_do - frames_done_total)
 		{
-			if (this->loops)
-				Decoder_DR_FLAC_Rewind(this);
+			if (decoder->loop)
+				Decoder_DR_FLAC_Rewind(decoder);
 			else
 				break;
 		}
