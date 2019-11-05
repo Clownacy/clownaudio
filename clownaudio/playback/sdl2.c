@@ -68,29 +68,32 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 {
 	BackendStream *stream = malloc(sizeof(BackendStream));
 
-	SDL_AudioSpec want;
-	memset(&want, 0, sizeof(want));
-	want.freq = STREAM_SAMPLE_RATE;
-	want.format = AUDIO_F32;
-	want.channels = STREAM_CHANNEL_COUNT;
-	want.samples = NextPowerOfTwo(((STREAM_SAMPLE_RATE * 10) / 1000) * STREAM_CHANNEL_COUNT);	// A low-latency buffer of 10 milliseconds
-	want.callback = Callback;
-	want.userdata = stream;
-
-	SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &want, NULL, 0);
-
-	if (device)
+	if (stream != NULL)
 	{
-		stream->user_callback = user_callback;
-		stream->user_data = user_data;
+		SDL_AudioSpec want;
+		memset(&want, 0, sizeof(want));
+		want.freq = STREAM_SAMPLE_RATE;
+		want.format = AUDIO_F32;
+		want.channels = STREAM_CHANNEL_COUNT;
+		want.samples = NextPowerOfTwo(((STREAM_SAMPLE_RATE * 10) / 1000) * STREAM_CHANNEL_COUNT);	// A low-latency buffer of 10 milliseconds
+		want.callback = Callback;
+		want.userdata = stream;
 
-		stream->device = device;
-		stream->volume = 1.0f;
-	}
-	else
-	{
-		free(stream);
-		stream = NULL;
+		SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &want, NULL, 0);
+
+		if (device > 0)
+		{
+			stream->user_callback = user_callback;
+			stream->user_data = user_data;
+
+			stream->device = device;
+			stream->volume = 1.0f;
+		}
+		else
+		{
+			free(stream);
+			stream = NULL;
+		}
 	}
 
 	return stream;
@@ -98,7 +101,7 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 
 bool Backend_DestroyStream(BackendStream *stream)
 {
-	if (stream)
+	if (stream != NULL)
 	{
 		SDL_CloseAudioDevice(stream->device);
 		free(stream);
@@ -109,7 +112,7 @@ bool Backend_DestroyStream(BackendStream *stream)
 
 bool Backend_SetVolume(BackendStream *stream, float volume)
 {
-	if (stream)
+	if (stream != NULL)
 		stream->volume = volume * volume;
 
 	return true;
@@ -117,7 +120,7 @@ bool Backend_SetVolume(BackendStream *stream, float volume)
 
 bool Backend_PauseStream(BackendStream *stream)
 {
-	if (stream)
+	if (stream != NULL)
 		SDL_PauseAudioDevice(stream->device, -1);
 
 	return true;
@@ -125,7 +128,7 @@ bool Backend_PauseStream(BackendStream *stream)
 
 bool Backend_ResumeStream(BackendStream *stream)
 {
-	if (stream)
+	if (stream != NULL)
 		SDL_PauseAudioDevice(stream->device, 0);
 
 	return true;

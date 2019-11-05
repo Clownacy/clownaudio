@@ -48,17 +48,20 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 {
 	BackendStream *stream = malloc(sizeof(BackendStream));
 
-	if (Pa_OpenDefaultStream(&stream->pa_stream, 0, STREAM_CHANNEL_COUNT, paFloat32, STREAM_SAMPLE_RATE, paFramesPerBufferUnspecified, Callback, stream ) == paNoError)
+	if (stream != NULL)
 	{
-		stream->user_callback = user_callback;
-		stream->user_data = user_data;
+		if (Pa_OpenDefaultStream(&stream->pa_stream, 0, STREAM_CHANNEL_COUNT, paFloat32, STREAM_SAMPLE_RATE, paFramesPerBufferUnspecified, Callback, stream ) == paNoError)
+		{
+			stream->user_callback = user_callback;
+			stream->user_data = user_data;
 
-		stream->volume = 1.0f;
-	}
-	else
-	{
-		free(stream);
-		stream = NULL;
+			stream->volume = 1.0f;
+		}
+		else
+		{
+			free(stream);
+			stream = NULL;
+		}
 	}
 
 	return stream;
@@ -68,7 +71,7 @@ bool Backend_DestroyStream(BackendStream *stream)
 {
 	bool success = true;
 
-	if (stream)
+	if (stream != NULL)
 	{
 		success = Pa_CloseStream(stream->pa_stream) == paNoError;
 		free(stream);
@@ -79,7 +82,7 @@ bool Backend_DestroyStream(BackendStream *stream)
 
 bool Backend_SetVolume(BackendStream *stream, float volume)
 {
-	if (stream)
+	if (stream != NULL)
 		stream->volume = volume * volume;
 
 	return true;
@@ -89,7 +92,7 @@ bool Backend_PauseStream(BackendStream *stream)
 {
 	bool success = true;
 
-	if (stream)
+	if (stream != NULL)
 		success = Pa_StopStream(stream->pa_stream) == paNoError;
 
 	return success;
@@ -99,7 +102,7 @@ bool Backend_ResumeStream(BackendStream *stream)
 {
 	bool success = true;
 
-	if (stream)
+	if (stream != NULL)
 		success = Pa_StartStream(stream->pa_stream) == paNoError;
 
 	return success;

@@ -72,19 +72,23 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 	if (cubeb_get_min_latency(cubeb_context, &output_params, &latency_frames) == CUBEB_OK)
 	{
 		stream = malloc(sizeof(BackendStream));
-		cubeb_stream *cubeb_stream_pointer;
 
-		if (cubeb_stream_init(cubeb_context, &cubeb_stream_pointer, NULL, NULL, NULL, NULL, &output_params, latency_frames, DataCallback, StateCallback, stream) == CUBEB_OK)
+		if (stream != NULL)
 		{
-			stream->user_callback = user_callback;
-			stream->user_data = user_data;
+			cubeb_stream *cubeb_stream_pointer;
 
-			stream->cubeb_stream_pointer = cubeb_stream_pointer;
-		}
-		else
-		{
-			free(stream);
-			stream = NULL;
+			if (cubeb_stream_init(cubeb_context, &cubeb_stream_pointer, "clownaudio stream", NULL, NULL, NULL, &output_params, latency_frames, DataCallback, StateCallback, stream) == CUBEB_OK)
+			{
+				stream->user_callback = user_callback;
+				stream->user_data = user_data;
+
+				stream->cubeb_stream_pointer = cubeb_stream_pointer;
+			}
+			else
+			{
+				free(stream);
+				stream = NULL;
+			}
 		}
 	}
 
@@ -95,7 +99,7 @@ bool Backend_DestroyStream(BackendStream *stream)
 {
 	bool success = true;
 
-	if (stream)
+	if (stream != NULL)
 	{
 		if (cubeb_stream_stop(stream->cubeb_stream_pointer) == CUBEB_OK)
 		{
@@ -115,7 +119,7 @@ bool Backend_SetVolume(BackendStream *stream, float volume)
 {
 	bool success = true;
 
-	if (stream)
+	if (stream != NULL)
 		success = cubeb_stream_set_volume(stream->cubeb_stream_pointer, volume * volume) == CUBEB_OK;
 
 	return success;
@@ -125,7 +129,7 @@ bool Backend_PauseStream(BackendStream *stream)
 {
 	bool success = true;
 
-	if (stream)
+	if (stream != NULL)
 		success = cubeb_stream_stop(stream->cubeb_stream_pointer) == CUBEB_OK;
 
 	return success;
@@ -135,7 +139,7 @@ bool Backend_ResumeStream(BackendStream *stream)
 {
 	bool success = true;
 
-	if (stream)
+	if (stream != NULL)
 		success = cubeb_stream_start(stream->cubeb_stream_pointer) == CUBEB_OK;
 
 	return success;

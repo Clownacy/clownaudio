@@ -44,26 +44,29 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 {
 	BackendStream *stream = malloc(sizeof(BackendStream));
 
-	ma_device_config config = ma_device_config_init(ma_device_type_playback);
-	config.playback.pDeviceID = NULL;
-	config.playback.format = ma_format_f32;
-	config.playback.channels = STREAM_CHANNEL_COUNT;
-	config.sampleRate = STREAM_SAMPLE_RATE;
-	config.noPreZeroedOutputBuffer = MA_TRUE;
-	config.dataCallback = Callback;
-	config.pUserData = stream;
-
-	if (ma_device_init(NULL, &config, &stream->device) == MA_SUCCESS)
+	if (stream != NULL)
 	{
-		stream->user_callback = user_callback;
-		stream->user_data = user_data;
+		ma_device_config config = ma_device_config_init(ma_device_type_playback);
+		config.playback.pDeviceID = NULL;
+		config.playback.format = ma_format_f32;
+		config.playback.channels = STREAM_CHANNEL_COUNT;
+		config.sampleRate = STREAM_SAMPLE_RATE;
+		config.noPreZeroedOutputBuffer = MA_TRUE;
+		config.dataCallback = Callback;
+		config.pUserData = stream;
 
-		stream->volume = 1.0f;
-	}
-	else
-	{
-		free(stream);
-		stream = NULL;
+		if (ma_device_init(NULL, &config, &stream->device) == MA_SUCCESS)
+		{
+			stream->user_callback = user_callback;
+			stream->user_data = user_data;
+
+			stream->volume = 1.0f;
+		}
+		else
+		{
+			free(stream);
+			stream = NULL;
+		}
 	}
 
 	return stream;
@@ -71,7 +74,7 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigne
 
 bool Backend_DestroyStream(BackendStream *stream)
 {
-	if (stream)
+	if (stream != NULL)
 	{
 		ma_device_uninit(&stream->device);
 		free(stream);
@@ -82,7 +85,7 @@ bool Backend_DestroyStream(BackendStream *stream)
 
 bool Backend_SetVolume(BackendStream *stream, float volume)
 {
-	if (stream)
+	if (stream != NULL)
 		stream->volume = volume * volume;
 
 	return true;
@@ -92,7 +95,7 @@ bool Backend_PauseStream(BackendStream *stream)
 {
 	bool success = true;
 
-	if (stream && ma_device_is_started(&stream->device))
+	if (stream != NULL && ma_device_is_started(&stream->device))
 		success = ma_device_stop(&stream->device) == MA_SUCCESS;
 
 	return success;
@@ -102,7 +105,7 @@ bool Backend_ResumeStream(BackendStream *stream)
 {
 	bool success = true;
 
-	if (stream && !ma_device_is_started(&stream->device))
+	if (stream != NULL && !ma_device_is_started(&stream->device))
 		success = ma_device_start(&stream->device) == MA_SUCCESS;
 
 	return success;

@@ -66,6 +66,7 @@ endif
 ifeq ($(USE_STB_VORBIS), true)
 SOURCES += clownaudio/decoders/stb_vorbis
 ALL_CFLAGS += -DUSE_STB_VORBIS
+ALL_LIBS += -lm
 endif
 
 ifeq ($(USE_LIBFLAC), true)
@@ -128,7 +129,7 @@ ALL_CFLAGS += $(SDL2_CFLAGS)
 ALL_LIBS += $(SDL2_LIBS)
 else ifeq ($(BACKEND), Cubeb)
 SOURCES += clownaudio/playback/cubeb
-ALL_LIBS += -lcubeb -lole32
+ALL_LIBS += -lcubeb
 else ifeq ($(BACKEND), PortAudio)
 SOURCES += clownaudio/playback/portaudio
 ALL_CFLAGS += `pkg-config portaudio-2.0 --cflags`
