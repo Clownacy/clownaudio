@@ -12,13 +12,25 @@ USE_PXTONE = false
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
 
-CFLAGS = -O2 -flto
+ifneq ($(RELEASE),)
+	CFLAGS = -O2 -flto
+else
+	CFLAGS = -Og -ggdb
+endif
 ALL_CFLAGS = -std=c99 -MMD -MP -MF $@.d $(CFLAGS)
 
-CXXFLAGS = -O2 -flto
+ifneq ($(RELEASE),)
+	CXXFLAGS = -O2 -flto
+else
+	CXXFLAGS = -Og -ggdb
+endif
 ALL_CXXFLAGS = -std=c++11 -MMD -MP -MF $@.d $(CXXFLAGS)
 
-LDFLAGS = -s
+ifneq ($(RELEASE),)
+	LDFLAGS = -s
+else
+	LDFLAGS =
+endif
 ALL_LDFLAGS = $(LDFLAGS)
 
 LIBS =
