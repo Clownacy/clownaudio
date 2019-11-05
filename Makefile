@@ -1,12 +1,12 @@
 USE_LIBVORBIS = false
-USE_TREMOR = false
+USE_TREMOR = true
 USE_STB_VORBIS = false
 USE_LIBFLAC = false
 USE_DR_FLAC = true
 USE_DR_WAV = false
 USE_LIBSNDFILE = false
 USE_LIBOPENMPT = false
-USE_LIBXMPLITE = false
+USE_LIBXMPLITE = true
 USE_SNES_SPC = false
 USE_PXTONE = false
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'

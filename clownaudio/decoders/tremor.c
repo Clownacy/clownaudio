@@ -8,20 +8,14 @@
 #include "common.h"
 #include "memory_file.h"
 
-typedef struct DecoderData_Tremor
+struct Decoder_Tremor
 {
-	unsigned char *file_buffer;
-	size_t file_size;
-} DecoderData_Tremor;
-
-typedef struct Decoder_Tremor
-{
-	DecoderData_Tremor *data;
+	DecoderData *data;
 	OggVorbis_File vorbis_file;
 	bool loops;
 	unsigned int bytes_per_frame;
 	unsigned int channel_count;
-} Decoder_Tremor;
+};
 
 static size_t MemoryFile_fread_wrapper(void *output, size_t size, size_t count, void *file)
 {
@@ -50,41 +44,16 @@ static const ov_callbacks ov_callback_memory = {
 	MemoryFile_ftell_wrapper
 };
 
-DecoderData_Tremor* Decoder_Tremor_LoadData(const char *file_path, LinkedBackend *linked_backend)
+Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned channel_count, DecoderInfo *info)
 {
-	(void)linked_backend;
+	(void)sample_rate;
+	(void)channel_count;
 
-	DecoderData_Tremor *data = NULL;
-
-	size_t file_size;
-	unsigned char *file_buffer = MemoryFile_fopen_to(file_path, &file_size);
-
-	if (file_buffer)
-	{
-		data = malloc(sizeof(DecoderData_Tremor));
-		data->file_buffer = file_buffer;
-		data->file_size = file_size;
-	}
-
-	return data;
-}
-
-void Decoder_Tremor_UnloadData(DecoderData_Tremor *data)
-{
-	if (data)
-	{
-		free(data->file_buffer);
-		free(data);
-	}
-}
-
-Decoder_Tremor* Decoder_Tremor_Create(DecoderData_Tremor *data, bool loops, DecoderInfo *info)
-{
 	Decoder_Tremor *decoder = NULL;
 
-	MemoryFile *file = MemoryFile_fopen_from(data->file_buffer, data->file_size, false);
+	MemoryFile *file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
 
-	if (file)
+	if (file != NULL)
 	{
 		OggVorbis_File vorbis_file;
 
@@ -94,16 +63,23 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData_Tremor *data, bool loops, Deco
 
 			decoder = malloc(sizeof(Decoder_Tremor));
 
-			decoder->data = data;
-			decoder->vorbis_file = vorbis_file;
-			decoder->loops = loops;
-			decoder->channel_count = v_info->channels;
-			decoder->bytes_per_frame = v_info->channels * sizeof(short);
+			if (decoder != NULL)
+			{
+				decoder->data = data;
+				decoder->vorbis_file = vorbis_file;
+				decoder->loops = loops;
+				decoder->channel_count = v_info->channels;
+				decoder->bytes_per_frame = v_info->channels * sizeof(short);
 
-			info->sample_rate = v_info->rate;
-			info->channel_count = v_info->channels;
-			info->decoded_size = ov_pcm_total(&vorbis_file, -1) * decoder->bytes_per_frame;
-			info->format = DECODER_FORMAT_S16;
+				info->sample_rate = v_info->rate;
+				info->channel_count = v_info->channels;
+				info->decoded_size = ov_pcm_total(&vorbis_file, -1) * decoder->bytes_per_frame;
+				info->format = DECODER_FORMAT_S16;
+			}
+			else
+			{
+				ov_clear(&decoder->vorbis_file);
+			}
 		}
 		else
 		{

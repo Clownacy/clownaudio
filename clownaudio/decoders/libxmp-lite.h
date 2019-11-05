@@ -4,12 +4,9 @@
 
 #include "common.h"
 
-typedef struct DecoderData_libXMPLite DecoderData_libXMPLite;
 typedef struct Decoder_libXMPLite Decoder_libXMPLite;
 
-DecoderData_libXMPLite* Decoder_libXMPLite_LoadData(const char *file_path, LinkedBackend *linked_backend);
-void Decoder_libXMPLite_UnloadData(DecoderData_libXMPLite *data);
-Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData_libXMPLite *data, bool loops, DecoderInfo *info);
-void Decoder_libXMPLite_Destroy(Decoder_libXMPLite *this);
-void Decoder_libXMPLite_Rewind(Decoder_libXMPLite *this);
-unsigned long Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *this, void *buffer, unsigned long bytes_to_do);
+Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info);
+void Decoder_libXMPLite_Destroy(Decoder_libXMPLite *decoder);
+void Decoder_libXMPLite_Rewind(Decoder_libXMPLite *decoder);
+unsigned long Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *decoder, void *buffer, unsigned long frames_to_do);

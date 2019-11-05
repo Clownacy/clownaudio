@@ -58,7 +58,7 @@ MemoryFile* MemoryFile_fopen(const char* const file_path)
 	size_t size;
 	unsigned char *data = MemoryFile_fopen_to(file_path, &size);
 
-	if (data)
+	if (data != NULL)
 		memory_file = MemoryFile_fopen_from(data, size, true);
 
 	return memory_file;

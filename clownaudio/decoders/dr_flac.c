@@ -27,14 +27,15 @@ Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, unsigned i
 
 	if (data != NULL)
 	{
-		decoder = malloc(sizeof(Decoder_DR_FLAC));
+		drflac *backend = drflac_open_memory(data->file_buffer, data->file_size);
 
-		if (decoder != NULL)
+		if (backend != NULL)
 		{
-			decoder->backend = drflac_open_memory(data->file_buffer, data->file_size);
+			decoder = malloc(sizeof(Decoder_DR_FLAC));
 
-			if (decoder->backend != NULL)
+			if (decoder != NULL)
 			{
+				decoder->backend = backend;
 				decoder->data = data;
 				decoder->loop = loop;
 
@@ -45,8 +46,7 @@ Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, unsigned i
 			}
 			else
 			{
-				free(decoder);
-				decoder = NULL;
+				drflac_close(backend);
 			}
 		}
 	}
