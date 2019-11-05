@@ -9,15 +9,9 @@
 #include "common.h"
 #include "memory_file.h"
 
-struct DecoderData_libVorbis
-{
-	unsigned char *file_buffer;
-	size_t file_size;
-};
-
 struct Decoder_libVorbis
 {
-	DecoderData_libVorbis *data;
+	DecoderData *data;
 	OggVorbis_File vorbis_file;
 	bool loops;
 	unsigned int channel_count;
@@ -50,59 +44,41 @@ static const ov_callbacks ov_callback_memory = {
 	MemoryFile_ftell_wrapper
 };
 
-DecoderData_libVorbis* Decoder_libVorbis_LoadData(const char *file_path, LinkedBackend *linked_backend)
+Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
-	(void)linked_backend;
+	(void)sample_rate;
+	(void)channel_count;
 
-	DecoderData_libVorbis *data = NULL;
+	Decoder_libVorbis *decoder = NULL;
 
-	size_t file_size;
-	unsigned char *file_buffer = MemoryFile_fopen_to(file_path, &file_size);
-
-	if (file_buffer)
+	if (data != NULL)
 	{
-		data = malloc(sizeof(DecoderData_libVorbis));
-		data->file_buffer = file_buffer;
-		data->file_size = file_size;
-	}
-
-	return data;
-}
-
-void Decoder_libVorbis_UnloadData(DecoderData_libVorbis *data)
-{
-	if (data)
-	{
-		free(data->file_buffer);
-		free(data);
-	}
-}
-
-Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData_libVorbis *data, bool loops, DecoderInfo *info)
-{
-	Decoder_libVorbis *this = NULL;
-
-	if (data && data->file_buffer)
-	{
-		MemoryFile *memory_file = MemoryFile_fopen_from(data->file_buffer, data->file_size, false);
+		MemoryFile *memory_file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
 
 		OggVorbis_File vorbis_file;
 
 		if (ov_open_callbacks(memory_file, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
 		{
-			this = malloc(sizeof(Decoder_libVorbis));
+			decoder = malloc(sizeof(Decoder_libVorbis));
 
-			vorbis_info *v_info = ov_info(&vorbis_file, -1);
+			if (decoder != NULL)
+			{
+				vorbis_info *v_info = ov_info(&vorbis_file, -1);
 
-			this->vorbis_file = vorbis_file;
-			this->channel_count = v_info->channels;
-			this->data = data;
-			this->loops = loops;
+				decoder->vorbis_file = vorbis_file;
+				decoder->channel_count = v_info->channels;
+				decoder->data = data;
+				decoder->loops = loops;
 
-			info->sample_rate = v_info->rate;
-			info->channel_count = v_info->channels;
-			info->decoded_size = ov_pcm_total(&vorbis_file, -1) * v_info->channels * sizeof(float);
-			info->format = DECODER_FORMAT_F32;
+				info->sample_rate = v_info->rate;
+				info->channel_count = v_info->channels;
+				info->decoded_size = ov_pcm_total(&vorbis_file, -1) * v_info->channels * sizeof(float);
+				info->format = DECODER_FORMAT_F32;
+			}
+			else
+			{
+				ov_clear(&vorbis_file);
+			}
 		}
 		else
 		{
@@ -110,36 +86,36 @@ Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData_libVorbis *data, bool lo
 		}
 	}
 
-	return this;
+	return decoder;
 }
 
-void Decoder_libVorbis_Destroy(Decoder_libVorbis *this)
+void Decoder_libVorbis_Destroy(Decoder_libVorbis *decoder)
 {
-	if (this)
+	if (decoder != NULL)
 	{
-		ov_clear(&this->vorbis_file);
-		free(this);
+		ov_clear(&decoder->vorbis_file);
+		free(decoder);
 	}
 }
 
-void Decoder_libVorbis_Rewind(Decoder_libVorbis *this)
+void Decoder_libVorbis_Rewind(Decoder_libVorbis *decoder)
 {
-	ov_time_seek(&this->vorbis_file, 0);
+	ov_time_seek(&decoder->vorbis_file, 0);
 }
 
-static unsigned long ReadFloats(Decoder_libVorbis *this, float *buffer, unsigned long frames_to_do)
+static unsigned long ReadFloats(Decoder_libVorbis *decoder, float *buffer, unsigned long frames_to_do)
 {
 	float **float_buffer;
-	long frames_read = ov_read_float(&this->vorbis_file, &float_buffer, frames_to_do, NULL);
+	long frames_read = ov_read_float(&decoder->vorbis_file, &float_buffer, frames_to_do, NULL);
 
 	for (long i = 0; i < frames_read; ++i)
-		for (unsigned int j = 0; j < this->channel_count; ++j)
+		for (unsigned int j = 0; j < decoder->channel_count; ++j)
 			*buffer++ = float_buffer[j][i];
 
 	return frames_read;
 }
 
-unsigned long Decoder_libVorbis_GetSamples(Decoder_libVorbis *this, void *buffer_void, unsigned long frames_to_do)
+unsigned long Decoder_libVorbis_GetSamples(Decoder_libVorbis *decoder, void *buffer_void, unsigned long frames_to_do)
 {
 	float *buffer = buffer_void;
 
@@ -147,12 +123,12 @@ unsigned long Decoder_libVorbis_GetSamples(Decoder_libVorbis *this, void *buffer
 
 	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
 	{
-		frames_done = ReadFloats(this, buffer + (frames_done_total * this->channel_count), frames_to_do - frames_done_total);
+		frames_done = ReadFloats(decoder, buffer + (frames_done_total * decoder->channel_count), frames_to_do - frames_done_total);
 
 		if (frames_done == 0)
 		{
-			if (this->loops)
-				Decoder_libVorbis_Rewind(this);
+			if (decoder->loops)
+				Decoder_libVorbis_Rewind(decoder);
 			else
 				break;
 		}

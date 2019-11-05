@@ -10,15 +10,9 @@
 #include "common.h"
 #include "memory_file.h"
 
-struct DecoderData_libSndfile
-{
-	unsigned char *file_buffer;
-	size_t file_size;
-};
-
 struct Decoder_libSndfile
 {
-	DecoderData_libSndfile *data;
+	DecoderData *data;
 	MemoryFile *file;
 	SNDFILE *sndfile;
 	DecoderFormat format;
@@ -61,58 +55,42 @@ static SF_VIRTUAL_IO sfvirtual = {
 	MemoryFile_ftell_wrapper
 };
 
-DecoderData_libSndfile* Decoder_libSndfile_LoadData(const char *file_path, LinkedBackend *linked_backend)
+Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
-	(void)linked_backend;
+	(void)sample_rate;
+	(void)channel_count;
 
-	DecoderData_libSndfile *data = NULL;
-
-	size_t file_size;
-	unsigned char *file_buffer = MemoryFile_fopen_to(file_path, &file_size);
-
-	if (file_buffer)
-	{
-		data = malloc(sizeof(DecoderData_libSndfile));
-		data->file_buffer = file_buffer;
-		data->file_size = file_size;
-	}
-
-	return data;
-}
-
-void Decoder_libSndfile_UnloadData(DecoderData_libSndfile *data)
-{
-	if (data)
-	{
-		free(data->file_buffer);
-		free(data);
-	}
-}
-
-Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData_libSndfile *data, bool loops, DecoderInfo *info)
-{
 	Decoder_libSndfile *decoder = NULL;
 
-	MemoryFile *file = MemoryFile_fopen_from(data->file_buffer, data->file_size, false);
+	MemoryFile *file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
 
 	SF_INFO sf_info;
 	memset(&sf_info, 0, sizeof(SF_INFO));
 
 	SNDFILE *sndfile = sf_open_virtual(&sfvirtual, SFM_READ, &sf_info, file);
 
-	if (sndfile)
+	if (sndfile != NULL)
 	{
 		decoder = malloc(sizeof(Decoder_libSndfile));
-		decoder->data = data;
-		decoder->sndfile = sndfile;
-		decoder->file = file;
-		decoder->channel_count = sf_info.channels;
-		decoder->loops = loops;
 
-		info->sample_rate = sf_info.samplerate;
-		info->channel_count = sf_info.channels;
-		info->decoded_size = sf_info.frames * sf_info.channels * sizeof(float);
-		info->format = DECODER_FORMAT_F32;
+		if (decoder != NULL)
+		{
+			decoder->data = data;
+			decoder->sndfile = sndfile;
+			decoder->file = file;
+			decoder->channel_count = sf_info.channels;
+			decoder->loops = loops;
+
+			info->sample_rate = sf_info.samplerate;
+			info->channel_count = sf_info.channels;
+			info->decoded_size = sf_info.frames * sf_info.channels * sizeof(float);
+			info->format = DECODER_FORMAT_F32;
+		}
+		else
+		{
+			sf_close(sndfile);
+			MemoryFile_fclose(file);
+		}
 	}
 	else
 	{
@@ -124,7 +102,7 @@ Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData_libSndfile *data, bool
 
 void Decoder_libSndfile_Destroy(Decoder_libSndfile *decoder)
 {
-	if (decoder)
+	if (decoder != NULL)
 	{
 		sf_close(decoder->sndfile);
 		MemoryFile_fclose(decoder->file);

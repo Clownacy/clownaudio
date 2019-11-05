@@ -13,15 +13,9 @@
 #undef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-struct DecoderData_libFLAC
-{
-	unsigned char *file_buffer;
-	size_t file_size;
-};
-
 struct Decoder_libFLAC
 {
-	DecoderData_libFLAC *data;
+	DecoderData *data;
 
 	MemoryFile *file;
 	FLAC__StreamDecoder *stream_decoder;
@@ -164,83 +158,66 @@ static void ErrorCallback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecode
 	this->error = true;
 }
 
-DecoderData_libFLAC* Decoder_libFLAC_LoadData(const char *file_path, LinkedBackend *linked_backend)
+Decoder_libFLAC* Decoder_libFLAC_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
-	(void)linked_backend;
+	(void)sample_rate;
+	(void)channel_count;
 
-	DecoderData_libFLAC *data = NULL;
+	Decoder_libFLAC *decoder = NULL;
 
-	size_t file_size;
-	unsigned char *file_buffer = MemoryFile_fopen_to(file_path, &file_size);
-
-	if (file_buffer)
+	if (data != NULL)
 	{
-		data = malloc(sizeof(DecoderData_libFLAC));
-		data->file_buffer = file_buffer;
-		data->file_size = file_size;
-	}
+		decoder = malloc(sizeof(Decoder_libFLAC));
 
-	return data;
-}
-
-void Decoder_libFLAC_UnloadData(DecoderData_libFLAC *data)
-{
-	if (data)
-	{
-		free(data->file_buffer);
-		free(data);
-	}
-}
-
-Decoder_libFLAC* Decoder_libFLAC_Create(DecoderData_libFLAC *data, bool loops, DecoderInfo *info)
-{
-	Decoder_libFLAC *decoder = malloc(sizeof(Decoder_libFLAC));
-
-	decoder->stream_decoder = FLAC__stream_decoder_new();
-
-	if (decoder->stream_decoder)
-	{
-		decoder->file = MemoryFile_fopen_from(data->file_buffer, data->file_size, false);
-
-		if (decoder->file)
+		if (decoder != NULL)
 		{
-			if (FLAC__stream_decoder_init_stream(decoder->stream_decoder, MemoryFile_fread_wrapper, MemoryFile_fseek_wrapper, MemoryFile_ftell_wrapper, MemoryFile_GetSize, MemoryFile_EOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
-			{
-				decoder->data = data;
-				decoder->error = false;
-				decoder->info = info;
-				decoder->loops = loops;
-				FLAC__stream_decoder_process_until_end_of_metadata(decoder->stream_decoder);
+			decoder->stream_decoder = FLAC__stream_decoder_new();
 
-				if (decoder->error)
+			if (decoder->stream_decoder != NULL)
+			{
+				decoder->file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
+
+				if (decoder->file != NULL)
 				{
-					FLAC__stream_decoder_finish(decoder->stream_decoder);
+					if (FLAC__stream_decoder_init_stream(decoder->stream_decoder, MemoryFile_fread_wrapper, MemoryFile_fseek_wrapper, MemoryFile_ftell_wrapper, MemoryFile_GetSize, MemoryFile_EOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
+					{
+						decoder->data = data;
+						decoder->error = false;
+						decoder->info = info;
+						decoder->loops = loops;
+						FLAC__stream_decoder_process_until_end_of_metadata(decoder->stream_decoder);
+
+						if (decoder->error)
+						{
+							FLAC__stream_decoder_finish(decoder->stream_decoder);
+							FLAC__stream_decoder_delete(decoder->stream_decoder);
+							MemoryFile_fclose(decoder->file);
+							free(decoder);
+							decoder = NULL;
+						}
+
+					}
+					else
+					{
+						FLAC__stream_decoder_delete(decoder->stream_decoder);
+						MemoryFile_fclose(decoder->file);
+						free(decoder);
+						decoder = NULL;
+					}
+				}
+				else
+				{
 					FLAC__stream_decoder_delete(decoder->stream_decoder);
-					MemoryFile_fclose(decoder->file);
 					free(decoder);
 					decoder = NULL;
 				}
-
 			}
 			else
 			{
-				FLAC__stream_decoder_delete(decoder->stream_decoder);
-				MemoryFile_fclose(decoder->file);
 				free(decoder);
 				decoder = NULL;
 			}
 		}
-		else
-		{
-			FLAC__stream_decoder_delete(decoder->stream_decoder);
-			free(decoder);
-			decoder = NULL;
-		}
-	}
-	else
-	{
-		free(decoder);
-		decoder = NULL;
 	}
 
 	return decoder;
@@ -248,7 +225,7 @@ Decoder_libFLAC* Decoder_libFLAC_Create(DecoderData_libFLAC *data, bool loops, D
 
 void Decoder_libFLAC_Destroy(Decoder_libFLAC *decoder)
 {
-	if (decoder)
+	if (decoder != NULL)
 	{
 		FLAC__stream_decoder_finish(decoder->stream_decoder);
 		FLAC__stream_decoder_delete(decoder->stream_decoder);
