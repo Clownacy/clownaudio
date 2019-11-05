@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #define STB_VORBIS_IMPLEMENTATION
-#define STB_VORBIS_STATIC
+//#define STB_VORBIS_STATIC
 #define STB_VORBIS_NO_STDIO
 #define STB_VORBIS_NO_PUSHDATA_API
 #define STB_VORBIS_NO_INTEGER_CONVERSION
@@ -17,7 +17,7 @@
 #pragma GCC diagnostic ignored "-Wunused-function"
 #pragma GCC diagnostic ignored "-Wunused-value"
 #endif
-#include "libs/stb_vorbis.h"
+#include "libs/stb_vorbis.c"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
