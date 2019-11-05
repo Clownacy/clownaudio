@@ -23,92 +23,67 @@
 #endif
 
 #include "common.h"
-#include "memory_file.h"
-
-struct DecoderData_STB_Vorbis
-{
-	unsigned char *file_buffer;
-	size_t file_size;
-};
 
 struct Decoder_STB_Vorbis
 {
-	DecoderData_STB_Vorbis *data;
+	DecoderData *data;
 	stb_vorbis *instance;
 	bool loops;
 };
 
-DecoderData_STB_Vorbis* Decoder_STB_Vorbis_LoadData(const char *file_path, LinkedBackend *linked_backend)
+Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
-	(void)linked_backend;
+	(void)sample_rate;
+	(void)channel_count;
 
-	DecoderData_STB_Vorbis *data = NULL;
+	Decoder_STB_Vorbis *decoder = NULL;
 
-	size_t file_size;
-	unsigned char *file_buffer = MemoryFile_fopen_to(file_path, &file_size);
-
-	if (file_buffer)
-	{
-		data = malloc(sizeof(DecoderData_STB_Vorbis));
-		data->file_buffer = file_buffer;
-		data->file_size = file_size;
-	}
-
-	return data;
-}
-
-void Decoder_STB_Vorbis_UnloadData(DecoderData_STB_Vorbis *data)
-{
-	if (data)
-	{
-		free(data->file_buffer);
-		free(data);
-	}
-}
-
-Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData_STB_Vorbis *data, bool loops, DecoderInfo *info)
-{
-	Decoder_STB_Vorbis *this = NULL;
-
-	if (data && data->file_buffer)
+	if (data != NULL)
 	{
 		stb_vorbis *instance = stb_vorbis_open_memory(data->file_buffer, data->file_size, NULL, NULL);
 
-		if (instance)
+		if (instance != NULL)
 		{
-			this = malloc(sizeof(Decoder_STB_Vorbis));
+			decoder = malloc(sizeof(Decoder_STB_Vorbis));
 
-			const stb_vorbis_info vorbis_info = stb_vorbis_get_info(instance);
+			if (decoder != NULL)
+			{
+				const stb_vorbis_info vorbis_info = stb_vorbis_get_info(instance);
 
-			this->instance = instance;
-			this->data = data;
-			this->loops = loops;
+				decoder->instance = instance;
+				decoder->data = data;
+				decoder->loops = loops;
 
-			info->sample_rate = vorbis_info.sample_rate;
-			info->channel_count = vorbis_info.channels;
-			info->decoded_size = stb_vorbis_stream_length_in_samples(instance) * vorbis_info.channels * sizeof(float);
-			info->format = DECODER_FORMAT_F32;
+				info->sample_rate = vorbis_info.sample_rate;
+				info->channel_count = vorbis_info.channels;
+				info->decoded_size = stb_vorbis_stream_length_in_samples(instance) * vorbis_info.channels * sizeof(float);
+				info->format = DECODER_FORMAT_F32;
+			}
+			else
+			{
+				stb_vorbis_close(instance);
+			}
 		}
 	}
 
-	return this;
+	return decoder;
 }
 
-void Decoder_STB_Vorbis_Destroy(Decoder_STB_Vorbis *this)
+void Decoder_STB_Vorbis_Destroy(Decoder_STB_Vorbis *decoder)
 {
-	if (this)
+	if (decoder != NULL)
 	{
-		stb_vorbis_close(this->instance);
-		free(this);
+		stb_vorbis_close(decoder->instance);
+		free(decoder);
 	}
 }
 
-void Decoder_STB_Vorbis_Rewind(Decoder_STB_Vorbis *this)
+void Decoder_STB_Vorbis_Rewind(Decoder_STB_Vorbis *decoder)
 {
-	stb_vorbis_seek_start(this->instance);
+	stb_vorbis_seek_start(decoder->instance);
 }
 
-unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *this, void *buffer_void, unsigned long frames_to_do)
+unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *decoder, void *buffer_void, unsigned long frames_to_do)
 {
 	float *buffer = buffer_void;
 
@@ -116,12 +91,12 @@ unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *this, void *buff
 
 	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
 	{
-		frames_done = stb_vorbis_get_samples_float_interleaved(this->instance, this->instance->channels, buffer + (frames_done_total * this->instance->channels), (frames_to_do - frames_done_total) * this->instance->channels);
+		frames_done = stb_vorbis_get_samples_float_interleaved(decoder->instance, decoder->instance->channels, buffer + (frames_done_total * decoder->instance->channels), (frames_to_do - frames_done_total) * decoder->instance->channels);
 
 		if (frames_done == 0)
 		{
-			if (this->loops)
-				Decoder_STB_Vorbis_Rewind(this);
+			if (decoder->loops)
+				Decoder_STB_Vorbis_Rewind(decoder);
 			else
 				break;
 		}

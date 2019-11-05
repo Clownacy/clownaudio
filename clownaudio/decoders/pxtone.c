@@ -9,67 +9,38 @@
 #include "libs/pxtone/shim.h"
 
 #include "common.h"
-#include "memory_file.h"
-
-#define SAMPLE_RATE 48000
-#define CHANNEL_COUNT 2
-
-struct DecoderData_PxTone
-{
-	unsigned char *file_buffer;
-	size_t file_size;
-};
 
 struct Decoder_PxTone
 {
-	DecoderData_PxTone *data;
+	DecoderData *data;
 	pxtnService *pxtn;
 	bool loop;
 };
 
-DecoderData_PxTone* Decoder_PxTone_LoadData(const char *file_path, LinkedBackend *linked_backend)
-{
-	(void)linked_backend;
-
-	DecoderData_PxTone *data = NULL;
-
-	size_t file_size;
-	unsigned char *file_buffer = MemoryFile_fopen_to(file_path, &file_size);
-
-	if (file_buffer)
-	{
-		data = malloc(sizeof(DecoderData_PxTone));
-		data->file_buffer = file_buffer;
-		data->file_size = file_size;
-	}
-
-	return data;
-}
-
-void Decoder_PxTone_UnloadData(DecoderData_PxTone *data)
-{
-	if (data)
-	{
-		free(data->file_buffer);
-		free(data);
-	}
-}
-
-Decoder_PxTone* Decoder_PxTone_Create(DecoderData_PxTone *data, bool loop, DecoderInfo *info)
+Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	Decoder_PxTone *decoder = NULL;
 
-	pxtnService *pxtn = PxTone_Open(data->file_buffer, data->file_size, loop, SAMPLE_RATE, CHANNEL_COUNT);
-	if (pxtn)
+	pxtnService *pxtn = PxTone_Open(data->file_buffer, data->file_size, loop, sample_rate, channel_count);
+
+	if (pxtn != NULL)
 	{
 		decoder = malloc(sizeof(Decoder_PxTone));
-		decoder->pxtn = pxtn;
-		decoder->data = data;
-		decoder->loop = loop;
 
-		info->sample_rate = SAMPLE_RATE;
-		info->channel_count = CHANNEL_COUNT;
-		info->format = DECODER_FORMAT_S16;
+		if (decoder != NULL)
+		{
+			decoder->pxtn = pxtn;
+			decoder->data = data;
+			decoder->loop = loop;
+
+			info->sample_rate = sample_rate;
+			info->channel_count = channel_count;
+			info->format = DECODER_FORMAT_S16;
+		}
+		else
+		{
+			PxTone_Close(pxtn);
+		}
 	}
 
 	return decoder;
@@ -77,7 +48,7 @@ Decoder_PxTone* Decoder_PxTone_Create(DecoderData_PxTone *data, bool loop, Decod
 
 void Decoder_PxTone_Destroy(Decoder_PxTone *decoder)
 {
-	if (decoder)
+	if (decoder != NULL)
 	{
 		PxTone_Close(decoder->pxtn);
 		free(decoder);

@@ -8,54 +8,21 @@
 #include "libs/snes_spc-0.9.0/snes_spc/spc.h"
 
 #include "common.h"
-#include "memory_file.h"
-
-struct DecoderData_SNES_SPC
-{
-	unsigned char *file_buffer;
-	size_t file_size;
-};
 
 struct Decoder_SNES_SPC
 {
-	DecoderData_SNES_SPC *data;
+	DecoderData *data;
 	SNES_SPC *snes_spc;
 //	SPC_Filter *filter;
 };
 
-DecoderData_SNES_SPC* Decoder_SNES_SPC_LoadData(const char *file_path, LinkedBackend *linked_backend)
-{
-	(void)linked_backend;
-
-	DecoderData_SNES_SPC *data = NULL;
-
-	size_t file_size;
-	unsigned char *file_buffer = MemoryFile_fopen_to(file_path, &file_size);
-
-	if (file_buffer)
-	{
-		data = malloc(sizeof(DecoderData_SNES_SPC));
-		data->file_buffer = file_buffer;
-		data->file_size = file_size;
-	}
-
-	return data;
-}
-
-void Decoder_SNES_SPC_UnloadData(DecoderData_SNES_SPC *data)
-{
-	if (data)
-	{
-		free(data->file_buffer);
-		free(data);
-	}
-}
-
-Decoder_SNES_SPC* Decoder_SNES_SPC_Create(DecoderData_SNES_SPC *data, bool loop, DecoderInfo *info)
+Decoder_SNES_SPC* Decoder_SNES_SPC_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	(void)loop;	// Unusable, sadly
+	(void)sample_rate;
+	(void)channel_count;
 
-	Decoder_SNES_SPC *this = NULL;
+	Decoder_SNES_SPC *decoder = NULL;
 
 	SNES_SPC *snes_spc = spc_new();
 
@@ -65,41 +32,49 @@ Decoder_SNES_SPC* Decoder_SNES_SPC_Create(DecoderData_SNES_SPC *data, bool loop,
 	{
 		spc_clear_echo(snes_spc);
 
-	//	spc_filter_clear(filter);
+		//spc_filter_clear(filter);
 
-		this = malloc(sizeof(Decoder_SNES_SPC));
-		this->data = data;
-		this->snes_spc = snes_spc;
-	//	this->filter = filter;
+		decoder = malloc(sizeof(Decoder_SNES_SPC));
 
-		info->sample_rate = spc_sample_rate;
-		info->channel_count = 2;
-		info->format = DECODER_FORMAT_S16;
+		if (decoder != NULL)
+		{
+			decoder->data = data;
+			decoder->snes_spc = snes_spc;
+			//decoder->filter = filter;
+
+			info->sample_rate = spc_sample_rate;
+			info->channel_count = 2;
+			info->format = DECODER_FORMAT_S16;
+		}
+		else
+		{
+			spc_delete(snes_spc);
+		}
 	}
 
-	return this;
+	return decoder;
 }
 
-void Decoder_SNES_SPC_Destroy(Decoder_SNES_SPC *this)
+void Decoder_SNES_SPC_Destroy(Decoder_SNES_SPC *decoder)
 {
-	if (this)
+	if (decoder != NULL)
 	{
-		spc_delete(this->snes_spc);
-		free(this);
+		spc_delete(decoder->snes_spc);
+		free(decoder);
 	}
 }
 
-void Decoder_SNES_SPC_Rewind(Decoder_SNES_SPC *this)
+void Decoder_SNES_SPC_Rewind(Decoder_SNES_SPC *decoder)
 {
-	spc_delete(this->snes_spc);
-	spc_load_spc(this->snes_spc, this->data->file_buffer, this->data->file_size);
+	spc_delete(decoder->snes_spc);
+	spc_load_spc(decoder->snes_spc, decoder->data->file_buffer, decoder->data->file_size);
 }
 
-unsigned long Decoder_SNES_SPC_GetSamples(Decoder_SNES_SPC *this, void *buffer, unsigned long frames_to_do)
+unsigned long Decoder_SNES_SPC_GetSamples(Decoder_SNES_SPC *decoder, void *buffer, unsigned long frames_to_do)
 {
-	spc_play(this->snes_spc, frames_to_do * 2, buffer);
+	spc_play(decoder->snes_spc, frames_to_do * 2, buffer);
 
-//	spc_filter_run(this->filter, buffer, bytes_to_do / sizeof(short));
+//	spc_filter_run(decoder->filter, buffer, bytes_to_do / sizeof(short));
 
 	return frames_to_do;
 }

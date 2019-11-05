@@ -3,12 +3,12 @@
 #include "pxtnService.h"
 #include "pxtnError.h"
 
-static bool _load_ptcop(pxtnService* pxtn, unsigned char *file_buffer, size_t file_size)
+static bool _load_ptcop(pxtnService* pxtn, const unsigned char *file_buffer, size_t file_size)
 {
 	bool success = false;
 
 	pxtnDescriptor desc;
-	if (desc.set_memory_r(file_buffer, file_size) && pxtn->read(&desc) == pxtnOK && pxtn->tones_ready() == pxtnOK)
+	if (desc.set_memory_r((void*)file_buffer, file_size) && pxtn->read(&desc) == pxtnOK && pxtn->tones_ready() == pxtnOK)
 		success = true;
 	else
 		pxtn->evels->Release();
@@ -16,7 +16,7 @@ static bool _load_ptcop(pxtnService* pxtn, unsigned char *file_buffer, size_t fi
 	return success;
 }
 
-extern "C" pxtnService* PxTone_Open(unsigned char *file_buffer, size_t file_size, bool loop, unsigned int sample_rate, unsigned int channel_count)
+extern "C" pxtnService* PxTone_Open(const unsigned char *file_buffer, size_t file_size, bool loop, unsigned int sample_rate, unsigned int channel_count)
 {
 	pxtnService *pxtn = new pxtnService();
 	if (pxtn->init() == pxtnOK)

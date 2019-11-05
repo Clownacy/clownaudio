@@ -78,7 +78,7 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned in
 			}
 			else
 			{
-				ov_clear(&decoder->vorbis_file);
+				ov_clear(&vorbis_file);
 			}
 		}
 		else
