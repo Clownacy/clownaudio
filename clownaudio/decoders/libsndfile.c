@@ -62,39 +62,42 @@ Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, uns
 
 	Decoder_libSndfile *decoder = NULL;
 
-	MemoryFile *file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
-
-	SF_INFO sf_info;
-	memset(&sf_info, 0, sizeof(SF_INFO));
-
-	SNDFILE *sndfile = sf_open_virtual(&sfvirtual, SFM_READ, &sf_info, file);
-
-	if (sndfile != NULL)
+	if (data != NULL)
 	{
-		decoder = malloc(sizeof(Decoder_libSndfile));
+		MemoryFile *file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
 
-		if (decoder != NULL)
+		SF_INFO sf_info;
+		memset(&sf_info, 0, sizeof(SF_INFO));
+
+		SNDFILE *sndfile = sf_open_virtual(&sfvirtual, SFM_READ, &sf_info, file);
+
+		if (sndfile != NULL)
 		{
-			decoder->data = data;
-			decoder->sndfile = sndfile;
-			decoder->file = file;
-			decoder->channel_count = sf_info.channels;
-			decoder->loops = loops;
+			decoder = malloc(sizeof(Decoder_libSndfile));
 
-			info->sample_rate = sf_info.samplerate;
-			info->channel_count = sf_info.channels;
-			info->decoded_size = sf_info.frames * sf_info.channels * sizeof(float);
-			info->format = DECODER_FORMAT_F32;
+			if (decoder != NULL)
+			{
+				decoder->data = data;
+				decoder->sndfile = sndfile;
+				decoder->file = file;
+				decoder->channel_count = sf_info.channels;
+				decoder->loops = loops;
+
+				info->sample_rate = sf_info.samplerate;
+				info->channel_count = sf_info.channels;
+				info->decoded_size = sf_info.frames * sf_info.channels * sizeof(float);
+				info->format = DECODER_FORMAT_F32;
+			}
+			else
+			{
+				sf_close(sndfile);
+				MemoryFile_fclose(file);
+			}
 		}
 		else
 		{
-			sf_close(sndfile);
 			MemoryFile_fclose(file);
 		}
-	}
-	else
-	{
-		MemoryFile_fclose(file);
 	}
 
 	return decoder;

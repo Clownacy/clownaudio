@@ -24,31 +24,34 @@ Decoder_SNES_SPC* Decoder_SNES_SPC_Create(DecoderData *data, bool loop, unsigned
 
 	Decoder_SNES_SPC *decoder = NULL;
 
-	SNES_SPC *snes_spc = spc_new();
-
-	//SPC_Filter *filter = spc_filter_new();
-
-	if (!spc_load_spc(snes_spc, data->file_buffer, data->file_size))
+	if (data != NULL)
 	{
-		spc_clear_echo(snes_spc);
+		SNES_SPC *snes_spc = spc_new();
 
-		//spc_filter_clear(filter);
+		//SPC_Filter *filter = spc_filter_new();
 
-		decoder = malloc(sizeof(Decoder_SNES_SPC));
-
-		if (decoder != NULL)
+		if (!spc_load_spc(snes_spc, data->file_buffer, data->file_size))
 		{
-			decoder->data = data;
-			decoder->snes_spc = snes_spc;
-			//decoder->filter = filter;
+			spc_clear_echo(snes_spc);
 
-			info->sample_rate = spc_sample_rate;
-			info->channel_count = 2;
-			info->format = DECODER_FORMAT_S16;
-		}
-		else
-		{
-			spc_delete(snes_spc);
+			//spc_filter_clear(filter);
+
+			decoder = malloc(sizeof(Decoder_SNES_SPC));
+
+			if (decoder != NULL)
+			{
+				decoder->data = data;
+				decoder->snes_spc = snes_spc;
+				//decoder->filter = filter;
+
+				info->sample_rate = spc_sample_rate;
+				info->channel_count = 2;
+				info->format = DECODER_FORMAT_S16;
+			}
+			else
+			{
+				spc_delete(snes_spc);
+			}
 		}
 	}
 

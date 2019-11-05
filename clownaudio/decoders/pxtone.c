@@ -21,25 +21,28 @@ Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned int
 {
 	Decoder_PxTone *decoder = NULL;
 
-	pxtnService *pxtn = PxTone_Open(data->file_buffer, data->file_size, loop, sample_rate, channel_count);
-
-	if (pxtn != NULL)
+	if (data != NULL)
 	{
-		decoder = malloc(sizeof(Decoder_PxTone));
+		pxtnService *pxtn = PxTone_Open(data->file_buffer, data->file_size, loop, sample_rate, channel_count);
 
-		if (decoder != NULL)
+		if (pxtn != NULL)
 		{
-			decoder->pxtn = pxtn;
-			decoder->data = data;
-			decoder->loop = loop;
+			decoder = malloc(sizeof(Decoder_PxTone));
 
-			info->sample_rate = sample_rate;
-			info->channel_count = channel_count;
-			info->format = DECODER_FORMAT_S16;
-		}
-		else
-		{
-			PxTone_Close(pxtn);
+			if (decoder != NULL)
+			{
+				decoder->pxtn = pxtn;
+				decoder->data = data;
+				decoder->loop = loop;
+
+				info->sample_rate = sample_rate;
+				info->channel_count = channel_count;
+				info->format = DECODER_FORMAT_S16;
+			}
+			else
+			{
+				PxTone_Close(pxtn);
+			}
 		}
 	}
 

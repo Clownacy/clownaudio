@@ -51,39 +51,42 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned in
 
 	Decoder_Tremor *decoder = NULL;
 
-	MemoryFile *file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
-
-	if (file != NULL)
+	if (data != NULL)
 	{
-		OggVorbis_File vorbis_file;
+		MemoryFile *file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
 
-		if (ov_open_callbacks(file, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
+		if (file != NULL)
 		{
-			vorbis_info *v_info = ov_info(&vorbis_file, -1);
+			OggVorbis_File vorbis_file;
 
-			decoder = malloc(sizeof(Decoder_Tremor));
-
-			if (decoder != NULL)
+			if (ov_open_callbacks(file, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
 			{
-				decoder->data = data;
-				decoder->vorbis_file = vorbis_file;
-				decoder->loops = loops;
-				decoder->channel_count = v_info->channels;
-				decoder->bytes_per_frame = v_info->channels * sizeof(short);
+				vorbis_info *v_info = ov_info(&vorbis_file, -1);
 
-				info->sample_rate = v_info->rate;
-				info->channel_count = v_info->channels;
-				info->decoded_size = ov_pcm_total(&vorbis_file, -1) * decoder->bytes_per_frame;
-				info->format = DECODER_FORMAT_S16;
+				decoder = malloc(sizeof(Decoder_Tremor));
+
+				if (decoder != NULL)
+				{
+					decoder->data = data;
+					decoder->vorbis_file = vorbis_file;
+					decoder->loops = loops;
+					decoder->channel_count = v_info->channels;
+					decoder->bytes_per_frame = v_info->channels * sizeof(short);
+
+					info->sample_rate = v_info->rate;
+					info->channel_count = v_info->channels;
+					info->decoded_size = ov_pcm_total(&vorbis_file, -1) * decoder->bytes_per_frame;
+					info->format = DECODER_FORMAT_S16;
+				}
+				else
+				{
+					ov_clear(&vorbis_file);
+				}
 			}
 			else
 			{
-				ov_clear(&vorbis_file);
+				MemoryFile_fclose(file);
 			}
-		}
-		else
-		{
-			MemoryFile_fclose(file);
 		}
 	}
 
