@@ -24,9 +24,9 @@ typedef struct Channel
 	Decoder *decoder;
 	Mixer_Sound instance;
 
-	unsigned int fade_out_counter_max;
-	unsigned int fade_in_counter_max;
-	unsigned int fade_counter;
+	unsigned long fade_out_counter_max;
+	unsigned long fade_in_counter_max;
+	unsigned long fade_counter;
 } Channel;
 
 typedef struct Mutex
@@ -42,7 +42,7 @@ static Channel *channel_list_head;
 
 static Mutex mixer_mutex;
 
-static unsigned int output_sample_rate;
+static unsigned long output_sample_rate;
 static unsigned int output_channel_count;
 
 static void MutexInit(Mutex *mutex)
@@ -90,7 +90,7 @@ static Channel* FindChannel(Mixer_Sound instance)
 	return NULL;
 }
 
-void Mixer_Init(unsigned int sample_rate, unsigned int channel_count)
+void Mixer_Init(unsigned long sample_rate, unsigned int channel_count)
 {
 	output_sample_rate = sample_rate;
 	output_channel_count = channel_count;

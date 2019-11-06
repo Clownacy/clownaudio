@@ -18,7 +18,7 @@ typedef struct DecoderData
 
 typedef struct DecoderInfo
 {
-	unsigned int sample_rate;
+	unsigned long sample_rate;
 	unsigned int channel_count;
 	size_t decoded_size;
 	DecoderFormat format;
@@ -26,7 +26,7 @@ typedef struct DecoderInfo
 
 typedef struct DecoderBackend
 {
-	void* (*Create)(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info);
+	void* (*Create)(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info);
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
 	unsigned long (*GetSamples)(void *decoder, void *buffer_void, unsigned long frames_to_do);

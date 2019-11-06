@@ -26,7 +26,7 @@ struct Decoder_DR_FLAC
 	bool loop;
 };
 
-Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	(void)sample_rate;
 	(void)channel_count;

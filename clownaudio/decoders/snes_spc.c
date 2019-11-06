@@ -16,7 +16,7 @@ struct Decoder_SNES_SPC
 //	SPC_Filter *filter;
 };
 
-Decoder_SNES_SPC* Decoder_SNES_SPC_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_SNES_SPC* Decoder_SNES_SPC_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	(void)loop;	// Unusable, sadly
 	(void)sample_rate;

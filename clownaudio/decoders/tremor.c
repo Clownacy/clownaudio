@@ -44,7 +44,7 @@ static const ov_callbacks ov_callback_memory = {
 	MemoryFile_ftell_wrapper
 };
 
-Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned channel_count, DecoderInfo *info)
+Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned channel_count, DecoderInfo *info)
 {
 	(void)sample_rate;
 	(void)channel_count;

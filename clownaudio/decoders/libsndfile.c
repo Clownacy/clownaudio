@@ -55,7 +55,7 @@ static SF_VIRTUAL_IO sfvirtual = {
 	MemoryFile_ftell_wrapper
 };
 
-Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	(void)sample_rate;
 	(void)channel_count;

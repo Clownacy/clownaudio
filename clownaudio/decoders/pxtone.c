@@ -17,7 +17,7 @@ struct Decoder_PxTone
 	bool loop;
 };
 
-Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	Decoder_PxTone *decoder = NULL;
 

@@ -158,7 +158,7 @@ static void ErrorCallback(const FLAC__StreamDecoder *decoder, FLAC__StreamDecode
 	this->error = true;
 }
 
-Decoder_libFLAC* Decoder_libFLAC_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_libFLAC* Decoder_libFLAC_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	(void)sample_rate;
 	(void)channel_count;

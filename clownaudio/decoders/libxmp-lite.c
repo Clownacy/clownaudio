@@ -17,7 +17,7 @@ struct Decoder_libXMPLite
 	unsigned int channel_count;
 };
 
-Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	Decoder_libXMPLite *decoder = NULL;
 

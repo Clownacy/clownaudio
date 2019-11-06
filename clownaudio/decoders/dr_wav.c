@@ -18,7 +18,7 @@ struct Decoder_DR_WAV
 	bool loops;
 };
 
-Decoder_DR_WAV* Decoder_DR_WAV_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_DR_WAV* Decoder_DR_WAV_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	(void)sample_rate;
 	(void)channel_count;

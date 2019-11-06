@@ -30,7 +30,7 @@ struct Decoder_STB_Vorbis
 	bool loops;
 };
 
-Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loops, unsigned int sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
 	(void)sample_rate;
 	(void)channel_count;

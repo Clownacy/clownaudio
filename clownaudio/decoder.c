@@ -44,7 +44,7 @@
 
 #define BACKEND_FUNCTIONS(name) \
 { \
-	(void*(*)(DecoderData*,bool,unsigned int,unsigned int,DecoderInfo*))Decoder_##name##_Create, \
+	(void*(*)(DecoderData*,bool,unsigned long,unsigned int,DecoderInfo*))Decoder_##name##_Create, \
 	(void(*)(void*))Decoder_##name##_Destroy, \
 	(void(*)(void*))Decoder_##name##_Rewind, \
 	(unsigned long(*)(void*,void*,unsigned long))Decoder_##name##_GetSamples \
@@ -129,7 +129,7 @@ void Decoder_UnloadData(DecoderData *data)
 	//}
 }
 
-Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned int sample_rate, unsigned int channel_count)
+Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count)
 {
 	for (unsigned int i = 0; i < sizeof(backends) / sizeof(backends[0]); ++i)
 	{
