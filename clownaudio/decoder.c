@@ -148,7 +148,6 @@ Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned int sample_rate, 
 				ma_format format;
 				switch (info.format)
 				{
-					default:	// Goddammit GCC shut up with your stupid warnings
 					case DECODER_FORMAT_S16:
 						format = ma_format_s16;
 						break;
@@ -160,6 +159,11 @@ Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned int sample_rate, 
 					case DECODER_FORMAT_F32:
 						format = ma_format_f32;
 						break;
+
+					default:
+						backends[i].Destroy(backend);
+						free(decoder);
+						return NULL;
 				}
 
 				const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, channel_count, sample_rate, PCMConverterCallback, decoder);
