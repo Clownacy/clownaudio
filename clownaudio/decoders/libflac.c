@@ -143,7 +143,7 @@ static void MetadataCallback(const FLAC__StreamDecoder *decoder, const FLAC__Str
 	this->bits_per_sample = metadata->data.stream_info.bits_per_sample;
 
 	// Init block buffer
-	this->block_buffer = malloc(metadata->data.stream_info.max_blocksize * sizeof(long) * metadata->data.stream_info.channels);
+	this->block_buffer = malloc(metadata->data.stream_info.max_blocksize * sizeof(FLAC__int32) * metadata->data.stream_info.channels);
 	this->block_buffer_index = 0;
 	this->block_buffer_size = 0;
 }
