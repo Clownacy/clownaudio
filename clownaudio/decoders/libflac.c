@@ -266,7 +266,7 @@ unsigned long Decoder_libFLAC_GetSamples(Decoder_libFLAC *decoder, void *buffer_
 			}
 		}
 
-		const unsigned int SIZE_OF_FRAME = 4 * decoder->channel_count;
+		const unsigned int SIZE_OF_FRAME = sizeof(FLAC__int32) * decoder->channel_count;
 
 		const unsigned long block_frames_to_do = MIN(frames_to_do - frames_done_total, decoder->block_buffer_size - decoder->block_buffer_index);
 
