@@ -41,7 +41,7 @@ Decoder_DR_WAV* Decoder_DR_WAV_Create(DecoderData *data, bool loops, unsigned in
 
 				info->sample_rate = instance->sampleRate;
 				info->channel_count = instance->channels;
-				info->decoded_size = (unsigned long)instance->totalPCMFrameCount * instance->channels * sizeof(float);
+				info->decoded_size = instance->totalPCMFrameCount * instance->channels * sizeof(float);
 				info->format = DECODER_FORMAT_F32;
 			}
 			else

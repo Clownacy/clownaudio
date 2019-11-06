@@ -20,7 +20,7 @@ typedef struct DecoderInfo
 {
 	unsigned int sample_rate;
 	unsigned int channel_count;
-	unsigned long decoded_size;
+	size_t decoded_size;
 	DecoderFormat format;
 } DecoderInfo;
 
