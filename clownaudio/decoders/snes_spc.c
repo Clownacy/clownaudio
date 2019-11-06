@@ -72,6 +72,7 @@ void Decoder_SNES_SPC_Destroy(Decoder_SNES_SPC *decoder)
 void Decoder_SNES_SPC_Rewind(Decoder_SNES_SPC *decoder)
 {
 	spc_delete(decoder->snes_spc);
+	decoder->snes_spc = spc_new();
 	spc_load_spc(decoder->snes_spc, decoder->data->file_buffer, decoder->data->file_size);
 }
 
