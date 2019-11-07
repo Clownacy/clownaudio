@@ -420,17 +420,15 @@ bool pxtnService::moo_set_master_volume( float v )
 // 
 ////////////////////
 
-bool pxtnService::Moo( void* p_buf, int32_t  size )
+int32_t pxtnService::Moo( void* p_buf, int32_t  size )
 {
-	if( !_moo_b_init       ) return false;
-	if( !_moo_b_valid_data ) return false;
-	if(  _moo_b_end_vomit  ) return false;
-
-	bool b_ret = false;
+	if( !_moo_b_init       ) return 0;
+	if( !_moo_b_valid_data ) return 0;
+	if(  _moo_b_end_vomit  ) return 0;
 
 	int32_t  smp_w = 0;
 
-	if( size % _dst_byte_per_smp ) return false;
+	if( size % _dst_byte_per_smp ) return 0;
 
 	int32_t  smp_num = size / _dst_byte_per_smp;
 
@@ -443,21 +441,15 @@ bool pxtnService::Moo( void* p_buf, int32_t  size )
 			if( !_moo_PXTONE_SAMPLE( sample ) ){ _moo_b_end_vomit = true; break; }
 			for( int ch = 0; ch < _dst_ch_num; ch++, p16++ ) *p16 = sample[ ch ];
 		}
-		for( ;          smp_w < smp_num; smp_w++ )
-		{
-			for( int ch = 0; ch < _dst_ch_num; ch++, p16++ ) *p16 = 0;
-		}
 	}
 
 	if( _sampled_proc )
 	{
 		int32_t clock = (int32_t)( _moo_smp_count / _moo_clock_rate );
-		if( !_sampled_proc( _sampled_user, this ) ){ _moo_b_end_vomit = true; goto term; }
+		if( !_sampled_proc( _sampled_user, this ) ){ _moo_b_end_vomit = true; }
 	}
 
-	b_ret = true;
-term:
-	return b_ret;
+	return smp_w;
 }
 
 int32_t pxtnService_moo_CalcSampleNum( int32_t meas_num, int32_t beat_num, int32_t sps, float beat_tempo )

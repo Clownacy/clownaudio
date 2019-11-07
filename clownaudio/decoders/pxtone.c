@@ -66,9 +66,9 @@ void Decoder_PxTone_Rewind(Decoder_PxTone *decoder)
 
 unsigned long Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, unsigned long frames_to_do)
 {
-	const unsigned long bytes_to_do = frames_to_do * sizeof(short) * 2;
+	const size_t size_of_frame = sizeof(short) * 2;
 
-	memset(buffer, 0, bytes_to_do);
+	memset(buffer, 0, frames_to_do * size_of_frame);
 
-	return PxTone_GetSamples(decoder->pxtn, buffer, bytes_to_do) /  (sizeof(short) * 2);
+	return PxTone_GetSamples(decoder->pxtn, buffer, frames_to_do * size_of_frame);
 }

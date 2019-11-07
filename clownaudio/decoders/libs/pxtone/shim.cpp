@@ -62,5 +62,5 @@ extern "C" void PxTone_Rewind(pxtnService *pxtn, bool loop)
 
 extern "C" unsigned long PxTone_GetSamples(pxtnService *pxtn, void *buffer, unsigned long bytes_to_do)
 {
-	return pxtn->Moo(buffer, bytes_to_do) ? bytes_to_do : 0;
+	return pxtn->Moo(buffer, bytes_to_do);
 }

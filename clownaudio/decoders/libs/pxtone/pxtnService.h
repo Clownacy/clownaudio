@@ -238,7 +238,7 @@ public :
 
 	bool    moo_preparation( const pxtnVOMITPREPARATION *p_build );
 
-	bool    Moo( void* p_buf, int32_t size );
+	int32_t Moo( void* p_buf, int32_t size );
 };
 
 int32_t pxtnService_moo_CalcSampleNum( int32_t meas_num, int32_t beat_num, int32_t sps, float beat_tempo );
