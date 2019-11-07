@@ -46,11 +46,10 @@ SOURCES = \
 	test \
 	clownaudio/clownaudio \
 	clownaudio/decoder \
-	clownaudio/memory_stream \
 	clownaudio/miniaudio \
 	clownaudio/mixer \
 	clownaudio/predecoder \
-	clownaudio/decoders/memory_file \
+	clownaudio/decoders/memory_stream \
 	clownaudio/decoders/misc_utilities
 
 ifeq ($(USE_LIBVORBIS), true)

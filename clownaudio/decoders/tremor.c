@@ -17,12 +17,12 @@ struct Decoder_Tremor
 	unsigned int channel_count;
 };
 
-static size_t MemoryFile_fread_wrapper(void *output, size_t size, size_t count, void *file)
+static size_t fread_wrapper(void *output, size_t size, size_t count, void *file)
 {
 	return ROMemoryStream_Read(file, output, size, count);
 }
 
-static int MemoryFile_fseek_wrapper(void *file, ogg_int64_t offset, int origin)
+static int fseek_wrapper(void *file, ogg_int64_t offset, int origin)
 {
 	enum MemoryStream_Origin memory_stream_origin;
 	switch (origin)
@@ -46,23 +46,23 @@ static int MemoryFile_fseek_wrapper(void *file, ogg_int64_t offset, int origin)
 	return (ROMemoryStream_SetPosition(file, offset, memory_stream_origin) ? 0 : -1);
 }
 
-static int MemoryFile_fclose_wrapper(void *file)
+static int fclose_wrapper(void *file)
 {
 	ROMemoryStream_Destroy(file);
 
 	return 0;
 }
 
-static long MemoryFile_ftell_wrapper(void *file)
+static long ftell_wrapper(void *file)
 {
 	return ROMemoryStream_GetPosition(file);
 }
 
 static const ov_callbacks ov_callback_memory = {
-	MemoryFile_fread_wrapper,
-	MemoryFile_fseek_wrapper,
-	MemoryFile_fclose_wrapper,
-	MemoryFile_ftell_wrapper
+	fread_wrapper,
+	fseek_wrapper,
+	fclose_wrapper,
+	ftell_wrapper
 };
 
 Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned channel_count, DecoderInfo *info)

@@ -20,12 +20,12 @@ struct Decoder_libSndfile
 	unsigned int channel_count;
 };
 
-static sf_count_t MemoryFile_fread_wrapper(void *output, sf_count_t count, void *user)
+static sf_count_t fread_wrapper(void *output, sf_count_t count, void *user)
 {
 	return ROMemoryStream_Read(user, output, 1, count);
 }
 
-static sf_count_t MemoryFile_fseek_wrapper(sf_count_t offset, int origin, void *user)
+static sf_count_t fseek_wrapper(sf_count_t offset, int origin, void *user)
 {
 	enum MemoryStream_Origin memory_stream_origin;
 	switch (origin)
@@ -49,29 +49,29 @@ static sf_count_t MemoryFile_fseek_wrapper(sf_count_t offset, int origin, void *
 	return (ROMemoryStream_SetPosition(user, offset, memory_stream_origin) ? 0 : -1);
 }
 
-static sf_count_t MemoryFile_ftell_wrapper(void *user)
+static sf_count_t ftell_wrapper(void *user)
 {
 	return ROMemoryStream_GetPosition(user);
 }
 
-static sf_count_t MemoryFile_GetSize(void *user)
+static sf_count_t GetStreamSize(void *user)
 {
-	const sf_count_t old_offset = MemoryFile_ftell_wrapper(user);
+	const sf_count_t old_offset = ftell_wrapper(user);
 
-	MemoryFile_fseek_wrapper(0, SEEK_END, user);
-	const sf_count_t size = MemoryFile_ftell_wrapper(user);
+	fseek_wrapper(0, SEEK_END, user);
+	const sf_count_t size = ftell_wrapper(user);
 
-	MemoryFile_fseek_wrapper(old_offset, SEEK_SET, user);
+	fseek_wrapper(old_offset, SEEK_SET, user);
 
 	return size;
 }
 
 static SF_VIRTUAL_IO sfvirtual = {
-	MemoryFile_GetSize,
-	MemoryFile_fseek_wrapper,
-	MemoryFile_fread_wrapper,
+	GetStreamSize,
+	fseek_wrapper,
+	fread_wrapper,
 	NULL,
-	MemoryFile_ftell_wrapper
+	ftell_wrapper
 };
 
 Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
