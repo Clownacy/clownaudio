@@ -40,6 +40,7 @@
 #endif
 #ifdef USE_PXTONE
 #include "decoders/pxtone.h"
+#include "decoders/pxtone_noise.h"
 #endif
 
 #define BACKEND_FUNCTIONS(name) \
@@ -90,6 +91,7 @@ static const DecoderBackend backends[] = {
 #endif
 #ifdef USE_PXTONE
 	BACKEND_FUNCTIONS(PxTone),
+	BACKEND_FUNCTIONS(PxToneNoise),
 #endif
 };
 

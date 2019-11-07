@@ -2,6 +2,7 @@
 
 #include "pxtnService.h"
 #include "pxtnError.h"
+#include "pxtoneNoise.h"
 
 static bool _load_ptcop(pxtnService* pxtn, const unsigned char *file_buffer, size_t file_size)
 {
@@ -63,4 +64,34 @@ extern "C" void PxTone_Rewind(pxtnService *pxtn, bool loop)
 extern "C" unsigned long PxTone_GetSamples(pxtnService *pxtn, void *buffer, unsigned long bytes_to_do)
 {
 	return pxtn->Moo(buffer, bytes_to_do);
+}
+
+extern "C" bool PxTone_NoiseGenerate(const unsigned char *file_buffer, size_t file_size, unsigned int sample_rate, unsigned int channel_count, void** buffer, size_t *buffer_size)
+{
+	bool success = false;
+
+	pxtoneNoise *pxtn = new pxtoneNoise();
+
+	if (pxtn->init())
+	{
+		if (pxtn->quality_set(channel_count, sample_rate, 16))
+		{
+			pxtnDescriptor desc;
+
+			if (desc.set_memory_r((void*)file_buffer, file_size))
+			{
+				int32_t size_int;
+
+				if (pxtn->generate(&desc, buffer, &size_int))
+				{
+					*buffer_size = size_int;
+					success = true;
+				}
+			}
+		}
+	}
+
+	delete pxtn;
+
+	return success;
 }

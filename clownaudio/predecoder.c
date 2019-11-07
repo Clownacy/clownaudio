@@ -11,7 +11,7 @@ struct PredecoderData
 {
 	void *decoded_data;
 	size_t decoded_data_size;
-	size_t size_of_frame;	// TODO - Get rid of this when we make stereo the only option
+	size_t channel_count;	// TODO - Get rid of this when we make stereo the only option
 };
 
 struct Predecoder
@@ -55,7 +55,7 @@ PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t f
 
 					predecoder_data->decoded_data = MemoryStream_GetBuffer(stream);
 					predecoder_data->decoded_data_size = MemoryStream_GetPosition(stream);
-					predecoder_data->size_of_frame = sizeof(float) * channel_count;
+					predecoder_data->channel_count = channel_count;
 				}
 
 				MemoryStream_Destroy(stream);
@@ -122,7 +122,7 @@ unsigned long Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, u
 
 	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
 	{
-		frames_done = ROMemoryStream_Read(predecoder->stream, buffer + (frames_done_total * predecoder->data->size_of_frame), predecoder->data->size_of_frame, frames_to_do - frames_done_total);
+		frames_done = ROMemoryStream_Read(predecoder->stream, buffer + (frames_done_total * predecoder->data->channel_count), predecoder->data->channel_count * sizeof(float), frames_to_do - frames_done_total);
 
 		if (frames_done < frames_to_do - frames_done_total)
 		{

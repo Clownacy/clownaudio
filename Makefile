@@ -112,7 +112,7 @@ ALL_LIBS += -lstdc++
 endif
 
 ifeq ($(USE_PXTONE), true)
-SOURCES += clownaudio/decoders/pxtone
+SOURCES += clownaudio/decoders/pxtone clownaudio/decoders/pxtone_noise
 ALL_CFLAGS += -DUSE_PXTONE
 ALL_LIBS += -lstdc++
 endif
