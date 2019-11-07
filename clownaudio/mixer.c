@@ -11,7 +11,7 @@
 #include <pthread.h>
 #endif
 
-#include "decoder.h"
+#include "predecoder.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -21,7 +21,7 @@ typedef struct Channel
 
 	bool paused;
 	float volume;
-	Decoder *decoder;
+	Predecoder *predecoder;
 	Mixer_Sound instance;
 
 	unsigned long fade_out_counter_max;
@@ -105,12 +105,12 @@ void Mixer_Deinit(void)
 
 Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/)
 {
-	return (Mixer_SoundData*)Decoder_LoadData(file_buffer, file_size);
+	return (Mixer_SoundData*)Predecoder_DecodeData(file_buffer, file_size, output_sample_rate, output_channel_count);
 }
 
 void Mixer_UnloadSoundData(Mixer_SoundData *sound)
 {
-	Decoder_UnloadData((DecoderData*)sound);
+	Predecoder_UnloadData((PredecoderData*)sound);
 }
 
 Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
@@ -119,15 +119,15 @@ Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
 
 	Mixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
-	Decoder *decoder = Decoder_Create((DecoderData*)sound, loop, output_sample_rate, output_channel_count);	// TODO: Format-negotiation
+	Predecoder *predecoder = Predecoder_Create((PredecoderData*)sound, loop);
 
-	if (decoder != NULL)
+	if (predecoder != NULL)
 	{
 		instance = ++instance_allocator;
 
 		Channel *channel = malloc(sizeof(Channel));
 
-		channel->decoder = decoder;
+		channel->predecoder = predecoder;
 		channel->volume = 1.0f;
 		channel->instance = instance;
 		channel->paused = true;
@@ -163,7 +163,7 @@ void Mixer_DestroySound(Mixer_Sound instance)
 
 	if (channel != NULL)
 	{
-		Decoder_Destroy(channel->decoder);
+		Predecoder_Destroy(channel->predecoder);
 		free(channel);
 	}
 }
@@ -270,7 +270,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 				float read_buffer[0x1000];
 
 				const unsigned long sub_frames_to_do = MIN(0x1000 / output_channel_count, frames_to_do - frames_done);
-				sub_frames_done = Decoder_GetSamples(channel->decoder, read_buffer, sub_frames_to_do);
+				sub_frames_done = Predecoder_GetSamples(channel->predecoder, read_buffer, sub_frames_to_do);
 
 				float *read_buffer_pointer = read_buffer;
 
@@ -311,7 +311,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 
 			if (frames_done < frames_to_do)	// Sound finished
 			{
-				Decoder_Destroy(channel->decoder);
+				Predecoder_Destroy(channel->predecoder);
 				*channel_pointer = channel->next;
 				free(channel);
 				continue;

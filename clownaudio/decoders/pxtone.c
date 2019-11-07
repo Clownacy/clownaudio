@@ -69,7 +69,6 @@ unsigned long Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, u
 	const unsigned long bytes_to_do = frames_to_do * sizeof(short) * 2;
 
 	memset(buffer, 0, bytes_to_do);
-	PxTone_GetSamples(decoder->pxtn, buffer, bytes_to_do);
 
-	return frames_to_do;
+	return PxTone_GetSamples(decoder->pxtn, buffer, bytes_to_do) /  (sizeof(short) * 2);
 }

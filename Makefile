@@ -1,12 +1,12 @@
-USE_LIBVORBIS = false
-USE_TREMOR = false
+USE_LIBVORBIS = true
+USE_TREMOR = true
 USE_STB_VORBIS = true
-USE_LIBFLAC = false
-USE_DR_FLAC = true
+USE_LIBFLAC = true
+USE_DR_FLAC = false
 USE_DR_WAV = true
 USE_LIBSNDFILE = false
-USE_LIBOPENMPT = false
-USE_LIBXMPLITE = false
+USE_LIBOPENMPT = true
+USE_LIBXMPLITE = true
 USE_SNES_SPC = true
 USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
@@ -46,8 +46,10 @@ SOURCES = \
 	test \
 	clownaudio/clownaudio \
 	clownaudio/decoder \
-	clownaudio/mixer \
+	clownaudio/memory_stream \
 	clownaudio/miniaudio \
+	clownaudio/mixer \
+	clownaudio/predecoder \
 	clownaudio/decoders/memory_file \
 	clownaudio/decoders/misc_utilities
 
