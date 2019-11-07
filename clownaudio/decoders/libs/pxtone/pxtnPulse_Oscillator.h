@@ -6,8 +6,8 @@
 class pxtnPulse_Oscillator
 {
 private:
-	void operator =     (const pxtnPulse_Oscillator& src){}
-	pxtnPulse_Oscillator(const pxtnPulse_Oscillator& src){}
+	void operator =     (const pxtnPulse_Oscillator& src);
+	pxtnPulse_Oscillator(const pxtnPulse_Oscillator& src);
 
 	pxtnPOINT *_p_point  ;
 	int32_t   _point_num ;

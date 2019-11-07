@@ -63,8 +63,8 @@ class pxtnEvelist
 
 private:
 
-	pxtnEvelist(              const pxtnEvelist &src  ){               } // copy
-	pxtnEvelist & operator = (const pxtnEvelist &right){ return *this; } // substitution
+	pxtnEvelist(              const pxtnEvelist &src  );                 // copy
+	pxtnEvelist & operator = (const pxtnEvelist &right){ (void)right; return *this; } // substitution
 
 	int32_t    _eve_allocated_num;
 	EVERECORD* _eves     ;

@@ -11,8 +11,8 @@
 class pxtnPulse_Oggv
 {
 private:
-	void operator = (const pxtnPulse_Oggv& src){}
-	pxtnPulse_Oggv  (const pxtnPulse_Oggv& src){}
+	void operator = (const pxtnPulse_Oggv& src);
+	pxtnPulse_Oggv  (const pxtnPulse_Oggv& src);
 
 	int32_t _ch     ;
 	int32_t _sps2   ;

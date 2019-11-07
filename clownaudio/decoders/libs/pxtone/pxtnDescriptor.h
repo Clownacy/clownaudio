@@ -22,8 +22,8 @@ class pxtnDescriptor
 {
 private:
 
-	void operator = (const pxtnDescriptor& src){}
-	pxtnDescriptor  (const pxtnDescriptor& src){}
+	void operator = (const pxtnDescriptor& src);
+	pxtnDescriptor  (const pxtnDescriptor& src);
 
 	enum
 	{

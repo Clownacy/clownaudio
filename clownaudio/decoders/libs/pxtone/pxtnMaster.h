@@ -10,8 +10,8 @@
 class pxtnMaster
 {
 private:
-	void operator = (const pxtnMaster& src){}
-	pxtnMaster      (const pxtnMaster& src){}
+	void operator = (const pxtnMaster& src);
+	pxtnMaster      (const pxtnMaster& src);
 
 	int32_t _beat_num   ;
 	float   _beat_tempo ;

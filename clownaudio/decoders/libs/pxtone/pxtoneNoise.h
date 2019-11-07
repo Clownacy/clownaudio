@@ -10,8 +10,8 @@
 class pxtoneNoise
 {
 private:
-	void operator = (const pxtoneNoise& src){}
-	pxtoneNoise     (const pxtoneNoise& src){}
+	void operator = (const pxtoneNoise& src);
+	pxtoneNoise     (const pxtoneNoise& src);
 
 	void *_bldr ;
 	int32_t  _ch_num;

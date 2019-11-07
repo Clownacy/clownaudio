@@ -1,13 +1,13 @@
-USE_LIBVORBIS = true
-USE_TREMOR = true
-USE_STB_VORBIS = true
-USE_LIBFLAC = true
-USE_DR_FLAC = true
-USE_DR_WAV = true
-USE_LIBSNDFILE = true
-USE_LIBOPENMPT = true
-USE_LIBXMPLITE = true
-USE_SNES_SPC = true
+USE_LIBVORBIS = false
+USE_TREMOR = false
+USE_STB_VORBIS = false
+USE_LIBFLAC = false
+USE_DR_FLAC = false
+USE_DR_WAV = false
+USE_LIBSNDFILE = false
+USE_LIBOPENMPT = false
+USE_LIBXMPLITE = false
+USE_SNES_SPC = false
 USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
@@ -196,7 +196,7 @@ obj/spc/%.o: clownaudio/decoders/libs/snes_spc-0.9.0/snes_spc/%.cpp
 
 obj/pxtone/%.o: clownaudio/decoders/libs/pxtone/%.cpp
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -Wno-switch -Wno-tautological-compare -Wno-sign-compare -Wno-unused-parameter -Wno-unused-value -Wno-unused-variable -Wno-missing-field-initializers -Wno-misleading-indentation -Wno-strict-aliasing $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
 
 test: $(OBJECTS)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra $^ -o $@ $(ALL_LDFLAGS) $(ALL_LIBS)
