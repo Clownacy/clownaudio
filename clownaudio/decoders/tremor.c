@@ -6,7 +6,7 @@
 #include <tremor/ivorbisfile.h>
 
 #include "common.h"
-#include "memory_file.h"
+#include "../memory_stream.h"
 
 struct Decoder_Tremor
 {
@@ -19,22 +19,43 @@ struct Decoder_Tremor
 
 static size_t MemoryFile_fread_wrapper(void *output, size_t size, size_t count, void *file)
 {
-	return MemoryFile_fread(output, size, count, file);
+	return ROMemoryStream_Read(file, output, size, count);
 }
 
 static int MemoryFile_fseek_wrapper(void *file, ogg_int64_t offset, int origin)
 {
-	return MemoryFile_fseek(file, offset, origin);
+	enum MemoryStream_Origin memory_stream_origin;
+	switch (origin)
+	{
+		case SEEK_SET:
+			memory_stream_origin = MEMORYSTREAM_START;
+			break;
+
+		case SEEK_CUR:
+			memory_stream_origin = MEMORYSTREAM_CURRENT;
+			break;
+
+		case SEEK_END:
+			memory_stream_origin = MEMORYSTREAM_END;
+			break;
+
+		default:
+			return -1;
+	}
+
+	return (ROMemoryStream_SetPosition(file, offset, memory_stream_origin) ? 0 : -1);
 }
 
 static int MemoryFile_fclose_wrapper(void *file)
 {
-	return MemoryFile_fclose(file);
+	ROMemoryStream_Destroy(file);
+
+	return 0;
 }
 
 static long MemoryFile_ftell_wrapper(void *file)
 {
-	return MemoryFile_ftell(file);
+	return ROMemoryStream_GetPosition(file);
 }
 
 static const ov_callbacks ov_callback_memory = {
@@ -55,13 +76,13 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned lo
 	{
 		if (data->file_buffer[0] == 'O' && data->file_buffer[1] == 'g' && data->file_buffer[2] == 'g' && data->file_buffer[3] == 'S')	// Detect .ogg files (because Tremor has a bad habit of tring to process .flac files, and corrupting the stack)
 		{
-			MemoryFile *file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
+			ROMemoryStream *memory_stream = ROMemoryStream_Create(data->file_buffer, data->file_size);
 
-			if (file != NULL)
+			if (memory_stream != NULL)
 			{
 				OggVorbis_File vorbis_file;
 
-				if (ov_open_callbacks(file, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
+				if (ov_open_callbacks(memory_stream, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
 				{
 					vorbis_info *v_info = ov_info(&vorbis_file, -1);
 
@@ -86,7 +107,7 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned lo
 				}
 				else
 				{
-					MemoryFile_fclose(file);
+					ROMemoryStream_Destroy(memory_stream);
 				}
 			}
 		}
