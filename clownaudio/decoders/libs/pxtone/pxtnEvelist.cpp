@@ -142,9 +142,14 @@ static int32_t _DefaultKindValue( uint8_t kind )
 	case EVENTKIND_GROUPNO   : return EVENTDEFAULT_GROUPNO  ;
 	case EVENTKIND_TUNING    :
 		{
-			float tuning;
-			tuning = EVENTDEFAULT_TUNING;
-			return *( (int32_t*)&tuning );
+			union
+			{
+				float f;
+				int32_t i;
+			} tuning;
+
+			tuning.f = EVENTDEFAULT_TUNING;
+			return tuning.i;
 		}
 	case EVENTKIND_PAN_TIME  : return EVENTDEFAULT_PAN_TIME ;
 	}
@@ -223,8 +228,14 @@ void pxtnEvelist::_rec_cut( EVERECORD* p_rec )
 
 bool pxtnEvelist::Record_Add_f( int32_t clock, uint8_t unit_no, uint8_t kind, float value_f )
 {
-	int32_t value = *( (int32_t*)(&value_f) );
-	return Record_Add_i( clock, unit_no, kind, value );
+	union
+	{
+		float f;
+		int32_t i;
+	} value;
+
+	value.f = value_f;
+	return Record_Add_i( clock, unit_no, kind, value.i );
 }
 
 bool pxtnEvelist::Record_Add_i( int32_t clock, uint8_t unit_no, uint8_t kind, int32_t value )
@@ -625,8 +636,14 @@ void pxtnEvelist::Linear_Add_i(  int32_t clock, uint8_t unit_no, uint8_t kind, i
 
 void pxtnEvelist::Linear_Add_f( int32_t clock, uint8_t unit_no, uint8_t kind, float value_f )
 {
-	int32_t value = *( (int32_t*)(&value_f) );
-	Linear_Add_i( clock, unit_no, kind, value );
+	union
+	{
+		float f;
+		int32_t i;
+	} value;
+
+	value.f = value_f;
+	Linear_Add_i( clock, unit_no, kind, value.i );
 }
 
 void pxtnEvelist::Linear_End( bool b_connect )

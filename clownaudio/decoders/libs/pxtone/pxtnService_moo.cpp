@@ -187,7 +187,19 @@ bool pxtnService::_moo_PXTONE_SAMPLE( void *p_data )
 		case EVENTKIND_LAST      : break;
 		case EVENTKIND_VOICENO   : _moo_ResetVoiceOn   ( p_u, _moo_p_eve->value            ); break;
 		case EVENTKIND_GROUPNO   : p_u->Tone_GroupNo   (              _moo_p_eve->value    ); break;
-		case EVENTKIND_TUNING    : p_u->Tone_Tuning    ( *( (float*)(&_moo_p_eve->value) ) ); break;
+		case EVENTKIND_TUNING    : 
+			{
+				union
+				{
+					float f;
+					int32_t i;
+				} value;
+
+				value.i = _moo_p_eve->value;
+
+				p_u->Tone_Tuning( value.f );
+				break;
+			}
 		}
 	}
 
