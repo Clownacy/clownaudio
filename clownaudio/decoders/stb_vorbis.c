@@ -55,7 +55,6 @@ Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loops, uns
 
 				info->sample_rate = vorbis_info.sample_rate;
 				info->channel_count = vorbis_info.channels;
-				info->decoded_size = stb_vorbis_stream_length_in_samples(instance) * vorbis_info.channels * sizeof(float);
 				info->format = DECODER_FORMAT_F32;
 			}
 			else

@@ -77,7 +77,6 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned lo
 
 						info->sample_rate = v_info->rate;
 						info->channel_count = v_info->channels;
-						info->decoded_size = ov_pcm_total(&vorbis_file, -1) * decoder->bytes_per_frame;
 						info->format = DECODER_FORMAT_S16;
 					}
 					else

@@ -22,7 +22,7 @@ struct Decoder_PxToneNoise
 
 Decoder_PxToneNoise* Decoder_PxToneNoise_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
 {
-	(void)sample_rate;	// PxTone only supports a few specific sample rates
+	(void)sample_rate;	// PxTone-Noise only supports a few specific sample rates
 	(void)channel_count;
 
 	Decoder_PxToneNoise *decoder = NULL;
@@ -47,7 +47,6 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(DecoderData *data, bool loop, un
 
 					info->sample_rate = SAMPLE_RATE;
 					info->channel_count = CHANNEL_COUNT;
-					info->decoded_size = 0;	// Not sure how to get the size of the decoded file yet
 					info->format = DECODER_FORMAT_S16;
 				}
 				else

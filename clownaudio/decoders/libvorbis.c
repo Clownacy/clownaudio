@@ -72,7 +72,6 @@ Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData *data, bool loops, unsig
 
 				info->sample_rate = v_info->rate;
 				info->channel_count = v_info->channels;
-				info->decoded_size = ov_pcm_total(&vorbis_file, -1) * v_info->channels * sizeof(float);
 				info->format = DECODER_FORMAT_F32;
 			}
 			else

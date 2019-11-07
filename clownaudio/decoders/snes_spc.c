@@ -46,7 +46,6 @@ Decoder_SNES_SPC* Decoder_SNES_SPC_Create(DecoderData *data, bool loop, unsigned
 
 				info->sample_rate = spc_sample_rate;
 				info->channel_count = 2;
-				info->decoded_size = 0;	// Not sure how to get the size of the decoded file yet
 				info->format = DECODER_FORMAT_S16;
 			}
 			else

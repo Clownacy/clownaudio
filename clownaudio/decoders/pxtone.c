@@ -37,7 +37,6 @@ Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned lon
 
 				info->sample_rate = sample_rate;
 				info->channel_count = channel_count;
-				info->decoded_size = 0;	// Not sure how to get the size of the decoded file yet
 				info->format = DECODER_FORMAT_S16;
 			}
 			else

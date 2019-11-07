@@ -137,7 +137,6 @@ static void MetadataCallback(const FLAC__StreamDecoder *decoder, const FLAC__Str
 
 	this->info->sample_rate = metadata->data.stream_info.sample_rate;
 	this->info->channel_count = this->channel_count = metadata->data.stream_info.channels;
-	this->info->decoded_size = (metadata->data.stream_info.bits_per_sample / 8) * metadata->data.stream_info.channels * metadata->data.stream_info.total_samples;
 	this->info->format = DECODER_FORMAT_S32;	// libFLAC doesn't do float32
 
 	this->bits_per_sample = metadata->data.stream_info.bits_per_sample;

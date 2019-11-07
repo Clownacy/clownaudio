@@ -49,7 +49,6 @@ Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, unsigned l
 
 				info->sample_rate = decoder->backend->sampleRate;
 				info->channel_count = decoder->backend->channels;
-				info->decoded_size = decoder->backend->totalSampleCount * sizeof(drflac_int32);
 				info->format = DECODER_FORMAT_S32;
 			}
 			else

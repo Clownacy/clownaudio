@@ -85,7 +85,6 @@ Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, uns
 
 				info->sample_rate = sf_info.samplerate;
 				info->channel_count = sf_info.channels;
-				info->decoded_size = sf_info.frames * sf_info.channels * sizeof(float);
 				info->format = DECODER_FORMAT_F32;
 			}
 			else
