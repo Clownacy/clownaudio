@@ -8,12 +8,12 @@
 #include <sndfile.h>
 
 #include "common.h"
-#include "memory_file.h"
+#include "../memory_stream.h"
 
 struct Decoder_libSndfile
 {
 	DecoderData *data;
-	MemoryFile *file;
+	ROMemoryStream *memory_stream;
 	SNDFILE *sndfile;
 	DecoderFormat format;
 	bool loops;
@@ -22,17 +22,36 @@ struct Decoder_libSndfile
 
 static sf_count_t MemoryFile_fread_wrapper(void *output, sf_count_t count, void *user)
 {
-	return MemoryFile_fread(output, 1, count, user);
+	return ROMemoryStream_Read(user, output, 1, count);
 }
 
 static sf_count_t MemoryFile_fseek_wrapper(sf_count_t offset, int origin, void *user)
 {
-	return MemoryFile_fseek(user, offset, origin);
+	enum MemoryStream_Origin memory_stream_origin;
+	switch (origin)
+	{
+		case SEEK_SET:
+			memory_stream_origin = MEMORYSTREAM_START;
+			break;
+
+		case SEEK_CUR:
+			memory_stream_origin = MEMORYSTREAM_CURRENT;
+			break;
+
+		case SEEK_END:
+			memory_stream_origin = MEMORYSTREAM_END;
+			break;
+
+		default:
+			return -1;
+	}
+
+	return (ROMemoryStream_SetPosition(user, offset, memory_stream_origin) ? 0 : -1);
 }
 
 static sf_count_t MemoryFile_ftell_wrapper(void *user)
 {
-	return MemoryFile_ftell(user);
+	return ROMemoryStream_GetPosition(user);
 }
 
 static sf_count_t MemoryFile_GetSize(void *user)
@@ -64,38 +83,41 @@ Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, uns
 
 	if (data != NULL)
 	{
-		MemoryFile *file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
+		ROMemoryStream *memory_stream = ROMemoryStream_Create(data->file_buffer, data->file_size);
 
-		SF_INFO sf_info;
-		memset(&sf_info, 0, sizeof(SF_INFO));
-
-		SNDFILE *sndfile = sf_open_virtual(&sfvirtual, SFM_READ, &sf_info, file);
-
-		if (sndfile != NULL)
+		if (memory_stream != NULL)
 		{
-			decoder = malloc(sizeof(Decoder_libSndfile));
+			SF_INFO sf_info;
+			memset(&sf_info, 0, sizeof(SF_INFO));
 
-			if (decoder != NULL)
+			SNDFILE *sndfile = sf_open_virtual(&sfvirtual, SFM_READ, &sf_info, memory_stream);
+
+			if (sndfile != NULL)
 			{
-				decoder->data = data;
-				decoder->sndfile = sndfile;
-				decoder->file = file;
-				decoder->channel_count = sf_info.channels;
-				decoder->loops = loops;
+				decoder = malloc(sizeof(Decoder_libSndfile));
 
-				info->sample_rate = sf_info.samplerate;
-				info->channel_count = sf_info.channels;
-				info->format = DECODER_FORMAT_F32;
+				if (decoder != NULL)
+				{
+					decoder->data = data;
+					decoder->sndfile = sndfile;
+					decoder->memory_stream = memory_stream;
+					decoder->channel_count = sf_info.channels;
+					decoder->loops = loops;
+
+					info->sample_rate = sf_info.samplerate;
+					info->channel_count = sf_info.channels;
+					info->format = DECODER_FORMAT_F32;
+				}
+				else
+				{
+					sf_close(sndfile);
+					ROMemoryStream_Destroy(memory_stream);
+				}
 			}
 			else
 			{
-				sf_close(sndfile);
-				MemoryFile_fclose(file);
+				ROMemoryStream_Destroy(memory_stream);
 			}
-		}
-		else
-		{
-			MemoryFile_fclose(file);
 		}
 	}
 
@@ -107,7 +129,7 @@ void Decoder_libSndfile_Destroy(Decoder_libSndfile *decoder)
 	if (decoder != NULL)
 	{
 		sf_close(decoder->sndfile);
-		MemoryFile_fclose(decoder->file);
+		ROMemoryStream_Destroy(decoder->memory_stream);
 		free(decoder);
 	}
 }
