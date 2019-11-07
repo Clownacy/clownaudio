@@ -167,8 +167,7 @@ PXTONE_SOURCES = \
 	pxtnWoice \
 	pxtnWoice_io \
 	pxtnWoicePTV \
-	pxtoneNoise \
-	shim
+	pxtoneNoise
 
 OBJECTS += $(addprefix obj/main/, $(addsuffix .o, $(SOURCES)))
 ifeq ($(USE_SNES_SPC), true)
