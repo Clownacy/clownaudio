@@ -186,6 +186,10 @@ obj/main/%.o: %.c
 	@mkdir -p $(@D)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
 
+obj/main/%.o: %.cpp
+	@mkdir -p $(@D)
+	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
+
 obj/spc/%.o: clownaudio/decoders/libs/snes_spc-0.9.0/snes_spc/%.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ -c

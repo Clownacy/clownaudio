@@ -2,11 +2,9 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "libs/pxtone/shim.h"
+#include "libs/pxtone/pxtoneNoise.h"
 
 #include "common.h"
 #include "memory_stream.h"
@@ -29,32 +27,47 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(DecoderData *data, bool loop, un
 
 	if (data != NULL)
 	{
-		void *buffer;
-		size_t buffer_size;
+		pxtoneNoise *pxtn = new pxtoneNoise();
 
-		if (PxTone_NoiseGenerate(data->file_buffer, data->file_size, SAMPLE_RATE, CHANNEL_COUNT, &buffer, &buffer_size))
+		if (pxtn->init())
 		{
-			ROMemoryStream *memory_stream = ROMemoryStream_Create(buffer, buffer_size);
-
-			if (memory_stream != NULL)
+			if (pxtn->quality_set(channel_count, sample_rate, 16))
 			{
-				decoder = malloc(sizeof(Decoder_PxToneNoise));
+				pxtnDescriptor desc;
 
-				if (decoder != NULL)
+				if (desc.set_memory_r((void*)data->file_buffer, data->file_size))
 				{
-					decoder->memory_stream = memory_stream;
-					decoder->loop = loop;
+					void *buffer;
+					int32_t buffer_size;
 
-					info->sample_rate = SAMPLE_RATE;
-					info->channel_count = CHANNEL_COUNT;
-					info->format = DECODER_FORMAT_S16;
-				}
-				else
-				{
-					ROMemoryStream_Destroy(memory_stream);
+					if (pxtn->generate(&desc, &buffer, &buffer_size))
+					{
+						ROMemoryStream *memory_stream = ROMemoryStream_Create(buffer, buffer_size);
+
+						if (memory_stream != NULL)
+						{
+							decoder = (Decoder_PxToneNoise*)malloc(sizeof(Decoder_PxToneNoise));
+
+							if (decoder != NULL)
+							{
+								decoder->memory_stream = memory_stream;
+								decoder->loop = loop;
+
+								info->sample_rate = SAMPLE_RATE;
+								info->channel_count = CHANNEL_COUNT;
+								info->format = DECODER_FORMAT_S16;
+							}
+							else
+							{
+								ROMemoryStream_Destroy(memory_stream);
+							}
+						}
+					}
 				}
 			}
 		}
+
+		delete pxtn;
 	}
 
 	return decoder;
@@ -76,7 +89,7 @@ void Decoder_PxToneNoise_Rewind(Decoder_PxToneNoise *decoder)
 
 unsigned long Decoder_PxToneNoise_GetSamples(Decoder_PxToneNoise *decoder, void *buffer_void, unsigned long frames_to_do)
 {
-	short *buffer = buffer_void;
+	short *buffer = (short*)buffer_void;
 
 	unsigned long frames_done_total = 0;
 
