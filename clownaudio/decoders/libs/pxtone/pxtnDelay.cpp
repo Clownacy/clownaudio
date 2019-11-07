@@ -66,6 +66,7 @@ pxtnERR pxtnDelay::Tone_Ready( int32_t beat_num, float beat_tempo, int32_t sps )
 		case DELAYUNIT_Beat  : _smp_num = (int32_t)( sps * 60            / beat_tempo / _freq ); break;
 		case DELAYUNIT_Meas  : _smp_num = (int32_t)( sps * 60 * beat_num / beat_tempo / _freq ); break;
 		case DELAYUNIT_Second: _smp_num = (int32_t)( sps                              / _freq ); break;
+		default: goto term;
 		}
 
 		for( int32_t c = 0; c < pxtnMAX_CHANNEL; c++ )
@@ -135,7 +136,7 @@ bool pxtnDelay::Write( pxtnDescriptor *p_doc ) const
 
 pxtnERR pxtnDelay::Read( pxtnDescriptor *p_doc )
 {
-	_DELAYSTRUCT dela = {0};
+	_DELAYSTRUCT dela = _DELAYSTRUCT();
 	int32_t      size =  0 ;
 
 	if( !p_doc->r( &size, 4,                    1 ) ) return pxtnERR_desc_r     ;

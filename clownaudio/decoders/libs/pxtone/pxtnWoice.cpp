@@ -267,7 +267,7 @@ term:
 }
 
 
-static void _UpdateWavePTV( pxtnVOICEUNIT* p_vc, pxtnVOICEINSTANCE* p_vi, int32_t  ch, int32_t  sps, int32_t  bps )
+static void _UpdateWavePTV( pxtnVOICEUNIT* p_vc, pxtnVOICEINSTANCE* p_vi, int32_t  ch, int32_t  bps )
 {
 	double  work, osc;
 	int32_t long_;
@@ -385,7 +385,7 @@ pxtnERR pxtnWoice::Tone_Ready_sample( const pxtnPulse_NoiseBuilder *ptn_bldr )
 				int32_t size = p_vi->smp_body_w * ch * bps / 8;
 				if( !( p_vi->p_smp_w = (uint8_t*)malloc( size ) ) ){ res = pxtnERR_memory; goto term; }
 				memset( p_vi->p_smp_w, 0x00, size );
-				_UpdateWavePTV( p_vc, p_vi, ch, sps, bps );
+				_UpdateWavePTV( p_vc, p_vi, ch, bps );
 				break;
 			}
 

@@ -55,7 +55,7 @@ pxtnPulse_Frequency::pxtnPulse_Frequency()
 }
 pxtnPulse_Frequency::~pxtnPulse_Frequency()
 {
-	if( _freq_table ) free( _freq_table ); _freq_table = NULL;
+	if( _freq_table ){ free( _freq_table ); _freq_table = NULL; }
 }
 
 bool pxtnPulse_Frequency::Init()

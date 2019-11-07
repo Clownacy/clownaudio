@@ -16,7 +16,7 @@ pxtoneNoise::pxtoneNoise()
 
 pxtoneNoise::~pxtoneNoise()
 {
-	if( _bldr ) delete (pxtnPulse_NoiseBuilder*)_bldr; _bldr = NULL;
+	if( _bldr ){delete (pxtnPulse_NoiseBuilder*)_bldr; _bldr = NULL; }
 }
 
 bool pxtoneNoise::init()

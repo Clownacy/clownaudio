@@ -19,7 +19,7 @@ WAVEFORMATCHUNK;
 
 void pxtnPulse_PCM::Release()
 {
-	if( _p_smp ) free( _p_smp ); _p_smp = NULL;
+	if( _p_smp ){ free( _p_smp ); _p_smp = NULL; }
 	_ch       =    0;
 	_sps      =    0;
 	_bps      =    0;
@@ -79,7 +79,7 @@ pxtnERR pxtnPulse_PCM::read( pxtnDescriptor* doc )
 	pxtnERR        res       = pxtnERR_VOID;
 	char            buf[ 16 ] = { 0 };
 	uint32_t        size      =   0  ;
-	WAVEFORMATCHUNK format    = { 0 };
+	WAVEFORMATCHUNK format    = WAVEFORMATCHUNK();
 
 	_p_smp = NULL;
 

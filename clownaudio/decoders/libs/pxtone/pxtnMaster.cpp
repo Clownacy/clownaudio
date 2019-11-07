@@ -112,7 +112,6 @@ bool pxtnMaster::io_w_v5( pxtnDescriptor *p_doc, int32_t rough ) const
 
 pxtnERR pxtnMaster::io_r_v5( pxtnDescriptor *p_doc )
 {
-	pxtnERR   res = pxtnERR_VOID;
 	int16_t   beat_clock   = 0;
 	int8_t    beat_num     = 0;
 	float     beat_tempo   = 0;
@@ -166,7 +165,7 @@ _x4x_MASTER;
 // read( project )
 pxtnERR pxtnMaster::io_r_x4x( pxtnDescriptor *p_doc )
 {
-	_x4x_MASTER mast     ={0};
+	_x4x_MASTER mast     = _x4x_MASTER();
 	int32_t     size     = 0;
 	int32_t     e        = 0;
 	int32_t     status   = 0;
@@ -211,7 +210,7 @@ pxtnERR pxtnMaster::io_r_x4x( pxtnDescriptor *p_doc )
 		}
 	}
 
-	if( e != mast.event_num ) return pxtnERR_desc_broken;
+	if( e != (int32_t)mast.event_num ) return pxtnERR_desc_broken;
 
 	_beat_num   = beat_num  ;
 	_beat_tempo = beat_tempo;

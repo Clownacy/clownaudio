@@ -82,6 +82,8 @@ bool pxtnDescriptor::seek( pxtnSEEK mode, int val )
 			if( _size + val <      0 ) return false;
 			_cur = _size + val;
 			break;
+		default:
+			return false;
 		}
 	}
 	return true;
@@ -93,7 +95,7 @@ bool pxtnDescriptor::w_asfile( const void *p, int size, int num )
 
 	if( !_p_desc || !_b_file || _b_read ) goto End;
 	
-	if( fwrite( p, size, num, (FILE*)_p_desc ) != num ) goto End;
+	if( (int)fwrite( p, size, num, (FILE*)_p_desc ) != num ) goto End;
 	_size += size * num;
 	
 	b_ret = true;
@@ -110,7 +112,7 @@ bool pxtnDescriptor::r(       void *p, int size, int num )
 
 	if( _b_file )
 	{
-		if( fread( p, size, num, (FILE*)_p_desc ) != num ) goto End;
+		if( (int)fread( p, size, num, (FILE*)_p_desc ) != num ) goto End;
 	}
 	else
 	{
@@ -155,7 +157,7 @@ int  pxtnDescriptor::v_w_asfile( int val, int *p_add )
 	uint8_t  a[ 5 ] = {0};
 	uint8_t  b[ 5 ] = {0};
 	uint32_t us     = (uint32_t )val;
-	int32_t  bytes  = 0;
+	size_t  bytes  = 0;
 	
 	a[ 0 ] = *( (uint8_t *)(&us) + 0 );
 	a[ 1 ] = *( (uint8_t *)(&us) + 1 );
