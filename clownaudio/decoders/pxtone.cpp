@@ -2,10 +2,11 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+//#include "libs/pxtone/pxtnService.h"
+//#include "libs/pxtone/pxtnError.h"
 #include "libs/pxtone/shim.h"
 
 #include "common.h"
@@ -27,7 +28,7 @@ Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned lon
 
 		if (pxtn != NULL)
 		{
-			decoder = malloc(sizeof(Decoder_PxTone));
+			decoder = (Decoder_PxTone*)malloc(sizeof(Decoder_PxTone));
 
 			if (decoder != NULL)
 			{

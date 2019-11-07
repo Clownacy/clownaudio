@@ -1,3 +1,5 @@
+#include "shim.h"
+
 #include <cstddef>
 
 #include "pxtnService.h"
@@ -17,7 +19,7 @@ static bool _load_ptcop(pxtnService* pxtn, const unsigned char *file_buffer, siz
 	return success;
 }
 
-extern "C" pxtnService* PxTone_Open(const unsigned char *file_buffer, size_t file_size, bool loop, unsigned int sample_rate, unsigned int channel_count)
+pxtnService* PxTone_Open(const unsigned char *file_buffer, size_t file_size, bool loop, unsigned int sample_rate, unsigned int channel_count)
 {
 	pxtnService *pxtn = new pxtnService();
 	if (pxtn->init() == pxtnOK)
@@ -26,7 +28,7 @@ extern "C" pxtnService* PxTone_Open(const unsigned char *file_buffer, size_t fil
 		{
 			if( _load_ptcop( pxtn, file_buffer, file_size ) )
 			{
-				pxtnVOMITPREPARATION prep = {};
+				pxtnVOMITPREPARATION prep = pxtnVOMITPREPARATION();
 				if (loop)
 					prep.flags |= pxtnVOMITPREPFLAG_loop;
 				prep.start_pos_float = 0;
@@ -45,12 +47,12 @@ extern "C" pxtnService* PxTone_Open(const unsigned char *file_buffer, size_t fil
 	return NULL;
 }
 
-extern "C" void PxTone_Close(pxtnService *pxtn)
+void PxTone_Close(pxtnService *pxtn)
 {
 	delete pxtn;
 }
 
-extern "C" void PxTone_Rewind(pxtnService *pxtn, bool loop)
+void PxTone_Rewind(pxtnService *pxtn, bool loop)
 {
 	pxtnVOMITPREPARATION prep = {};
 	if (loop)
@@ -61,12 +63,12 @@ extern "C" void PxTone_Rewind(pxtnService *pxtn, bool loop)
 	pxtn->moo_preparation( &prep );
 }
 
-extern "C" unsigned long PxTone_GetSamples(pxtnService *pxtn, void *buffer, unsigned long bytes_to_do)
+unsigned long PxTone_GetSamples(pxtnService *pxtn, void *buffer, unsigned long bytes_to_do)
 {
 	return pxtn->Moo(buffer, bytes_to_do);
 }
 
-extern "C" bool PxTone_NoiseGenerate(const unsigned char *file_buffer, size_t file_size, unsigned int sample_rate, unsigned int channel_count, void** buffer, size_t *buffer_size)
+bool PxTone_NoiseGenerate(const unsigned char *file_buffer, size_t file_size, unsigned int sample_rate, unsigned int channel_count, void** buffer, size_t *buffer_size)
 {
 	bool success = false;
 
