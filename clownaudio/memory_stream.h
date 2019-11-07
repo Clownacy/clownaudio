@@ -42,12 +42,12 @@ bool MemoryStream_Write(MemoryStream *memory_stream, const void *data, size_t si
 size_t MemoryStream_Read(MemoryStream *memory_stream, void *output, size_t size, size_t count);
 void* MemoryStream_GetBuffer(MemoryStream *memory_stream);
 size_t MemoryStream_GetPosition(MemoryStream *memory_stream);
-void MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
+int MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
 void MemoryStream_Rewind(MemoryStream *memory_stream);
 
 ROMemoryStream* ROMemoryStream_Create(const void *data, size_t size);
 void ROMemoryStream_Destroy(ROMemoryStream *memory_stream);
 size_t ROMemoryStream_Read(ROMemoryStream *memory_stream, void *output, size_t size, size_t count);
 size_t ROMemoryStream_GetPosition(ROMemoryStream *memory_stream);
-void ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
+int ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
 void ROMemoryStream_Rewind(ROMemoryStream *memory_stream);

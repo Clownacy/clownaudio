@@ -128,7 +128,7 @@ size_t MemoryStream_GetPosition(MemoryStream *memory_stream)
 	return memory_stream->position;
 }
 
-void MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
+int MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
 {
 	switch (origin)
 	{
@@ -143,7 +143,12 @@ void MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enu
 		case MEMORYSTREAM_END:
 			memory_stream->position = (size_t)(memory_stream->end + offset);
 			break;
+
+		default:
+			return -1;
 	}
+
+	return 0;
 }
 
 void MemoryStream_Rewind(MemoryStream *memory_stream)
@@ -182,9 +187,9 @@ size_t ROMemoryStream_GetPosition(ROMemoryStream *memory_stream)
 	return MemoryStream_GetPosition((MemoryStream*)memory_stream);
 }
 
-void ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
+int ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
 {
-	MemoryStream_SetPosition((MemoryStream*)memory_stream, offset, origin);
+	return MemoryStream_SetPosition((MemoryStream*)memory_stream, offset, origin);
 }
 
 void ROMemoryStream_Rewind(ROMemoryStream *memory_stream)
