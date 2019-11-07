@@ -199,6 +199,6 @@ obj/pxtone/%.o: clownaudio/decoders/libs/pxtone/%.cpp
 	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
 
 test: $(OBJECTS)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra $^ -o $@ $(ALL_LDFLAGS) $(ALL_LIBS)
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $^ -o $@ $(ALL_LDFLAGS) $(ALL_LIBS)
 
 include $(wildcard $(DEPENDENCIES))
