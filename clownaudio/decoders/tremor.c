@@ -6,7 +6,7 @@
 #include <tremor/ivorbisfile.h>
 
 #include "common.h"
-#include "../memory_stream.h"
+#include "memory_stream.h"
 
 struct Decoder_Tremor
 {

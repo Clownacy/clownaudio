@@ -9,7 +9,7 @@
 #include "libs/pxtone/shim.h"
 
 #include "common.h"
-#include "../memory_stream.h"
+#include "memory_stream.h"
 
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
