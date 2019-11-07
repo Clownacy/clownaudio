@@ -7,7 +7,7 @@
 #include <vorbis/vorbisfile.h>
 
 #include "common.h"
-#include "memory_file.h"
+#include "../memory_stream.h"
 
 struct Decoder_libVorbis
 {
@@ -19,22 +19,43 @@ struct Decoder_libVorbis
 
 static size_t MemoryFile_fread_wrapper(void *output, size_t size, size_t count, void *file)
 {
-	return MemoryFile_fread(output, size, count, file);
+	return ROMemoryStream_Read(file, output, size, count);
 }
 
 static int MemoryFile_fseek_wrapper(void *file, ogg_int64_t offset, int origin)
 {
-	return MemoryFile_fseek(file, offset, origin);
+	enum MemoryStream_Origin memory_stream_origin;
+	switch (origin)
+	{
+		case SEEK_SET:
+			memory_stream_origin = MEMORYSTREAM_START;
+			break;
+
+		case SEEK_CUR:
+			memory_stream_origin = MEMORYSTREAM_CURRENT;
+			break;
+
+		case SEEK_END:
+			memory_stream_origin = MEMORYSTREAM_END;
+			break;
+
+		default:
+			return -1;
+	}
+
+	return (ROMemoryStream_SetPosition(file, offset, memory_stream_origin) ? 0 : -1);
 }
 
 static int MemoryFile_fclose_wrapper(void *file)
 {
-	return MemoryFile_fclose(file);
+	ROMemoryStream_Destroy(file);
+
+	return 0;
 }
 
 static long MemoryFile_ftell_wrapper(void *file)
 {
-	return MemoryFile_ftell(file);
+	return ROMemoryStream_GetPosition(file);
 }
 
 static const ov_callbacks ov_callback_memory = {
@@ -53,35 +74,38 @@ Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData *data, bool loops, unsig
 
 	if (data != NULL)
 	{
-		MemoryFile *memory_file = MemoryFile_fopen_from((unsigned char*)data->file_buffer, data->file_size, false);
+		ROMemoryStream *memory_stream = ROMemoryStream_Create(data->file_buffer, data->file_size);
 
-		OggVorbis_File vorbis_file;
-
-		if (ov_open_callbacks(memory_file, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
+		if (memory_stream != NULL)
 		{
-			decoder = malloc(sizeof(Decoder_libVorbis));
+			OggVorbis_File vorbis_file;
 
-			if (decoder != NULL)
+			if (ov_open_callbacks(memory_stream, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
 			{
-				vorbis_info *v_info = ov_info(&vorbis_file, -1);
+				decoder = malloc(sizeof(Decoder_libVorbis));
 
-				decoder->vorbis_file = vorbis_file;
-				decoder->channel_count = v_info->channels;
-				decoder->data = data;
-				decoder->loops = loops;
+				if (decoder != NULL)
+				{
+					vorbis_info *v_info = ov_info(&vorbis_file, -1);
 
-				info->sample_rate = v_info->rate;
-				info->channel_count = v_info->channels;
-				info->format = DECODER_FORMAT_F32;
+					decoder->vorbis_file = vorbis_file;
+					decoder->channel_count = v_info->channels;
+					decoder->data = data;
+					decoder->loops = loops;
+
+					info->sample_rate = v_info->rate;
+					info->channel_count = v_info->channels;
+					info->format = DECODER_FORMAT_F32;
+				}
+				else
+				{
+					ov_clear(&vorbis_file);
+				}
 			}
 			else
 			{
-				ov_clear(&vorbis_file);
+				ROMemoryStream_Destroy(memory_stream);
 			}
-		}
-		else
-		{
-			MemoryFile_fclose(memory_file);
 		}
 	}
 

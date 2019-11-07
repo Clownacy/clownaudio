@@ -55,7 +55,7 @@ static FLAC__StreamDecoderSeekStatus MemoryFile_fseek_wrapper(const FLAC__Stream
 
 	Decoder_libFLAC *decoder = user;
 
-	return ROMemoryStream_SetPosition(decoder->memory_stream, offset, MEMORYSTREAM_START) != 0 ? FLAC__STREAM_DECODER_SEEK_STATUS_ERROR : FLAC__STREAM_DECODER_SEEK_STATUS_OK;
+	return ROMemoryStream_SetPosition(decoder->memory_stream, offset, MEMORYSTREAM_START) ? FLAC__STREAM_DECODER_SEEK_STATUS_OK : FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
 }
 
 static FLAC__StreamDecoderTellStatus MemoryFile_ftell_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__uint64 *offset, void *user)
