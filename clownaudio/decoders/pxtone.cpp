@@ -91,6 +91,6 @@ unsigned long Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, u
 	const size_t size_of_frame = sizeof(short) * 2;
 
 	memset(buffer, 0, frames_to_do * size_of_frame);
-	
+
 	return decoder->pxtn->Moo(buffer, frames_to_do * size_of_frame);
 }
