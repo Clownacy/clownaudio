@@ -17,7 +17,7 @@ struct PredecoderData
 struct Predecoder
 {
 	PredecoderData *data;	// TODO - And this
-	ROMemoryStream *stream;
+	ROMemoryStream *memory_stream;
 	bool loop;
 };
 
@@ -33,9 +33,9 @@ PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t f
 
 		if (decoder != NULL)
 		{
-			MemoryStream *stream = MemoryStream_Create(false);
+			MemoryStream *memory_stream = MemoryStream_Create(false);
 
-			if (stream != NULL)
+			if (memory_stream != NULL)
 			{
 				predecoder_data = malloc(sizeof(PredecoderData));
 
@@ -47,18 +47,18 @@ PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t f
 
 						unsigned long samples_read = Decoder_GetSamples(decoder, buffer, 0x1000 / channel_count) * channel_count;
 
-						MemoryStream_Write(stream, buffer, sizeof(float), samples_read);
+						MemoryStream_Write(memory_stream, buffer, sizeof(float), samples_read);
 
 						if (samples_read != 0x1000)
 							break;
 					}
 
-					predecoder_data->decoded_data = MemoryStream_GetBuffer(stream);
-					predecoder_data->decoded_data_size = MemoryStream_GetPosition(stream);
+					predecoder_data->decoded_data = MemoryStream_GetBuffer(memory_stream);
+					predecoder_data->decoded_data_size = MemoryStream_GetPosition(memory_stream);
 					predecoder_data->channel_count = channel_count;
 				}
 
-				MemoryStream_Destroy(stream);
+				MemoryStream_Destroy(memory_stream);
 			}
 			
 			Decoder_Destroy(decoder);
@@ -90,10 +90,10 @@ Predecoder* Predecoder_Create(PredecoderData *data, bool loop)
 		if (predecoder != NULL)
 		{
 			predecoder->data = data;
-			predecoder->stream = ROMemoryStream_Create(data->decoded_data, data->decoded_data_size);
+			predecoder->memory_stream = ROMemoryStream_Create(data->decoded_data, data->decoded_data_size);
 			predecoder->loop = loop;
 
-			if (predecoder->stream == NULL)
+			if (predecoder->memory_stream == NULL)
 			{
 				free(predecoder);
 				predecoder = NULL;
@@ -106,12 +106,12 @@ Predecoder* Predecoder_Create(PredecoderData *data, bool loop)
 
 void Predecoder_Destroy(Predecoder *predecoder)
 {
-	ROMemoryStream_Destroy(predecoder->stream);
+	ROMemoryStream_Destroy(predecoder->memory_stream);
 }
 
 void Predecoder_Rewind(Predecoder *predecoder)
 {
-	ROMemoryStream_Rewind(predecoder->stream);
+	ROMemoryStream_Rewind(predecoder->memory_stream);
 }
 
 unsigned long Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, unsigned long frames_to_do)
@@ -122,7 +122,7 @@ unsigned long Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, u
 
 	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
 	{
-		frames_done = ROMemoryStream_Read(predecoder->stream, buffer + (frames_done_total * predecoder->data->channel_count), predecoder->data->channel_count * sizeof(float), frames_to_do - frames_done_total);
+		frames_done = ROMemoryStream_Read(predecoder->memory_stream, buffer + (frames_done_total * predecoder->data->channel_count), predecoder->data->channel_count * sizeof(float), frames_to_do - frames_done_total);
 
 		if (frames_done < frames_to_do - frames_done_total)
 		{
