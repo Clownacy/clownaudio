@@ -278,6 +278,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 				{
 					float volume = channel->volume;
 
+					// Apply fade-out volume
 					if (channel->fade_out_counter_max)
 					{
 						const float fade_out_volume = channel->fade_counter / (float)channel->fade_out_counter_max;
@@ -288,6 +289,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 							--channel->fade_counter;
 					}
 
+					// Apply fade-in volume
 					if (channel->fade_in_counter_max)
 					{
 						const float fade_in_volume = (channel->fade_in_counter_max - channel->fade_counter) / (float)channel->fade_in_counter_max;
@@ -298,6 +300,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 							channel->fade_in_counter_max = 0;
 					}
 
+					// Mix data with output, and apply channel volume
 					for (unsigned int j = 0; j < output_channel_count; ++j)
 						*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
 				}
