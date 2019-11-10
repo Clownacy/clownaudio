@@ -111,17 +111,10 @@ unsigned long SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_
 	{
 		frames_done += Predecoder_GetSamples(split_decoder->predecoder[split_decoder->current_half], &buffer[frames_done * split_decoder->data->size_of_frame], frames_to_do - frames_done);
 
-		if (frames_done == frames_to_do)
-		{
-			break;
-		}
+		if (frames_done != frames_to_do && split_decoder->current_half == 0)
+			split_decoder->current_half = 1;
 		else
-		{
-			if (split_decoder->current_half == 0)
-				split_decoder->current_half = 1;
-			else
-				break;
-		}
+			break;
 	}
 
 	return frames_done;

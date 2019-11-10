@@ -142,21 +142,26 @@ unsigned long Decoder_libVorbis_GetSamples(Decoder_libVorbis *decoder, void *buf
 {
 	float *buffer = buffer_void;
 
-	unsigned long frames_done_total = 0;
+	unsigned long frames_done = 0;
 
-	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
+	for (;;)
 	{
-		frames_done = ReadFloats(decoder, buffer + (frames_done_total * decoder->channel_count), frames_to_do - frames_done_total);
+		unsigned long frames = ReadFloats(decoder, &buffer[frames_done * decoder->channel_count], frames_to_do - frames_done);
 
-		if (frames_done == 0)
+		if (frames == 0)
 		{
 			if (decoder->loops)
 				Decoder_libVorbis_Rewind(decoder);
 			else
 				break;
 		}
+
+		frames_done += frames;
+
+		if (frames_done == frames_to_do)
+			break;
 	}
 
 
-	return frames_done_total;
+	return frames_done;
 }

@@ -244,9 +244,9 @@ unsigned long Decoder_libFLAC_GetSamples(Decoder_libFLAC *decoder, void *buffer_
 {
 	unsigned char *buffer = buffer_void;
 
-	unsigned long frames_done_total = 0;
+	unsigned long frames_done = 0;
 
-	while (frames_done_total != frames_to_do)
+	while (frames_done != frames_to_do)
 	{
 		if (decoder->block_buffer_index == decoder->block_buffer_size)
 		{
@@ -268,13 +268,13 @@ unsigned long Decoder_libFLAC_GetSamples(Decoder_libFLAC *decoder, void *buffer_
 
 		const unsigned int SIZE_OF_FRAME = sizeof(FLAC__int32) * decoder->channel_count;
 
-		const unsigned long block_frames_to_do = MIN(frames_to_do - frames_done_total, decoder->block_buffer_size - decoder->block_buffer_index);
+		const unsigned long block_frames_to_do = MIN(frames_to_do - frames_done, decoder->block_buffer_size - decoder->block_buffer_index);
 
-		memcpy(buffer + (frames_done_total * SIZE_OF_FRAME), decoder->block_buffer + (decoder->block_buffer_index * SIZE_OF_FRAME), block_frames_to_do * SIZE_OF_FRAME);
+		memcpy(buffer + (frames_done * SIZE_OF_FRAME), &decoder->block_buffer[decoder->block_buffer_index * SIZE_OF_FRAME], block_frames_to_do * SIZE_OF_FRAME);
 
 		decoder->block_buffer_index += block_frames_to_do;
-		frames_done_total += block_frames_to_do;
+		frames_done += block_frames_to_do;
 	}
 
-	return frames_done_total;
+	return frames_done;
 }

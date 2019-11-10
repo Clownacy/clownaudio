@@ -136,20 +136,25 @@ unsigned long Decoder_Tremor_GetSamples(Decoder_Tremor *decoder, void *buffer_vo
 
 	const unsigned long bytes_to_do = frames_to_do * decoder->bytes_per_frame;
 
-	unsigned long bytes_done_total = 0;
+	unsigned long bytes_done = 0;
 
-	for (unsigned long bytes_done; bytes_done_total != bytes_to_do; bytes_done_total += bytes_done)
+	for (;;)
 	{
-		bytes_done = ov_read(&decoder->vorbis_file, buffer + bytes_done_total, bytes_to_do - bytes_done_total, NULL);
+		unsigned long bytes = ov_read(&decoder->vorbis_file, &buffer[bytes_done], bytes_to_do - bytes_done, NULL);
 
-		if (bytes_done == 0)
+		if (bytes == 0)
 		{
 			if (decoder->loops)
 				Decoder_Tremor_Rewind(decoder);
 			else
 				break;
 		}
+
+		bytes_done += bytes;
+
+		if (bytes_done == bytes_to_do)
+			break;
 	}
 
-	return bytes_done_total / decoder->bytes_per_frame;
+	return bytes_done / decoder->bytes_per_frame;
 }

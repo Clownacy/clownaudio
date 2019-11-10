@@ -118,20 +118,17 @@ unsigned long Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, u
 {
 	float *buffer = buffer_void;
 
-	unsigned long frames_done_total = 0;
+	unsigned long frames_done = 0;
 
-	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
+	for (;;)
 	{
-		frames_done = ROMemoryStream_Read(predecoder->memory_stream, buffer + (frames_done_total * predecoder->data->channel_count), predecoder->data->channel_count * sizeof(float), frames_to_do - frames_done_total);
+		frames_done += ROMemoryStream_Read(predecoder->memory_stream, &buffer[frames_done * predecoder->data->channel_count], predecoder->data->channel_count * sizeof(float), frames_to_do - frames_done);
 
-		if (frames_done < frames_to_do - frames_done_total)
-		{
-			if (predecoder->loop)
-				Predecoder_Rewind(predecoder);
-			else
-				break;
-		}
+		if (frames_done != frames_to_do && predecoder->loop)
+			Predecoder_Rewind(predecoder);
+		else
+			break;
 	}
 
-	return frames_done_total;
+	return frames_done;
 }

@@ -79,20 +79,17 @@ unsigned long Decoder_DR_FLAC_GetSamples(Decoder_DR_FLAC *decoder, void *buffer_
 {
 	drflac_int32 *buffer = buffer_void;
 
-	unsigned long frames_done_total = 0;
+	unsigned long frames_done = 0;
 
-	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
+	for (;;)
 	{
-		frames_done = (unsigned long)drflac_read_pcm_frames_s32(decoder->backend, frames_to_do - frames_done_total, buffer + (frames_done_total * decoder->backend->channels));
+		frames_done += (unsigned long)drflac_read_pcm_frames_s32(decoder->backend, frames_to_do - frames_done, &buffer[frames_done * decoder->backend->channels]);
 
-		if (frames_done < frames_to_do - frames_done_total)
-		{
-			if (decoder->loop)
-				Decoder_DR_FLAC_Rewind(decoder);
-			else
-				break;
-		}
+		if (frames_done != frames_to_do && decoder->loop)
+			Decoder_DR_FLAC_Rewind(decoder);
+		else
+			break;
 	}
 
-	return frames_done_total;
+	return frames_done;
 }

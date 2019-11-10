@@ -91,20 +91,17 @@ unsigned long Decoder_PxToneNoise_GetSamples(Decoder_PxToneNoise *decoder, void 
 {
 	short *buffer = (short*)buffer_void;
 
-	unsigned long frames_done_total = 0;
+	unsigned long frames_done = 0;
 
-	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
+	for (;;)
 	{
-		frames_done = ROMemoryStream_Read(decoder->memory_stream, buffer + (frames_done_total * CHANNEL_COUNT), sizeof(short) * CHANNEL_COUNT, frames_to_do - frames_done_total);
+		frames_done += ROMemoryStream_Read(decoder->memory_stream, &buffer[frames_done * CHANNEL_COUNT], sizeof(short) * CHANNEL_COUNT, frames_to_do - frames_done);
 
-		if (frames_done < frames_to_do - frames_done_total)
-		{
-			if (decoder->loop)
-				Decoder_PxToneNoise_Rewind(decoder);
-			else
-				break;
-		}
+		if (frames_done != frames_to_do && decoder->loop)
+			Decoder_PxToneNoise_Rewind(decoder);
+		else
+			break;
 	}
 
-	return frames_done_total;
+	return frames_done;
 }

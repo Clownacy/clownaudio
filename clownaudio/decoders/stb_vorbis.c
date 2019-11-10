@@ -85,20 +85,25 @@ unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *decoder, void *b
 {
 	float *buffer = buffer_void;
 
-	unsigned long frames_done_total = 0;
+	unsigned long frames_done = 0;
 
-	for (unsigned long frames_done; frames_done_total != frames_to_do; frames_done_total += frames_done)
+	for (;;)
 	{
-		frames_done = stb_vorbis_get_samples_float_interleaved(decoder->instance, decoder->instance->channels, buffer + (frames_done_total * decoder->instance->channels), (frames_to_do - frames_done_total) * decoder->instance->channels);
+		unsigned long frames = stb_vorbis_get_samples_float_interleaved(decoder->instance, decoder->instance->channels, &buffer[frames_done * decoder->instance->channels], (frames_to_do - frames_done) * decoder->instance->channels);
 
-		if (frames_done == 0)
+		if (frames == 0)
 		{
 			if (decoder->loops)
 				Decoder_STB_Vorbis_Rewind(decoder);
 			else
 				break;
 		}
+
+		frames_done += frames;
+
+		if (frames == frames_to_do)
+			break;
 	}
 
-	return frames_done_total;
+	return frames_done;
 }
