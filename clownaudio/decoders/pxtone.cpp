@@ -10,6 +10,9 @@
 
 #include "common.h"
 
+#define SAMPLE_RATE 48000
+#define CHANNEL_COUNT 2
+
 struct Decoder_PxTone
 {
 	DecoderData *data;
@@ -17,7 +20,7 @@ struct Decoder_PxTone
 	bool loop;
 };
 
-Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
 	if (data != NULL)
 	{
@@ -25,7 +28,7 @@ Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned lon
 
 		if (pxtn->init() == pxtnOK)
 		{
-			if (pxtn->set_destination_quality(channel_count, sample_rate))
+			if (pxtn->set_destination_quality(CHANNEL_COUNT, SAMPLE_RATE))
 			{
 				pxtnDescriptor desc;
 
@@ -47,8 +50,8 @@ Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, unsigned lon
 							decoder->data = data;
 							decoder->loop = loop;
 
-							info->sample_rate = sample_rate;
-							info->channel_count = channel_count;
+							info->sample_rate = SAMPLE_RATE;
+							info->channel_count = CHANNEL_COUNT;
 							info->format = DECODER_FORMAT_S16;
 
 							return decoder;

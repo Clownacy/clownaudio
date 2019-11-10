@@ -12,9 +12,8 @@ struct Decoder_Tremor
 {
 	DecoderData *data;
 	OggVorbis_File vorbis_file;
-	bool loops;
+	bool loop;
 	unsigned int bytes_per_frame;
-	unsigned int channel_count;
 };
 
 static size_t fread_wrapper(void *output, size_t size, size_t count, void *file)
@@ -65,11 +64,8 @@ static const ov_callbacks ov_callback_memory = {
 	ftell_wrapper
 };
 
-Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned channel_count, DecoderInfo *info)
+Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
-	(void)sample_rate;
-	(void)channel_count;
-
 	Decoder_Tremor *decoder = NULL;
 
 	if (data != NULL)
@@ -92,8 +88,7 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loops, unsigned lo
 					{
 						decoder->data = data;
 						decoder->vorbis_file = vorbis_file;
-						decoder->loops = loops;
-						decoder->channel_count = v_info->channels;
+						decoder->loop = loop;
 						decoder->bytes_per_frame = v_info->channels * sizeof(short);
 
 						info->sample_rate = v_info->rate;
@@ -144,7 +139,7 @@ unsigned long Decoder_Tremor_GetSamples(Decoder_Tremor *decoder, void *buffer_vo
 
 		if (bytes == 0)
 		{
-			if (decoder->loops)
+			if (decoder->loop)
 				Decoder_Tremor_Rewind(decoder);
 			else
 				break;

@@ -9,14 +9,15 @@
 
 #include "common.h"
 
+#define SAMPLE_RATE 48000
+#define CHANNEL_COUNT 2
+
 struct Decoder_libOpenMPT
 {
 	openmpt_module *module;
-	unsigned long sample_rate;
-	unsigned int channel_count;
 };
 
-Decoder_libOpenMPT* Decoder_libOpenMPT_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_libOpenMPT* Decoder_libOpenMPT_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
 	Decoder_libOpenMPT *decoder = NULL;
 
@@ -31,14 +32,12 @@ Decoder_libOpenMPT* Decoder_libOpenMPT_Create(DecoderData *data, bool loops, uns
 			if (decoder != NULL)
 			{
 				decoder->module = module;
-				decoder->sample_rate = sample_rate;
-				decoder->channel_count = channel_count;
 
-				info->sample_rate = sample_rate;
-				info->channel_count = channel_count;
+				info->sample_rate = SAMPLE_RATE;
+				info->channel_count = CHANNEL_COUNT;
 				info->format = DECODER_FORMAT_F32;
 
-				if (loops)
+				if (loop)
 					openmpt_module_set_repeat_count(decoder->module, -1);
 			}
 			else
@@ -73,7 +72,7 @@ unsigned long Decoder_libOpenMPT_GetSamples(Decoder_libOpenMPT *decoder, void *b
 
 	for (;;)
 	{
-		unsigned long frames = openmpt_module_read_interleaved_float_stereo(decoder->module, decoder->sample_rate, frames_to_do - frames_done, &buffer[frames_done * decoder->channel_count]);
+		unsigned long frames = openmpt_module_read_interleaved_float_stereo(decoder->module, SAMPLE_RATE, frames_to_do - frames_done, &buffer[frames_done * CHANNEL_COUNT]);
 
 		if (frames == 0)
 			break;

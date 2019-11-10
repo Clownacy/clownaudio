@@ -18,11 +18,8 @@ struct Decoder_PxToneNoise
 	bool loop;
 };
 
-Decoder_PxToneNoise* Decoder_PxToneNoise_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_PxToneNoise* Decoder_PxToneNoise_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
-	(void)sample_rate;	// PxTone-Noise only supports a few specific sample rates
-	(void)channel_count;
-
 	Decoder_PxToneNoise *decoder = NULL;
 
 	if (data != NULL)
@@ -31,7 +28,7 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(DecoderData *data, bool loop, un
 
 		if (pxtn->init())
 		{
-			if (pxtn->quality_set(channel_count, sample_rate, 16))
+			if (pxtn->quality_set(CHANNEL_COUNT, SAMPLE_RATE, 16))
 			{
 				pxtnDescriptor desc;
 

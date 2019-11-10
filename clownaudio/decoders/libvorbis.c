@@ -13,7 +13,7 @@ struct Decoder_libVorbis
 {
 	DecoderData *data;
 	OggVorbis_File vorbis_file;
-	bool loops;
+	bool loop;
 	unsigned int channel_count;
 };
 
@@ -65,11 +65,8 @@ static const ov_callbacks ov_callback_memory = {
 	ftell_wrapper
 };
 
-Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
-	(void)sample_rate;
-	(void)channel_count;
-
 	Decoder_libVorbis *decoder = NULL;
 
 	if (data != NULL)
@@ -91,7 +88,7 @@ Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData *data, bool loops, unsig
 					decoder->vorbis_file = vorbis_file;
 					decoder->channel_count = v_info->channels;
 					decoder->data = data;
-					decoder->loops = loops;
+					decoder->loop = loop;
 
 					info->sample_rate = v_info->rate;
 					info->channel_count = v_info->channels;
@@ -150,7 +147,7 @@ unsigned long Decoder_libVorbis_GetSamples(Decoder_libVorbis *decoder, void *buf
 
 		if (frames == 0)
 		{
-			if (decoder->loops)
+			if (decoder->loop)
 				Decoder_libVorbis_Rewind(decoder);
 			else
 				break;

@@ -25,10 +25,10 @@ typedef struct DecoderInfo
 
 typedef struct DecoderBackend
 {
-	void* (*Create)(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info);
+	void* (*Create)(DecoderData *data, bool loops, DecoderInfo *info);
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
-	unsigned long (*GetSamples)(void *decoder, void *buffer_void, unsigned long frames_to_do);
+	unsigned long (*GetSamples)(void *decoder, void *buffer, unsigned long frames_to_do);
 } DecoderBackend;
 
 static inline unsigned int GetSizeOfFrame(DecoderInfo *info)

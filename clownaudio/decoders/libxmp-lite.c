@@ -9,15 +9,17 @@
 
 #include "common.h"
 
+#define SAMPLE_RATE 48000
+#define CHANNEL_COUNT 2
+
 struct Decoder_libXMPLite
 {
 	DecoderData *data;
 	xmp_context context;
-	bool loops;
-	unsigned int channel_count;
+	bool loop;
 };
 
-Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
 	Decoder_libXMPLite *decoder = NULL;
 
@@ -27,7 +29,7 @@ Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loops, uns
 
 		if (!xmp_load_module_from_memory(context, (void*)data->file_buffer, data->file_size))
 		{
-			xmp_start_player(context, sample_rate, 0);
+			xmp_start_player(context, SAMPLE_RATE, 0);
 
 			decoder = malloc(sizeof(Decoder_libXMPLite));
 
@@ -35,11 +37,10 @@ Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loops, uns
 			{
 				decoder->context = context;
 				decoder->data = data;
-				decoder->loops = loops;
-				decoder->channel_count = channel_count;
+				decoder->loop = loop;
 
-				info->sample_rate = sample_rate;
-				info->channel_count = channel_count;
+				info->sample_rate = SAMPLE_RATE;
+				info->channel_count = CHANNEL_COUNT;
 				info->format = DECODER_FORMAT_S16;
 			}
 			else
@@ -72,7 +73,7 @@ void Decoder_libXMPLite_Rewind(Decoder_libXMPLite *decoder)
 
 unsigned long Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *decoder, void *buffer, unsigned long frames_to_do)
 {
-	xmp_play_buffer(decoder->context, buffer, frames_to_do * decoder->channel_count * sizeof(short), !decoder->loops);
+	xmp_play_buffer(decoder->context, buffer, frames_to_do * CHANNEL_COUNT * sizeof(short), !decoder->loop);
 
 	return frames_to_do;
 }

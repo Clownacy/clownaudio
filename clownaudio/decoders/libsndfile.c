@@ -16,7 +16,7 @@ struct Decoder_libSndfile
 	ROMemoryStream *memory_stream;
 	SNDFILE *sndfile;
 	DecoderFormat format;
-	bool loops;
+	bool loop;
 	unsigned int channel_count;
 };
 
@@ -74,11 +74,8 @@ static SF_VIRTUAL_IO sfvirtual = {
 	ftell_wrapper
 };
 
-Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
-	(void)sample_rate;
-	(void)channel_count;
-
 	Decoder_libSndfile *decoder = NULL;
 
 	if (data != NULL)
@@ -102,7 +99,7 @@ Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loops, uns
 					decoder->sndfile = sndfile;
 					decoder->memory_stream = memory_stream;
 					decoder->channel_count = sf_info.channels;
-					decoder->loops = loops;
+					decoder->loop = loop;
 
 					info->sample_rate = sf_info.samplerate;
 					info->channel_count = sf_info.channels;
@@ -149,7 +146,7 @@ unsigned long Decoder_libSndfile_GetSamples(Decoder_libSndfile *decoder, void *b
 	{
 		frames_done += sf_readf_float(decoder->sndfile, &buffer[frames_done * decoder->channel_count], frames_to_do - frames_done);
 
-		if (frames_done != frames_to_do && decoder->loops)
+		if (frames_done != frames_to_do && decoder->loop)
 			Decoder_libSndfile_Rewind(decoder);
 		else
 			break;

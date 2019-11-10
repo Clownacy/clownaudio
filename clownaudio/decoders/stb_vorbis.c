@@ -27,14 +27,11 @@ struct Decoder_STB_Vorbis
 {
 	DecoderData *data;
 	stb_vorbis *instance;
-	bool loops;
+	bool loop;
 };
 
-Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loops, unsigned long sample_rate, unsigned int channel_count, DecoderInfo *info)
+Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
-	(void)sample_rate;
-	(void)channel_count;
-
 	Decoder_STB_Vorbis *decoder = NULL;
 
 	if (data != NULL)
@@ -51,7 +48,7 @@ Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loops, uns
 
 				decoder->instance = instance;
 				decoder->data = data;
-				decoder->loops = loops;
+				decoder->loop = loop;
 
 				info->sample_rate = vorbis_info.sample_rate;
 				info->channel_count = vorbis_info.channels;
@@ -93,7 +90,7 @@ unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *decoder, void *b
 
 		if (frames == 0)
 		{
-			if (decoder->loops)
+			if (decoder->loop)
 				Decoder_STB_Vorbis_Rewind(decoder);
 			else
 				break;
