@@ -33,7 +33,7 @@ struct Decoder_libFLAC
 	unsigned long block_buffer_size;
 };
 
-static FLAC__StreamDecoderReadStatus MemoryFile_fread_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__byte *output, size_t *count, void *user)
+static FLAC__StreamDecoderReadStatus fread_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__byte *output, size_t *count, void *user)
 {
 	(void)flac_stream_decoder;
 
@@ -49,7 +49,7 @@ static FLAC__StreamDecoderReadStatus MemoryFile_fread_wrapper(const FLAC__Stream
 	return status;
 }
 
-static FLAC__StreamDecoderSeekStatus MemoryFile_fseek_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__uint64 offset, void *user)
+static FLAC__StreamDecoderSeekStatus fseek_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__uint64 offset, void *user)
 {
 	(void)flac_stream_decoder;
 
@@ -58,7 +58,7 @@ static FLAC__StreamDecoderSeekStatus MemoryFile_fseek_wrapper(const FLAC__Stream
 	return ROMemoryStream_SetPosition(decoder->memory_stream, offset, MEMORYSTREAM_START) ? FLAC__STREAM_DECODER_SEEK_STATUS_OK : FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
 }
 
-static FLAC__StreamDecoderTellStatus MemoryFile_ftell_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__uint64 *offset, void *user)
+static FLAC__StreamDecoderTellStatus ftell_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__uint64 *offset, void *user)
 {
 	(void)flac_stream_decoder;
 
@@ -69,7 +69,7 @@ static FLAC__StreamDecoderTellStatus MemoryFile_ftell_wrapper(const FLAC__Stream
 	return FLAC__STREAM_DECODER_TELL_STATUS_OK;
 }
 
-static FLAC__StreamDecoderLengthStatus MemoryFile_GetSize(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__uint64 *length, void *user)
+static FLAC__StreamDecoderLengthStatus GetSize(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__uint64 *length, void *user)
 {
 	(void)flac_stream_decoder;
 
@@ -85,7 +85,7 @@ static FLAC__StreamDecoderLengthStatus MemoryFile_GetSize(const FLAC__StreamDeco
 	return FLAC__STREAM_DECODER_LENGTH_STATUS_OK;
 }
 
-static FLAC__bool MemoryFile_EOF(const FLAC__StreamDecoder *flac_stream_decoder, void *user)
+static FLAC__bool CheckEOF(const FLAC__StreamDecoder *flac_stream_decoder, void *user)
 {
 	(void)flac_stream_decoder;
 
@@ -176,7 +176,7 @@ Decoder_libFLAC* Decoder_libFLAC_Create(DecoderData *data, bool loops, DecoderIn
 
 				if (decoder->memory_stream != NULL)
 				{
-					if (FLAC__stream_decoder_init_stream(decoder->flac_stream_decoder, MemoryFile_fread_wrapper, MemoryFile_fseek_wrapper, MemoryFile_ftell_wrapper, MemoryFile_GetSize, MemoryFile_EOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
+					if (FLAC__stream_decoder_init_stream(decoder->flac_stream_decoder, fread_wrapper, fseek_wrapper, ftell_wrapper, GetSize, CheckEOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
 					{
 						decoder->data = data;
 						decoder->error = false;
