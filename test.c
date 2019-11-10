@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 		fclose(file);
 	}
 
-	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffer, file_size);
+	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffer, file_size, NULL, 0);
 
 	if (sound)
 		printf("Loaded sound\n");

@@ -11,7 +11,7 @@
 #include <pthread.h>
 #endif
 
-#include "predecoder.h"
+#include "split_decoder.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
@@ -21,7 +21,7 @@ typedef struct Channel
 
 	bool paused;
 	float volume;
-	Predecoder *predecoder;
+	SplitDecoder *split_decoder;
 	Mixer_Sound instance;
 
 	unsigned long fade_out_counter_max;
@@ -103,14 +103,14 @@ void Mixer_Deinit(void)
 	MutexDeinit(&mixer_mutex);
 }
 
-Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/)
+Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2/*, bool predecode*/)
 {
-	return (Mixer_SoundData*)Predecoder_DecodeData(file_buffer, file_size, output_sample_rate, output_channel_count);
+	return (Mixer_SoundData*)SplitDecoder_DecodeData(file_buffer1, file_size1, file_buffer2, file_size2, output_sample_rate, output_channel_count);
 }
 
 void Mixer_UnloadSoundData(Mixer_SoundData *sound)
 {
-	Predecoder_UnloadData((PredecoderData*)sound);
+	SplitDecoder_UnloadData((SplitDecoderData*)sound);
 }
 
 Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
@@ -119,15 +119,15 @@ Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
 
 	Mixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
-	Predecoder *predecoder = Predecoder_Create((PredecoderData*)sound, loop);
+	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop);
 
-	if (predecoder != NULL)
+	if (split_decoder != NULL)
 	{
 		instance = ++instance_allocator;
 
 		Channel *channel = malloc(sizeof(Channel));
 
-		channel->predecoder = predecoder;
+		channel->split_decoder = split_decoder;
 		channel->volume = 1.0f;
 		channel->instance = instance;
 		channel->paused = true;
@@ -163,7 +163,7 @@ void Mixer_DestroySound(Mixer_Sound instance)
 
 	if (channel != NULL)
 	{
-		Predecoder_Destroy(channel->predecoder);
+		SplitDecoder_Destroy(channel->split_decoder);
 		free(channel);
 	}
 }
@@ -270,7 +270,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 				float read_buffer[0x1000];
 
 				const unsigned long sub_frames_to_do = MIN(0x1000 / output_channel_count, frames_to_do - frames_done);
-				sub_frames_done = Predecoder_GetSamples(channel->predecoder, read_buffer, sub_frames_to_do);
+				sub_frames_done = SplitDecoder_GetSamples(channel->split_decoder, read_buffer, sub_frames_to_do);
 
 				float *read_buffer_pointer = read_buffer;
 
@@ -311,7 +311,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 
 			if (frames_done < frames_to_do)	// Sound finished
 			{
-				Predecoder_Destroy(channel->predecoder);
+				SplitDecoder_Destroy(channel->split_decoder);
 				*channel_pointer = channel->next;
 				free(channel);
 				continue;

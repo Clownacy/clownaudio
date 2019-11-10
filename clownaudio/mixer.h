@@ -8,7 +8,7 @@ typedef unsigned int Mixer_Sound;
 
 void Mixer_Init(unsigned long sample_rate, unsigned int channel_count);
 void Mixer_Deinit(void);
-Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/);
+Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2/*, bool predecode*/);
 void Mixer_UnloadSoundData(Mixer_SoundData *sound);
 Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop);
 void Mixer_DestroySound(Mixer_Sound instance);

@@ -61,9 +61,9 @@ void ClownAudio_Unpause(void)
 	Backend_ResumeStream(stream);
 }
 
-ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer, size_t file_size/*, bool predecode*/)
+ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2/*, bool predecode*/)
 {
-	return (ClownAudio_SoundData*)Mixer_LoadSoundData(file_buffer, file_size);
+	return (ClownAudio_SoundData*)Mixer_LoadSoundData(file_buffer1, file_size1, file_buffer2, file_size2);
 }
 
 void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)

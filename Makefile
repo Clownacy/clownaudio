@@ -49,6 +49,7 @@ SOURCES = \
 	clownaudio/miniaudio \
 	clownaudio/mixer \
 	clownaudio/predecoder \
+	clownaudio/split_decoder \
 	clownaudio/decoders/memory_stream \
 	clownaudio/decoders/misc_utilities
 
