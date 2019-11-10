@@ -24,7 +24,7 @@ ifneq ($(RELEASE),)
 else
 	CXXFLAGS = -Og -ggdb
 endif
-ALL_CXXFLAGS = -std=c++11 -MMD -MP -MF $@.d $(CXXFLAGS)
+ALL_CXXFLAGS = -std=c++98 -MMD -MP -MF $@.d $(CXXFLAGS)
 
 ifneq ($(RELEASE),)
 	LDFLAGS = -s

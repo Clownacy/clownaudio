@@ -18,7 +18,7 @@ enum _RANDOMTYPE
 {
 	_RANDOM_None = 0,
 	_RANDOM_Saw     ,
-	_RANDOM_Rect    ,
+	_RANDOM_Rect
 };
 
 typedef struct

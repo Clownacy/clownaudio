@@ -28,7 +28,7 @@ private:
 	enum
 	{
 		_BUFSIZE_HEEP = 1024,
-		_TAGLINE_NUM  =  128,
+		_TAGLINE_NUM  =  128
 	};
 	
 	void    *_p_desc;

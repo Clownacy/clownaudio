@@ -25,7 +25,7 @@ enum
 	EVENTKIND_TUNING    ,// 14
 	EVENTKIND_PAN_TIME  ,// 15
 
-	EVENTKIND_NUM       ,// 16
+	EVENTKIND_NUM        // 16
 };
 
 #define EVENTDEFAULT_VOLUME       104

@@ -52,7 +52,7 @@ private:
 		_enum_FMTVER_x2x, // no version of exe
 		_enum_FMTVER_x3x, // unit has voice / basic-key for only view
 		_enum_FMTVER_x4x, // unit has event
-		_enum_FMTVER_v5 ,
+		_enum_FMTVER_v5
 	};
 	
 	bool _b_init;

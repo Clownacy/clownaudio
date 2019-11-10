@@ -29,7 +29,7 @@ enum pxWAVETYPE
 	pxWAVETYPE_Saw6   ,
 	pxWAVETYPE_Saw8   ,
 
-	pxWAVETYPE_num,
+	pxWAVETYPE_num
 };
 
 typedef struct
