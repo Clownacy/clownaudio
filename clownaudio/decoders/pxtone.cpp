@@ -91,7 +91,7 @@ void Decoder_PxTone_Rewind(Decoder_PxTone *decoder)
 
 unsigned long Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, unsigned long frames_to_do)
 {
-	const size_t size_of_frame = sizeof(short) * 2;
+	const size_t size_of_frame = sizeof(short) * CHANNEL_COUNT;
 
 	memset(buffer, 0, frames_to_do * size_of_frame);
 
