@@ -9,7 +9,7 @@
 struct SplitDecoderData
 {
 	PredecoderData *predecoder_data[2];
-	unsigned int size_of_frame;	// TODO - Get rid of this when we force stereo
+	unsigned int channel_count;	// TODO - Get rid of this when we force stereo
 };
 
 struct SplitDecoder
@@ -27,7 +27,7 @@ SplitDecoderData* SplitDecoder_DecodeData(const unsigned char *file_buffer1, siz
 	{
 		data->predecoder_data[0] = Predecoder_DecodeData(file_buffer1, file_size1, sample_rate, channel_count);
 		data->predecoder_data[1] = Predecoder_DecodeData(file_buffer2, file_size2, sample_rate, channel_count);
-		data->size_of_frame = channel_count * sizeof(float);
+		data->channel_count = channel_count;
 
 		if (data->predecoder_data[0] != NULL || data->predecoder_data[1] != NULL)
 			return data;
@@ -109,7 +109,7 @@ unsigned long SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_
 
 	for (;;)
 	{
-		frames_done += Predecoder_GetSamples(split_decoder->predecoder[split_decoder->current_half], &buffer[frames_done * split_decoder->data->size_of_frame], frames_to_do - frames_done);
+		frames_done += Predecoder_GetSamples(split_decoder->predecoder[split_decoder->current_half], &buffer[frames_done * split_decoder->data->channel_count], frames_to_do - frames_done);
 
 		if (frames_done != frames_to_do && split_decoder->current_half == 0)
 			split_decoder->current_half = 1;
