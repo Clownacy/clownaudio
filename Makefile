@@ -115,6 +115,10 @@ ifeq ($(USE_PXTONE), true)
 SOURCES += clownaudio/decoders/pxtone clownaudio/decoders/pxtone_noise
 ALL_CFLAGS += -DUSE_PXTONE
 ALL_LIBS += -lstdc++
+# Apparently PxTone supports Vorbis-encoded samples
+ifeq ($(USE_LIBVORBIS), true)
+ALL_CXXFLAGS += -DpxINCLUDE_OGGVORBIS
+endif
 endif
 
 ifeq ($(BACKEND), miniaudio)
