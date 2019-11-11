@@ -148,7 +148,7 @@ pxtnPulse_Oggv::~pxtnPulse_Oggv()
 
 void pxtnPulse_Oggv::Release()
 {
-	if( _p_data ) free( _p_data ); _p_data = NULL;
+	if( _p_data ){ free( _p_data ); _p_data = NULL; }
 	_ch      = 0;
 	_sps2    = 0;
 	_smp_num = 0;
@@ -169,7 +169,8 @@ End:
 
 	if( res != pxtnOK )
 	{
-		if( _p_data ) free( _p_data ); _p_data = NULL; _size = 0;
+		if( _p_data ){ free( _p_data ); _p_data = NULL; }
+		_size = 0;
 	}
 	return res;
 }
@@ -204,30 +205,31 @@ pxtnERR pxtnPulse_Oggv::Decode( pxtnPulse_PCM * p_pcm ) const
 	default: break;
     }
 
-    vi    = ov_info( &vf,-1 );
-	
-	int32_t current_section;
-	char    pcmout[ 4096 ] = {0}; //take 4k out of the data segment, not the stack
+    vi    = ov_info( &vf,-1 );	
 	{
-		int32_t smp_num = (int32_t)ov_pcm_total( &vf, -1 );
-		uint32_t bytes;
-
-		bytes = vi->channels * 2 * smp_num;
-
-		res = p_pcm->Create( vi->channels, vi->rate, 16, smp_num );
-		if( res != pxtnOK ) goto term;
-	}
-    // decode..
-	{
-		int32_t ret = 0;
-		uint8_t  *p  = (uint8_t*)p_pcm->get_p_buf_variable();
-		do
+		int32_t current_section;
+		char    pcmout[ 4096 ] = {0}; //take 4k out of the data segment, not the stack
 		{
-			ret = ov_read( &vf, pcmout, 4096, 0, 2, 1, &current_section );
-			if( ret > 0 ) memcpy( p, pcmout, ret ); //fwrite( pcmout, 1, ret, of );
-			p += ret;
+			int32_t smp_num = (int32_t)ov_pcm_total( &vf, -1 );
+			//uint32_t bytes;
+
+			//bytes = vi->channels * 2 * smp_num;
+
+			res = p_pcm->Create( vi->channels, vi->rate, 16, smp_num );
+			if( res != pxtnOK ) goto term;
 		}
-		while( ret );
+		// decode..
+		{
+			int32_t ret = 0;
+			uint8_t  *p  = (uint8_t*)p_pcm->get_p_buf_variable();
+			do
+			{
+				ret = ov_read( &vf, pcmout, 4096, 0, 2, 1, &current_section );
+				if( ret > 0 ) memcpy( p, pcmout, ret ); //fwrite( pcmout, 1, ret, of );
+				p += ret;
+			}
+			while( ret );
+		}
 	}
     
     // end.
@@ -301,7 +303,8 @@ End:
 
 	if( !b_ret )
 	{
-		if( _p_data ) free( _p_data ); _p_data = NULL; _size = 0;
+		if( _p_data ){ free( _p_data ); _p_data = NULL; }
+		_size = 0;
 	}
 
 	return b_ret;

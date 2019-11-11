@@ -246,7 +246,7 @@ bool pxtnWoice::io_mateOGGV_w( pxtnDescriptor *p_doc ) const
 {
 	if( !_voices ) return false;
 
-	_MATERIALSTRUCT_OGGV mate = {0};
+	_MATERIALSTRUCT_OGGV mate = _MATERIALSTRUCT_OGGV();
 	pxtnVOICEUNIT*       p_vc = &_voices[ 0 ];
 
 	if( !p_vc->p_oggv ) return false;
@@ -268,7 +268,7 @@ bool pxtnWoice::io_mateOGGV_w( pxtnDescriptor *p_doc ) const
 pxtnERR pxtnWoice::io_mateOGGV_r( pxtnDescriptor *p_doc )
 {
 	pxtnERR              res  = pxtnERR_VOID;
-	_MATERIALSTRUCT_OGGV mate = {0};
+	_MATERIALSTRUCT_OGGV mate = _MATERIALSTRUCT_OGGV();
 	int32_t              size =  0 ;
 
 	if( !p_doc->r( &size, 4,                              1 ) ) return pxtnERR_desc_r;
