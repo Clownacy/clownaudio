@@ -49,7 +49,7 @@ SOURCES = \
 	clownaudio/mixer \
 	clownaudio/decoder/decoder \
 	clownaudio/decoder/predecoder \
-	clownaudio/decoder/split_decoder \
+	clownaudio/decoder/resampled_decoder \
 	clownaudio/decoder/backends/memory_stream \
 	clownaudio/decoder/backends/misc_utilities
 

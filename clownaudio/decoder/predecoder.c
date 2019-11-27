@@ -4,24 +4,36 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "../miniaudio.h"
+
 #include "decoder.h"
 #include "backends/memory_stream.h"
+
+#define CHANNEL_COUNT 2
 
 struct PredecoderData
 {
 	void *decoded_data;
 	size_t decoded_data_size;
-	size_t channel_count;	// TODO - Get rid of this when we make stereo the only option
+	unsigned long sample_rate;
 };
 
 struct Predecoder
 {
-	PredecoderData *data;	// TODO - And this
 	ROMemoryStream *memory_stream;
 	bool loop;
 };
 
-PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t file_size, unsigned long sample_rate, unsigned int channel_count)
+static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
+{
+	(void)converter;
+
+	Decoder *decoder = (Decoder*)user_data;
+
+	return Decoder_GetSamples(decoder, output_buffer, frames_to_do);
+}
+
+PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t file_size)
 {
 	PredecoderData *predecoder_data = NULL;
 
@@ -29,7 +41,8 @@ PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t f
 
 	if (decoder_data != NULL)
 	{
-		Decoder *decoder = Decoder_Create(decoder_data, false, sample_rate, channel_count);
+		DecoderInfo info;
+		Decoder *decoder = Decoder_Create(decoder_data, false, &info);
 
 		if (decoder != NULL)
 		{
@@ -41,11 +54,37 @@ PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t f
 
 				if (predecoder_data != NULL)
 				{
+					ma_format format;
+					switch (info.format)
+					{
+						case DECODER_FORMAT_S16:
+							format = ma_format_s16;
+							break;
+
+						case DECODER_FORMAT_S32:
+							format = ma_format_s32;
+							break;
+
+						case DECODER_FORMAT_F32:
+							format = ma_format_f32;
+							break;
+/*
+						default:
+							backends[i].Destroy(backend);
+							free(decoder);
+							return NULL;*/
+					}
+
+					const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, 2, info.sample_rate, PCMConverterCallback, decoder);
+
+					ma_pcm_converter converter;
+					ma_pcm_converter_init(&config, &converter);
+
 					for (;;)
 					{
 						float buffer[0x1000];
 
-						unsigned long samples_read = Decoder_GetSamples(decoder, buffer, 0x1000 / channel_count) * channel_count;
+						unsigned long samples_read = (unsigned long)ma_pcm_converter_read(&converter, buffer, 0x1000 / CHANNEL_COUNT) * CHANNEL_COUNT;
 
 						MemoryStream_Write(memory_stream, buffer, sizeof(float), samples_read);
 
@@ -55,7 +94,7 @@ PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t f
 
 					predecoder_data->decoded_data = MemoryStream_GetBuffer(memory_stream);
 					predecoder_data->decoded_data_size = MemoryStream_GetPosition(memory_stream);
-					predecoder_data->channel_count = channel_count;
+					predecoder_data->sample_rate = info.sample_rate;
 				}
 
 				MemoryStream_Destroy(memory_stream);
@@ -79,7 +118,7 @@ void Predecoder_UnloadData(PredecoderData *data)
 	}
 }
 
-Predecoder* Predecoder_Create(PredecoderData *data, bool loop)
+Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info)
 {
 	Predecoder *predecoder = NULL;
 
@@ -89,9 +128,12 @@ Predecoder* Predecoder_Create(PredecoderData *data, bool loop)
 
 		if (predecoder != NULL)
 		{
-			predecoder->data = data;
 			predecoder->memory_stream = ROMemoryStream_Create(data->decoded_data, data->decoded_data_size);
 			predecoder->loop = loop;
+
+			info->sample_rate = data->sample_rate;
+			info->channel_count = CHANNEL_COUNT;
+			info->format = DECODER_FORMAT_F32;
 
 			if (predecoder->memory_stream == NULL)
 			{
@@ -122,7 +164,7 @@ unsigned long Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, u
 
 	for (;;)
 	{
-		frames_done += ROMemoryStream_Read(predecoder->memory_stream, &buffer[frames_done * predecoder->data->channel_count], predecoder->data->channel_count * sizeof(float), frames_to_do - frames_done);
+		frames_done += ROMemoryStream_Read(predecoder->memory_stream, &buffer[frames_done * CHANNEL_COUNT], sizeof(float) * CHANNEL_COUNT, frames_to_do - frames_done);
 
 		if (frames_done != frames_to_do && predecoder->loop)
 			Predecoder_Rewind(predecoder);

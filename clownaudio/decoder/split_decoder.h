@@ -11,4 +11,4 @@ void SplitDecoder_UnloadData(SplitDecoderData *data);
 SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop);
 void SplitDecoder_Destroy(SplitDecoder *split_decoder);
 void SplitDecoder_Rewind(SplitDecoder *split_decoder);
-unsigned long SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_void, unsigned long frames_to_do);
+unsigned long SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer, unsigned long frames_to_do);

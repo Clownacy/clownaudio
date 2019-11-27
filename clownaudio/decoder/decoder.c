@@ -4,8 +4,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "../miniaudio.h"
-
 #include "backends/common.h"
 
 #ifdef USE_LIBVORBIS
@@ -51,22 +49,21 @@
 	(unsigned long(*)(void*,void*,unsigned long))Decoder_##name##_GetSamples \
 }
 
-typedef struct DecoderBackend
+typedef struct DecoderBackendFunctions
 {
 	void* (*Create)(DecoderData *data, bool loops, DecoderInfo *info);
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
 	unsigned long (*GetSamples)(void *decoder, void *buffer, unsigned long frames_to_do);
-} DecoderBackend;
+} DecoderBackendFunctions;
 
 struct Decoder
 {
 	void *backend;
-	const DecoderBackend *backend_functions;
-	ma_pcm_converter converter;
+	const DecoderBackendFunctions *backend_functions;
 };
 
-static const DecoderBackend backends[] = {
+static const DecoderBackendFunctions backend_functions[] = {
 #ifdef USE_LIBVORBIS
 	BACKEND_FUNCTIONS(libVorbis),
 #endif
@@ -103,15 +100,6 @@ static const DecoderBackend backends[] = {
 #endif
 };
 
-static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
-{
-	(void)converter;
-
-	Decoder *decoder = (Decoder*)user_data;
-
-	return decoder->backend_functions->GetSamples(decoder->backend, output_buffer, frames_to_do);
-}
-
 DecoderData* Decoder_LoadData(const unsigned char *file_buffer, size_t file_size)
 {
 	DecoderData *data = NULL;
@@ -132,19 +120,14 @@ DecoderData* Decoder_LoadData(const unsigned char *file_buffer, size_t file_size
 
 void Decoder_UnloadData(DecoderData *data)
 {
-	//if (data != NULL)
-	//{
-	//	free(data->file_buffer);
-		free(data);
-	//}
+	free(data);
 }
 
-Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count)
+Decoder* Decoder_Create(DecoderData *data, bool loop, DecoderInfo *info)
 {
-	for (unsigned int i = 0; i < sizeof(backends) / sizeof(backends[0]); ++i)
+	for (unsigned int i = 0; i < sizeof(backend_functions) / sizeof(backend_functions[0]); ++i)
 	{
-		DecoderInfo info;
-		void *backend = backends[i].Create(data, loop, &info);
+		void *backend = backend_functions[i].Create(data, loop, info);
 
 		if (backend != NULL)
 		{
@@ -153,38 +136,11 @@ Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned long sample_rate,
 			if (decoder != NULL)
 			{
 				decoder->backend = backend;
-				decoder->backend_functions = &backends[i];
-
-				ma_format format;
-				switch (info.format)
-				{
-					case DECODER_FORMAT_S16:
-						format = ma_format_s16;
-						break;
-
-					case DECODER_FORMAT_S32:
-						format = ma_format_s32;
-						break;
-
-					case DECODER_FORMAT_F32:
-						format = ma_format_f32;
-						break;
-
-					default:
-						backends[i].Destroy(backend);
-						free(decoder);
-						return NULL;
-				}
-
-				const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, channel_count, sample_rate, PCMConverterCallback, decoder);
-				ma_pcm_converter_init(&config, &decoder->converter);
-
+				decoder->backend_functions = &backend_functions[i];
 				return decoder;
 			}
-			else
-			{
-				backends[i].Destroy(backend);
-			}
+
+			backend_functions[i].Destroy(backend);
 		}
 	}
 
@@ -207,5 +163,5 @@ void Decoder_Rewind(Decoder *decoder)
 
 unsigned long Decoder_GetSamples(Decoder *decoder, void *buffer, unsigned long frames_to_do)
 {
-	return (unsigned long)ma_pcm_converter_read(&decoder->converter, buffer, frames_to_do);
+	return decoder->backend_functions->GetSamples(decoder->backend, buffer, frames_to_do);
 }
