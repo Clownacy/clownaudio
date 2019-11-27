@@ -21,7 +21,6 @@
 
 struct Decoder_DR_FLAC
 {
-	DecoderData *data;
 	drflac *backend;
 	bool loop;
 };
@@ -41,7 +40,6 @@ Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, DecoderInf
 			if (decoder != NULL)
 			{
 				decoder->backend = backend;
-				decoder->data = data;
 				decoder->loop = loop;
 
 				info->sample_rate = decoder->backend->sampleRate;
