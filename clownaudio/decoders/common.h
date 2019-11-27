@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
 #include <stddef.h>
 
 typedef enum DecoderFormat
@@ -22,18 +21,3 @@ typedef struct DecoderInfo
 	unsigned int channel_count;
 	DecoderFormat format;
 } DecoderInfo;
-
-typedef struct DecoderBackend
-{
-	void* (*Create)(DecoderData *data, bool loops, DecoderInfo *info);
-	void (*Destroy)(void *decoder);
-	void (*Rewind)(void *decoder);
-	unsigned long (*GetSamples)(void *decoder, void *buffer, unsigned long frames_to_do);
-} DecoderBackend;
-
-static inline unsigned int GetSizeOfFrame(DecoderInfo *info)
-{
-	const unsigned int sizes[3] = {sizeof(short), sizeof(long), sizeof(float)};
-
-	return sizes[info->format] * info->channel_count;
-}

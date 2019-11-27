@@ -51,6 +51,14 @@
 	(unsigned long(*)(void*,void*,unsigned long))Decoder_##name##_GetSamples \
 }
 
+typedef struct DecoderBackend
+{
+	void* (*Create)(DecoderData *data, bool loops, DecoderInfo *info);
+	void (*Destroy)(void *decoder);
+	void (*Rewind)(void *decoder);
+	unsigned long (*GetSamples)(void *decoder, void *buffer, unsigned long frames_to_do);
+} DecoderBackend;
+
 struct Decoder
 {
 	void *backend;
@@ -197,7 +205,7 @@ void Decoder_Rewind(Decoder *decoder)
 	decoder->backend_functions->Rewind(decoder->backend);
 }
 
-unsigned long Decoder_GetSamples(Decoder *decoder, void *buffer_void, unsigned long frames_to_do)
+unsigned long Decoder_GetSamples(Decoder *decoder, void *buffer, unsigned long frames_to_do)
 {
-	return (unsigned long)ma_pcm_converter_read(&decoder->converter, buffer_void, frames_to_do);
+	return (unsigned long)ma_pcm_converter_read(&decoder->converter, buffer, frames_to_do);
 }

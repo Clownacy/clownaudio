@@ -12,4 +12,4 @@ void Decoder_UnloadData(DecoderData *data);
 Decoder* Decoder_Create(DecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count);
 void Decoder_Destroy(Decoder *decoder);
 void Decoder_Rewind(Decoder *decoder);
-unsigned long Decoder_GetSamples(Decoder *decoder, void *buffer_void, unsigned long frames_to_do);
+unsigned long Decoder_GetSamples(Decoder *decoder, void *buffer, unsigned long frames_to_do);
