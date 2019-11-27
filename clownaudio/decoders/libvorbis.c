@@ -159,6 +159,5 @@ unsigned long Decoder_libVorbis_GetSamples(Decoder_libVorbis *decoder, void *buf
 			break;
 	}
 
-
 	return frames_done;
 }
