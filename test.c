@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -6,6 +7,32 @@
 //#include "stb_leakcheck.h"
 
 #include "clownaudio/clownaudio.h"
+
+static void FileToMemory(const char *filename, unsigned char **buffer, size_t *size)
+{
+	*buffer = NULL;
+	*size = 0;
+
+	FILE *file = fopen(filename, "rb");
+
+	if (file != NULL)
+	{
+		fseek(file, 0, SEEK_END);
+		size_t _size = ftell(file);
+		rewind(file);
+
+		unsigned char *_buffer = malloc(_size);
+
+		if (_buffer != NULL)
+		{
+			fread(_buffer, 1, _size, file);
+			*buffer = _buffer;
+			*size = _size;
+		}
+
+		fclose(file);
+	}
+}
 
 int main(int argc, char *argv[])
 {
@@ -15,43 +42,26 @@ int main(int argc, char *argv[])
 		printf("Couldn't init mixer\n");
 	fflush(stdout);
 
-	unsigned char *file_buffer = NULL;
-	size_t file_size = 0;
-
-	FILE *file = fopen(argc > 1 ? argv[1] : "../audio_lib/test_intro.flac", "rb");
-	if (file != NULL)
+	unsigned char *file_buffers[2];
+	size_t file_sizes[2];
+	if (argc == 3)
 	{
-		fseek(file, 0, SEEK_END);
-		file_size = ftell(file);
-		rewind(file);
-
-		file_buffer = malloc(file_size);
-
-		if (file_buffer != NULL)
-			fread(file_buffer, 1, file_size, file);
-
-		fclose(file);
+		FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
+		FileToMemory(argv[2], &file_buffers[1], &file_sizes[1]);
+	}
+	else if (argc == 2)
+	{
+		FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
+		file_buffers[1] = NULL;
+		file_sizes[1] = 0;
+	}
+	else
+	{
+		FileToMemory("../audio_lib/test_intro.flac", &file_buffers[0], &file_sizes[0]);
+		FileToMemory("../audio_lib/test_loop.flac", &file_buffers[1], &file_sizes[1]);
 	}
 
-	unsigned char *file_buffer2 = NULL;
-	size_t file_size2 = 0;
-
-	file = fopen(argc > 1 ? argv[2] : "../audio_lib/test_loop.flac", "rb");
-	if (file != NULL)
-	{
-		fseek(file, 0, SEEK_END);
-		file_size2 = ftell(file);
-		rewind(file);
-
-		file_buffer2 = malloc(file_size2);
-
-		if (file_buffer2 != NULL)
-			fread(file_buffer2, 1, file_size2, file);
-
-		fclose(file);
-	}
-
-	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffer, file_size, file_buffer2, file_size2, false);
+	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
 
 	if (sound)
 		printf("Loaded sound\n");
