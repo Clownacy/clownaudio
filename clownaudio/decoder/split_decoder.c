@@ -19,14 +19,14 @@ struct SplitDecoder
 	unsigned int current_half;
 };
 
-SplitDecoderData* SplitDecoder_LoadData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2)
+SplitDecoderData* SplitDecoder_LoadData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
 {
 	SplitDecoderData *data = malloc(sizeof(SplitDecoderData));
 
 	if (data != NULL)
 	{
-		data->resampled_decoder_data[0] = ResampledDecoder_LoadData(file_buffer1, file_size1);
-		data->resampled_decoder_data[1] = ResampledDecoder_LoadData(file_buffer2, file_size2);
+		data->resampled_decoder_data[0] = ResampledDecoder_LoadData(file_buffer1, file_size1, predecode);
+		data->resampled_decoder_data[1] = ResampledDecoder_LoadData(file_buffer2, file_size2, predecode);
 
 		if (data->resampled_decoder_data[0] != NULL || data->resampled_decoder_data[1] != NULL)
 			return data;
@@ -65,18 +65,25 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 			}
 			else if (data->resampled_decoder_data[0] != NULL)
 			{
+				split_decoder->resampled_decoder[0] = NULL;
 				split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[0], loop, sample_rate, channel_count);
 				split_decoder->current_half = 1;
 			}
 			else if (data->resampled_decoder_data[1] != NULL)
 			{
+				split_decoder->resampled_decoder[0] = NULL;
 				split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate, channel_count);
 				split_decoder->current_half = 1;
 			}
+
+			if (split_decoder->resampled_decoder[1] != NULL)
+				return split_decoder;
+
+			free(split_decoder);
 		}
 	}
 
-	return split_decoder;
+	return NULL;
 }
 
 void SplitDecoder_Destroy(SplitDecoder *split_decoder)
@@ -119,6 +126,9 @@ unsigned long SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_
 
 void SplitDecoder_SetSampleRate(SplitDecoder *split_decoder, unsigned long sample_rate)
 {
-	ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[0], sample_rate);
-	ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[1], sample_rate);
+	if (split_decoder != NULL)
+	{
+		ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[0], sample_rate);
+		ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[1], sample_rate);
+	}
 }

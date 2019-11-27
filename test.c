@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	unsigned char *file_buffer2 = NULL;
 	size_t file_size2 = 0;
 
-	file = fopen(argc > 2 ? argv[2] : "../audio_lib/test_loop.flac", "rb");
+	file = fopen(argc > 1 ? argv[2] : "../audio_lib/test_loop.flac", "rb");
 	if (file != NULL)
 	{
 		fseek(file, 0, SEEK_END);
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 		fclose(file);
 	}
 
-	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffer, file_size, file_buffer2, file_size2);
+	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffer, file_size, file_buffer2, file_size2, false);
 
 	if (sound)
 		printf("Loaded sound\n");

@@ -103,9 +103,9 @@ void Mixer_Deinit(void)
 	MutexDeinit(&mixer_mutex);
 }
 
-Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2/*, bool predecode*/)
+Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
 {
-	return (Mixer_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2);
+	return (Mixer_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, predecode);
 }
 
 void Mixer_UnloadSoundData(Mixer_SoundData *sound)
