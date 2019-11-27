@@ -94,6 +94,9 @@ int main(int argc, char *argv[])
 	fflush(stdout);
 	ClownAudio_UnloadSoundData(sound);
 
+	free(file_buffers[1]);
+	free(file_buffers[0]);
+
 	printf("Deiniting mixer\n");
 	fflush(stdout);
 	ClownAudio_Deinit();
