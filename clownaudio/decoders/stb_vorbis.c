@@ -25,7 +25,6 @@
 
 struct Decoder_STB_Vorbis
 {
-	DecoderData *data;
 	stb_vorbis *instance;
 	bool loop;
 };
@@ -47,7 +46,6 @@ Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loop, Deco
 				const stb_vorbis_info vorbis_info = stb_vorbis_get_info(instance);
 
 				decoder->instance = instance;
-				decoder->data = data;
 				decoder->loop = loop;
 
 				info->sample_rate = vorbis_info.sample_rate;

@@ -15,7 +15,6 @@
 
 struct Decoder_PxTone
 {
-	DecoderData *data;
 	pxtnService *pxtn;
 	bool loop;
 };
@@ -47,7 +46,6 @@ Decoder_PxTone* Decoder_PxTone_Create(DecoderData *data, bool loop, DecoderInfo 
 						if (decoder != NULL)
 						{
 							decoder->pxtn = pxtn;
-							decoder->data = data;
 							decoder->loop = loop;
 
 							info->sample_rate = SAMPLE_RATE;

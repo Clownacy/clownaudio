@@ -10,7 +10,6 @@
 
 struct Decoder_Tremor
 {
-	DecoderData *data;
 	OggVorbis_File vorbis_file;
 	bool loop;
 	unsigned int bytes_per_frame;
@@ -86,7 +85,6 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loop, DecoderInfo 
 
 					if (decoder != NULL)
 					{
-						decoder->data = data;
 						decoder->vorbis_file = vorbis_file;
 						decoder->loop = loop;
 						decoder->bytes_per_frame = v_info->channels * sizeof(short);

@@ -11,7 +11,6 @@
 
 struct Decoder_libVorbis
 {
-	DecoderData *data;
 	OggVorbis_File vorbis_file;
 	bool loop;
 	unsigned int channel_count;
@@ -87,7 +86,6 @@ Decoder_libVorbis* Decoder_libVorbis_Create(DecoderData *data, bool loop, Decode
 
 					decoder->vorbis_file = vorbis_file;
 					decoder->channel_count = v_info->channels;
-					decoder->data = data;
 					decoder->loop = loop;
 
 					info->sample_rate = v_info->rate;

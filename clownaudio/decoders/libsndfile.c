@@ -12,7 +12,6 @@
 
 struct Decoder_libSndfile
 {
-	DecoderData *data;
 	ROMemoryStream *memory_stream;
 	SNDFILE *sndfile;
 	DecoderFormat format;
@@ -95,7 +94,6 @@ Decoder_libSndfile* Decoder_libSndfile_Create(DecoderData *data, bool loop, Deco
 
 				if (decoder != NULL)
 				{
-					decoder->data = data;
 					decoder->sndfile = sndfile;
 					decoder->memory_stream = memory_stream;
 					decoder->channel_count = sf_info.channels;

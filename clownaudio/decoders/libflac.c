@@ -15,8 +15,6 @@
 
 struct Decoder_libFLAC
 {
-	DecoderData *data;
-
 	ROMemoryStream *memory_stream;
 	FLAC__StreamDecoder *flac_stream_decoder;
 	DecoderInfo *info;
@@ -178,7 +176,6 @@ Decoder_libFLAC* Decoder_libFLAC_Create(DecoderData *data, bool loops, DecoderIn
 				{
 					if (FLAC__stream_decoder_init_stream(decoder->flac_stream_decoder, fread_wrapper, fseek_wrapper, ftell_wrapper, GetSize, CheckEOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
 					{
-						decoder->data = data;
 						decoder->error = false;
 						decoder->info = info;
 						decoder->loops = loops;

@@ -13,7 +13,6 @@
 
 struct Decoder_DR_WAV
 {
-	DecoderData *data;
 	drwav *instance;
 	bool loops;
 };
@@ -33,7 +32,6 @@ Decoder_DR_WAV* Decoder_DR_WAV_Create(DecoderData *data, bool loops, DecoderInfo
 			if (decoder != NULL)
 			{
 				decoder->instance = instance;
-				decoder->data = data;
 				decoder->loops = loops;
 
 				info->sample_rate = instance->sampleRate;

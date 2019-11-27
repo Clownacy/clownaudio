@@ -14,7 +14,6 @@
 
 struct Decoder_libXMPLite
 {
-	DecoderData *data;
 	xmp_context context;
 	bool loop;
 };
@@ -36,7 +35,6 @@ Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loop, Deco
 			if (decoder != NULL)
 			{
 				decoder->context = context;
-				decoder->data = data;
 				decoder->loop = loop;
 
 				info->sample_rate = SAMPLE_RATE;
