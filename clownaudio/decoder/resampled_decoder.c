@@ -47,25 +47,12 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 			resampled_decoder->predecoder = predecoder;
 
 			ma_format format;
-			switch (info.format)
-			{
-				case DECODER_FORMAT_S16:
-					format = ma_format_s16;
-					break;
-
-				case DECODER_FORMAT_S32:
-					format = ma_format_s32;
-					break;
-
-				case DECODER_FORMAT_F32:
-					format = ma_format_f32;
-					break;
-/*
-				default:
-					backends[i].Destroy(backend);
-					free(decoder);
-					return NULL;*/
-			}
+			if (info.format == DECODER_FORMAT_S16)
+				format = ma_format_s16;
+			else if (info.format == DECODER_FORMAT_S32)
+				format = ma_format_s32;
+			else //if (info.format == DECODER_FORMAT_F32)
+				format = ma_format_f32;
 
 			const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, channel_count, sample_rate, PCMConverterCallback, resampled_decoder->predecoder);
 			ma_pcm_converter_init(&config, &resampled_decoder->converter);
