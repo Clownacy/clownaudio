@@ -116,3 +116,9 @@ unsigned long SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_
 
 	return frames_done;
 }
+
+void SplitDecoder_SetSampleRate(SplitDecoder *split_decoder, unsigned long sample_rate)
+{
+	ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[0], sample_rate);
+	ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[1], sample_rate);
+}

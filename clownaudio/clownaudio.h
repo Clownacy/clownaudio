@@ -19,3 +19,4 @@ void ClownAudio_UnpauseSound(ClownAudio_Sound instance);
 void ClownAudio_FadeOutSound(ClownAudio_Sound instance, unsigned int duration);
 void ClownAudio_FadeInSound(ClownAudio_Sound instance, unsigned int duration);
 void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume);
+void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate);

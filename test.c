@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
 	fflush(stdout);
 
 	getchar();
+	ClownAudio_SetSoundSampleRate(instance, 8000);
+	getchar();
 	ClownAudio_FadeOutSound(instance, 5 * 1000);
 	getchar();
 	ClownAudio_FadeInSound(instance, 2 * 1000);

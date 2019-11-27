@@ -54,7 +54,8 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 			else //if (info.format == DECODER_FORMAT_F32)
 				format = ma_format_f32;
 
-			const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, channel_count, sample_rate, PCMConverterCallback, resampled_decoder->predecoder);
+			ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, channel_count, sample_rate, PCMConverterCallback, resampled_decoder->predecoder);
+			config.allowDynamicSampleRate = MA_TRUE;
 			ma_pcm_converter_init(&config, &resampled_decoder->converter);
 
 			return resampled_decoder;
@@ -83,4 +84,9 @@ void ResampledDecoder_Rewind(ResampledDecoder *resampled_decoder)
 unsigned long ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *buffer, unsigned long frames_to_do)
 {
 	return (unsigned long)ma_pcm_converter_read(&resampled_decoder->converter, buffer, frames_to_do);
+}
+
+void ResampledDecoder_SetSampleRate(ResampledDecoder *resampled_decoder, unsigned long sample_rate)
+{
+	ma_pcm_converter_set_input_sample_rate(&resampled_decoder->converter, sample_rate);
 }
