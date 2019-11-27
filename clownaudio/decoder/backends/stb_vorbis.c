@@ -96,7 +96,7 @@ unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *decoder, void *b
 
 		frames_done += frames;
 
-		if (frames == frames_to_do)
+		if (frames_done == frames_to_do)
 			break;
 	}
 
