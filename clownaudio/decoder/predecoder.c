@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #include "decoder.h"
-#include "decoders/memory_stream.h"
+#include "backends/memory_stream.h"
 
 struct PredecoderData
 {

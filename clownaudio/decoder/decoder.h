@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "decoders/common.h"
+#include "backends/common.h"
 
 typedef struct Decoder Decoder;
 

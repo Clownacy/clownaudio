@@ -4,43 +4,43 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "miniaudio.h"
+#include "../miniaudio.h"
 
-#include "decoders/common.h"
+#include "backends/common.h"
 
 #ifdef USE_LIBVORBIS
-#include "decoders/libvorbis.h"
+#include "backends/libvorbis.h"
 #endif
 #ifdef USE_TREMOR
-#include "decoders/tremor.h"
+#include "backends/tremor.h"
 #endif
 #ifdef USE_STB_VORBIS
-#include "decoders/stb_vorbis.h"
+#include "backends/stb_vorbis.h"
 #endif
 #ifdef USE_LIBFLAC
-#include "decoders/libflac.h"
+#include "backends/libflac.h"
 #endif
 #ifdef USE_DR_FLAC
-#include "decoders/dr_flac.h"
+#include "backends/dr_flac.h"
 #endif
 #ifdef USE_DR_WAV
-#include "decoders/dr_wav.h"
+#include "backends/dr_wav.h"
 #endif
 #ifdef USE_LIBSNDFILE
-#include "decoders/libsndfile.h"
+#include "backends/libsndfile.h"
 #endif
 #ifdef USE_LIBXMPLITE
-#include "decoders/libxmp-lite.h"
+#include "backends/libxmp-lite.h"
 #endif
 #ifdef USE_LIBOPENMPT
-#include "decoders/libopenmpt.h"
+#include "backends/libopenmpt.h"
 #endif
 #ifdef USE_SNES_SPC
-#include "decoders/snes_spc.h"
+#include "backends/snes_spc.h"
 #endif
 #ifdef USE_PXTONE
-#include "decoders/pxtone.h"
-#include "decoders/pxtone_noise.h"
+#include "backends/pxtone.h"
+#include "backends/pxtone_noise.h"
 #endif
 
 #define BACKEND_FUNCTIONS(name) \

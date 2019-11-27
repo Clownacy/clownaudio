@@ -11,7 +11,7 @@
 #include <pthread.h>
 #endif
 
-#include "split_decoder.h"
+#include "decoder/split_decoder.h"
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
