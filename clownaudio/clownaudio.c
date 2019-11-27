@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 #include "mixer.h"
-#include "playback.h"
+#include "playback/playback.h"
 
 static BackendStream *stream;
 
