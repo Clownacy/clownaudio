@@ -28,7 +28,7 @@ bool ClownAudio_Init(void)
 
 		if (stream != NULL)
 		{
-			Mixer_Init(STREAM_SAMPLE_RATE, STREAM_CHANNEL_COUNT);
+			Mixer_Init(STREAM_SAMPLE_RATE);
 
 			if (Backend_ResumeStream(stream))
 				success = true;

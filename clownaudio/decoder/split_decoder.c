@@ -48,7 +48,7 @@ void SplitDecoder_UnloadData(SplitDecoderData *data)
 	}
 }
 
-SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned long sample_rate, unsigned int channel_count)
+SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned long sample_rate)
 {
 	SplitDecoder *split_decoder = NULL;
 
@@ -60,14 +60,14 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 		{
 			if (data->resampled_decoder_data[0] != NULL && data->resampled_decoder_data[1] != NULL)
 			{
-				split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], false, sample_rate, channel_count);
-				split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate, channel_count);
+				split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], false, sample_rate);
+				split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate);
 				split_decoder->current_decoder = 0;
 				split_decoder->last_decoder = false;
 			}
 			else if (data->resampled_decoder_data[0] != NULL)
 			{
-				split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], loop, sample_rate, channel_count);
+				split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], loop, sample_rate);
 				split_decoder->resampled_decoder[1] = NULL;
 				split_decoder->current_decoder = 0;
 				split_decoder->last_decoder = true;
@@ -75,7 +75,7 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 			else if (data->resampled_decoder_data[1] != NULL)
 			{
 				split_decoder->resampled_decoder[0] = NULL;
-				split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate, channel_count);
+				split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate);
 				split_decoder->current_decoder = 1;
 				split_decoder->last_decoder = true;
 			}

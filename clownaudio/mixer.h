@@ -6,7 +6,7 @@
 typedef struct Mixer_SoundData Mixer_SoundData;
 typedef unsigned int Mixer_Sound;
 
-void Mixer_Init(unsigned long sample_rate, unsigned int channel_count);
+void Mixer_Init(unsigned long sample_rate);
 void Mixer_Deinit(void);
 Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode);
 void Mixer_UnloadSoundData(Mixer_SoundData *sound);

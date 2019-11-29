@@ -13,6 +13,8 @@
 
 #include "decoder/split_decoder.h"
 
+#define CHANNEL_COUNT 2
+
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 typedef struct Channel
@@ -43,7 +45,6 @@ static Channel *channel_list_head;
 static Mutex mixer_mutex;
 
 static unsigned long output_sample_rate;
-static unsigned int output_channel_count;
 
 static void MutexInit(Mutex *mutex)
 {
@@ -90,10 +91,9 @@ static Channel* FindChannel(Mixer_Sound instance)
 	return NULL;
 }
 
-void Mixer_Init(unsigned long sample_rate, unsigned int channel_count)
+void Mixer_Init(unsigned long sample_rate)
 {
 	output_sample_rate = sample_rate;
-	output_channel_count = channel_count;
 
 	MutexInit(&mixer_mutex);
 }
@@ -119,7 +119,7 @@ Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
 
 	Mixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
-	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, output_sample_rate, output_channel_count);
+	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, output_sample_rate);
 
 	if (split_decoder != NULL)
 	{
@@ -281,7 +281,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 			{
 				float read_buffer[0x1000];
 
-				const unsigned long sub_frames_to_do = MIN(0x1000 / output_channel_count, frames_to_do - frames_done);
+				const unsigned long sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
 				sub_frames_done = SplitDecoder_GetSamples(channel->split_decoder, read_buffer, sub_frames_to_do);
 
 				float *read_buffer_pointer = read_buffer;
@@ -312,8 +312,8 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 							channel->fade_in_counter_max = 0;
 					}
 
-					// Mix data with output, and apply channel volume
-					for (unsigned int j = 0; j < output_channel_count; ++j)
+					// Mix data with output, and apply volume
+					for (unsigned int j = 0; j < CHANNEL_COUNT; ++j)
 						*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
 				}
 
