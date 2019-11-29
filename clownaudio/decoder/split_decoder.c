@@ -80,7 +80,7 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 				split_decoder->last_decoder = true;
 			}
 
-			if (split_decoder->resampled_decoder[0] != NULL && split_decoder->resampled_decoder[1] != NULL)
+			if (split_decoder->resampled_decoder[0] != NULL || split_decoder->resampled_decoder[1] != NULL)
 				return split_decoder;
 
 			free(split_decoder);
