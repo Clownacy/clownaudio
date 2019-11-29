@@ -62,26 +62,38 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 			{
 				split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], false, sample_rate);
 				split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate);
-				split_decoder->current_decoder = 0;
-				split_decoder->last_decoder = false;
+
+				if (split_decoder->resampled_decoder[0] != NULL && split_decoder->resampled_decoder[1] != NULL)
+				{
+					split_decoder->current_decoder = 0;
+					split_decoder->last_decoder = false;
+					return split_decoder;
+				}
 			}
 			else if (data->resampled_decoder_data[0] != NULL)
 			{
 				split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], loop, sample_rate);
 				split_decoder->resampled_decoder[1] = NULL;
-				split_decoder->current_decoder = 0;
-				split_decoder->last_decoder = true;
+
+				if (split_decoder->resampled_decoder[0] != NULL)
+				{
+					split_decoder->current_decoder = 0;
+					split_decoder->last_decoder = true;
+					return split_decoder;
+				}
 			}
 			else if (data->resampled_decoder_data[1] != NULL)
 			{
 				split_decoder->resampled_decoder[0] = NULL;
 				split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate);
-				split_decoder->current_decoder = 1;
-				split_decoder->last_decoder = true;
-			}
 
-			if (split_decoder->resampled_decoder[0] != NULL || split_decoder->resampled_decoder[1] != NULL)
-				return split_decoder;
+				if (split_decoder->resampled_decoder[1] != NULL)
+				{
+					split_decoder->current_decoder = 1;
+					split_decoder->last_decoder = true;
+					return split_decoder;
+				}
+			}
 
 			free(split_decoder);
 		}
