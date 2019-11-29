@@ -288,11 +288,6 @@ void Mixer_SetPan(Mixer_Sound instance, float pan)
 
 		channel->right_pan[0] = 1.0f - channel->right_pan[1];
 		channel->left_pan[1] = 1.0f - channel->left_pan[0];
-
-		printf("%f\n", channel->left_pan[0]);
-		printf("%f\n", channel->right_pan[0]);
-		printf("%f\n", channel->left_pan[1]);
-		printf("%f\n", channel->right_pan[1]);
 	}
 
 	MutexUnlock(&mixer_mutex);
@@ -348,21 +343,19 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 					}
 
 					// Mix data with output, and apply volume
+					const float left_sample = *read_buffer_pointer++;
+					const float right_sample = *read_buffer_pointer++;
+
 					for (unsigned int j = 0; j < CHANNEL_COUNT; ++j)
 					{
-						float sample = (read_buffer_pointer[0] * channel->left_pan[j]) + (read_buffer_pointer[1] * channel->right_pan[j]);
+						float panned_sample = (left_sample * channel->left_pan[j]) + (right_sample * channel->right_pan[j]);
 
 						const float total_pan = channel->left_pan[j] + channel->right_pan[j];
-						if (total_pan > 1.0)
-							sample /= total_pan;	// Clamp back down to the original max volume
+						if (total_pan > 1.0f)
+							panned_sample /= total_pan;	// Clamp back down to the original max volume
 
-						*output_buffer_pointer++ += sample;
+						*output_buffer_pointer++ += panned_sample * volume;
 					}
-
-					read_buffer_pointer += 2;
-
-//					for (unsigned int j = 0; j < CHANNEL_COUNT; ++j)
-	//					*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
 				}
 
 				if (sub_frames_done < sub_frames_to_do)
