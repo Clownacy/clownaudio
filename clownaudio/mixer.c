@@ -17,7 +17,7 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define CLAMP(x, y, z) MIN(MAX((x), (y)), (z))
+#define CLAMP(x, min, max) MIN(MAX((x), (min)), (max))
 
 typedef struct Channel
 {
@@ -321,7 +321,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 					float volume = channel->volume;
 
 					// Apply fade-out volume
-					if (channel->fade_out_counter_max)
+					if (channel->fade_out_counter_max != 0)
 					{
 						const float fade_out_volume = channel->fade_counter / (float)channel->fade_out_counter_max;
 
@@ -332,7 +332,7 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 					}
 
 					// Apply fade-in volume
-					if (channel->fade_in_counter_max)
+					if (channel->fade_in_counter_max != 0)
 					{
 						const float fade_in_volume = (channel->fade_in_counter_max - channel->fade_counter) / (float)channel->fade_in_counter_max;
 
