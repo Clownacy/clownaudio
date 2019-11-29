@@ -110,3 +110,8 @@ void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long samp
 {
 	Mixer_SetSoundSampleRate(instance, sample_rate1, sample_rate2);
 }
+
+void ClownAudio_SetSoundPan(ClownAudio_Sound instance, float pan)
+{
+	Mixer_SetPan(instance, pan);
+}

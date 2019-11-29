@@ -16,6 +16,8 @@
 #define CHANNEL_COUNT 2
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define CLAMP(x, y, z) MIN(MAX((x), (y)), (z))
 
 typedef struct Channel
 {
@@ -23,6 +25,8 @@ typedef struct Channel
 
 	bool paused;
 	float volume;
+	float left_pan[CHANNEL_COUNT];
+	float right_pan[CHANNEL_COUNT];
 	SplitDecoder *split_decoder;
 	Mixer_Sound instance;
 
@@ -129,6 +133,10 @@ Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
 
 		channel->split_decoder = split_decoder;
 		channel->volume = 1.0f;
+		channel->left_pan[0] = 1.0f;
+		channel->right_pan[0] = 0.0f;
+		channel->left_pan[1] = 0.0f;
+		channel->right_pan[1] = 1.0f;
 		channel->instance = instance;
 		channel->paused = true;
 		channel->fade_out_counter_max = 0;
@@ -263,6 +271,23 @@ void Mixer_SetSoundSampleRate(Mixer_Sound instance, unsigned long sample_rate1, 
 	MutexUnlock(&mixer_mutex);
 }
 
+void Mixer_SetPan(Mixer_Sound instance, float pan)
+{
+	MutexLock(&mixer_mutex);
+
+	Channel *channel = FindChannel(instance);
+
+	if (channel != NULL)
+	{
+		channel->left_pan[0] = 1.0f - CLAMP(pan, 0.0f, 1.0f);
+		channel->right_pan[0] = CLAMP(-pan, 0.0f, 1.0f);
+		channel->left_pan[1] = CLAMP(pan, 0.0f, 1.0f);
+		channel->right_pan[1] = 1.0f - CLAMP(-pan, 0.0f, 1.0f);
+	}
+
+	MutexUnlock(&mixer_mutex);
+}
+
 void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 {
 	MutexLock(&mixer_mutex);
@@ -314,7 +339,20 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 
 					// Mix data with output, and apply volume
 					for (unsigned int j = 0; j < CHANNEL_COUNT; ++j)
-						*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
+					{
+						float sample = (read_buffer_pointer[0] * channel->left_pan[j]) + (read_buffer_pointer[1] * channel->right_pan[j]);
+
+						const float total_pan = channel->left_pan[j] + channel->right_pan[j];
+						if (total_pan > 1.0)
+							sample /= total_pan;	// Clamp back down to the original max volume
+
+						*output_buffer_pointer++ += sample;
+					}
+
+					read_buffer_pointer += 2;
+
+//					for (unsigned int j = 0; j < CHANNEL_COUNT; ++j)
+	//					*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
 				}
 
 				if (sub_frames_done < sub_frames_to_do)
