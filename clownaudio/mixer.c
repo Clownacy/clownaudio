@@ -280,9 +280,19 @@ void Mixer_SetPan(Mixer_Sound instance, float pan)
 	if (channel != NULL)
 	{
 		channel->left_pan[0] = 1.0f - CLAMP(pan, 0.0f, 1.0f);
-		channel->right_pan[0] = CLAMP(-pan, 0.0f, 1.0f);
-		channel->left_pan[1] = CLAMP(pan, 0.0f, 1.0f);
 		channel->right_pan[1] = 1.0f - CLAMP(-pan, 0.0f, 1.0f);
+
+		// Logarithmic (realistic) panning
+		channel->left_pan[0] *= channel->left_pan[0];
+		channel->right_pan[1] *= channel->right_pan[1];
+
+		channel->right_pan[0] = 1.0f - channel->right_pan[1];
+		channel->left_pan[1] = 1.0f - channel->left_pan[0];
+
+		printf("%f\n", channel->left_pan[0]);
+		printf("%f\n", channel->right_pan[0]);
+		printf("%f\n", channel->left_pan[1]);
+		printf("%f\n", channel->right_pan[1]);
 	}
 
 	MutexUnlock(&mixer_mutex);
