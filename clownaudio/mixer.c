@@ -251,14 +251,14 @@ void Mixer_SetSoundVolume(Mixer_Sound instance, float volume)
 	MutexUnlock(&mixer_mutex);
 }
 
-void Mixer_SetSoundSampleRate(Mixer_Sound instance, unsigned long sample_rate)
+void Mixer_SetSoundSampleRate(Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
 {
 	MutexLock(&mixer_mutex);
 
 	Channel *channel = FindChannel(instance);
 
 	if (channel != NULL)
-		SplitDecoder_SetSampleRate(channel->split_decoder, sample_rate);
+		SplitDecoder_SetSampleRate(channel->split_decoder, sample_rate1, sample_rate2);
 
 	MutexUnlock(&mixer_mutex);
 }
