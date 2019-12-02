@@ -71,6 +71,7 @@ void Decoder_PxTone_Destroy(Decoder_PxTone *decoder)
 {
 	if (decoder != NULL)
 	{
+		decoder->pxtn->evels->Release();
 		delete decoder->pxtn;
 		free(decoder);
 	}
