@@ -15,6 +15,7 @@
 struct Decoder_PxToneNoise
 {
 	ROMemoryStream *memory_stream;
+	void *buffer;
 	bool loop;
 };
 
@@ -48,17 +49,21 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(DecoderData *data, bool loop, De
 							if (decoder != NULL)
 							{
 								decoder->memory_stream = memory_stream;
+								decoder->buffer = buffer;
 								decoder->loop = loop;
 
 								info->sample_rate = SAMPLE_RATE;
 								info->channel_count = CHANNEL_COUNT;
 								info->format = DECODER_FORMAT_S16;
+
+								delete pxtn;
+								return decoder;
 							}
-							else
-							{
-								ROMemoryStream_Destroy(memory_stream);
-							}
+
+							ROMemoryStream_Destroy(memory_stream);
 						}
+
+						free(buffer);
 					}
 				}
 			}
@@ -75,6 +80,7 @@ void Decoder_PxToneNoise_Destroy(Decoder_PxToneNoise *decoder)
 	if (decoder != NULL)
 	{
 		ROMemoryStream_Destroy(decoder->memory_stream);
+		free(decoder->buffer);
 		free(decoder);
 	}
 }

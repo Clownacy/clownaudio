@@ -45,15 +45,16 @@ Decoder_SNES_SPC* Decoder_SNES_SPC_Create(DecoderData *data, bool loop, DecoderI
 				info->sample_rate = spc_sample_rate;
 				info->channel_count = 2;
 				info->format = DECODER_FORMAT_S16;
-			}
-			else
-			{
-				spc_delete(snes_spc);
+
+				return decoder;
 			}
 		}
+
+		spc_filter_delete(filter);
+		spc_delete(snes_spc);
 	}
 
-	return decoder;
+	return NULL;
 }
 
 void Decoder_SNES_SPC_Destroy(Decoder_SNES_SPC *decoder)
