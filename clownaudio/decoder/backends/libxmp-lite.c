@@ -40,17 +40,18 @@ Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loop, Deco
 				info->sample_rate = SAMPLE_RATE;
 				info->channel_count = CHANNEL_COUNT;
 				info->format = DECODER_FORMAT_S16;
+
+				return decoder;
 			}
-			else
-			{
-				xmp_end_player(decoder->context);
-				xmp_release_module(decoder->context);
-				xmp_free_context(decoder->context);
-			}
+
+			xmp_end_player(context);
+			xmp_release_module(context);
 		}
+
+		xmp_free_context(context);
 	}
 
-	return decoder;
+	return NULL;
 }
 
 void Decoder_libXMPLite_Destroy(Decoder_libXMPLite *decoder)
