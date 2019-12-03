@@ -81,6 +81,11 @@ void ClownAudio_DestroySound(ClownAudio_Sound instance)
 	Mixer_DestroySound(instance);
 }
 
+void ClownAudio_RewindSound(ClownAudio_Sound instance)
+{
+	Mixer_RewindSound(instance);
+}
+
 void ClownAudio_PauseSound(ClownAudio_Sound instance)
 {
 	Mixer_PauseSound(instance);

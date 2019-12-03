@@ -176,6 +176,18 @@ void Mixer_DestroySound(Mixer_Sound instance)
 	}
 }
 
+void Mixer_RewindSound(Mixer_Sound instance)
+{
+	MutexLock(&mixer_mutex);
+
+	Channel *channel = FindChannel(instance);
+
+	if (channel != NULL)
+		SplitDecoder_Rewind(channel->split_decoder);
+
+	MutexUnlock(&mixer_mutex);
+}
+
 void Mixer_PauseSound(Mixer_Sound instance)
 {
 	MutexLock(&mixer_mutex);

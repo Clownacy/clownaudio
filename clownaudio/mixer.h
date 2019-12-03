@@ -12,6 +12,7 @@ Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t f
 void Mixer_UnloadSoundData(Mixer_SoundData *sound);
 Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop);
 void Mixer_DestroySound(Mixer_Sound instance);
+void Mixer_RewindSound(Mixer_Sound instance);
 void Mixer_PauseSound(Mixer_Sound instance);
 void Mixer_UnpauseSound(Mixer_Sound instance);
 void Mixer_FadeOutSound(Mixer_Sound instance, unsigned int duration);
