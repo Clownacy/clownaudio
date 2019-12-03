@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 		printf("Couldn't load sound\n");
 	fflush(stdout);
 
-	ClownAudio_Sound instance = ClownAudio_CreateSound(sound, true);
+	ClownAudio_Sound instance = ClownAudio_CreateSound(sound, true, true);
 	ClownAudio_UnpauseSound(instance);
 
 	if (instance)

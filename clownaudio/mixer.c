@@ -24,6 +24,7 @@ typedef struct Channel
 	struct Channel *next;
 
 	bool paused;
+	bool free_when_done;
 	float volume;
 	float left_pan[CHANNEL_COUNT];
 	float right_pan[CHANNEL_COUNT];
@@ -117,7 +118,7 @@ void Mixer_UnloadSoundData(Mixer_SoundData *sound)
 	SplitDecoder_UnloadData((SplitDecoderData*)sound);
 }
 
-Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
+Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop, bool free_when_done)
 {
 	static Mixer_Sound instance_allocator;
 
@@ -139,6 +140,7 @@ Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop)
 		channel->right_pan[1] = 1.0f;
 		channel->instance = instance;
 		channel->paused = true;
+		channel->free_when_done = free_when_done;
 		channel->fade_out_counter_max = 0;
 		channel->fade_in_counter_max = 0;
 
@@ -379,10 +381,17 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 
 			if (frames_done < frames_to_do)	// Sound finished
 			{
-				SplitDecoder_Destroy(channel->split_decoder);
-				*channel_pointer = channel->next;
-				free(channel);
-				continue;
+				if (channel->free_when_done)
+				{
+					SplitDecoder_Destroy(channel->split_decoder);
+					*channel_pointer = channel->next;
+					free(channel);
+					continue;
+				}
+				else
+				{
+					channel->paused = true;
+				}
 			}
 		}
 

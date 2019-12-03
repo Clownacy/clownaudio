@@ -71,9 +71,9 @@ void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
 	Mixer_UnloadSoundData((Mixer_SoundData*)sound);
 }
 
-ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop)
+ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done)
 {
-	return Mixer_CreateSound((Mixer_SoundData*)sound, loop);
+	return Mixer_CreateSound((Mixer_SoundData*)sound, loop, free_when_done);
 }
 
 void ClownAudio_DestroySound(ClownAudio_Sound instance)
