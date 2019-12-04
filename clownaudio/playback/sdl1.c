@@ -11,7 +11,7 @@
 
 struct BackendStream
 {
-	void (*user_callback)(void*, float*, unsigned long);
+	void (*user_callback)(void*, float*, size_t);
 	void *user_data;
 
 	float volume;
@@ -79,7 +79,7 @@ void Backend_Deinit(void)
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
-BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigned long), void *user_data)
+BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
 {
 	BackendStream *stream = malloc(sizeof(BackendStream));
 

@@ -33,7 +33,7 @@
 
 #define DECODER_FUNCTIONS(name) \
 { \
-	(void*(*)(const unsigned char*,size_t,bool,DecoderInfo*))Decoder_##name##_Create, \
+	(void*(*)(const unsigned char*,size_t,DecoderInfo*))Decoder_##name##_Create, \
 	(void(*)(void*))Decoder_##name##_Destroy, \
 	(void(*)(void*))Decoder_##name##_Rewind, \
 	(unsigned long(*)(void*,void*,unsigned long))Decoder_##name##_GetSamples \
@@ -41,7 +41,7 @@
 
 typedef struct LowLevelDecoderFunctions
 {
-	void* (*Create)(const unsigned char *data, size_t data_size, bool loops, DecoderInfo *info);
+	void* (*Create)(const unsigned char *data, size_t data_size, DecoderInfo *info);
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
 	unsigned long (*GetSamples)(void *decoder, void *buffer, unsigned long frames_to_do);
@@ -51,6 +51,8 @@ struct LowLevelDecoderSelector
 {
 	void *decoder;
 	const LowLevelDecoderFunctions *decoder_functions;
+	bool loop;
+	size_t size_of_frame;
 };
 
 static const LowLevelDecoderFunctions decoder_functions[] = {
@@ -82,22 +84,40 @@ static const LowLevelDecoderFunctions decoder_functions[] = {
 
 LowLevelDecoderSelector* LowLevelDecoderSelector_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
-	for (unsigned int i = 0; i < sizeof(decoder_functions) / sizeof(decoder_functions[0]); ++i)
+	if (data != NULL)
 	{
-		void *decoder = decoder_functions[i].Create(data, data_size, loop, info);
-
-		if (decoder != NULL)
+		for (unsigned int i = 0; i < sizeof(decoder_functions) / sizeof(decoder_functions[0]); ++i)
 		{
-			LowLevelDecoderSelector *selector = malloc(sizeof(LowLevelDecoderSelector));
+			void *decoder = decoder_functions[i].Create(data, data_size, info);
 
-			if (selector != NULL)
+			if (decoder != NULL)
 			{
-				selector->decoder = decoder;
-				selector->decoder_functions = &decoder_functions[i];
-				return selector;
-			}
+				LowLevelDecoderSelector *selector = malloc(sizeof(LowLevelDecoderSelector));
 
-			decoder_functions[i].Destroy(decoder);
+				if (selector != NULL)
+				{
+					selector->decoder = decoder;
+					selector->decoder_functions = &decoder_functions[i];
+					selector->loop = loop;
+					selector->size_of_frame = info->channel_count;
+
+					switch (info->format)
+					{
+						case DECODER_FORMAT_S16:
+							selector->size_of_frame *= 2;
+							break;
+
+						case DECODER_FORMAT_S32:
+						case DECODER_FORMAT_F32:
+							selector->size_of_frame *= 4;
+							break;
+					}
+
+					return selector;
+				}
+
+				decoder_functions[i].Destroy(decoder);
+			}
 		}
 	}
 
@@ -106,11 +126,8 @@ LowLevelDecoderSelector* LowLevelDecoderSelector_Create(const unsigned char *dat
 
 void LowLevelDecoderSelector_Destroy(LowLevelDecoderSelector *selector)
 {
-	if (selector != NULL)
-	{
-		selector->decoder_functions->Destroy(selector->decoder);
-		free(selector);
-	}
+	selector->decoder_functions->Destroy(selector->decoder);
+	free(selector);
 }
 
 void LowLevelDecoderSelector_Rewind(LowLevelDecoderSelector *selector)
@@ -118,7 +135,24 @@ void LowLevelDecoderSelector_Rewind(LowLevelDecoderSelector *selector)
 	selector->decoder_functions->Rewind(selector->decoder);
 }
 
-unsigned long LowLevelDecoderSelector_GetSamples(LowLevelDecoderSelector *selector, void *buffer, unsigned long frames_to_do)
+size_t LowLevelDecoderSelector_GetSamples(LowLevelDecoderSelector *selector, void *buffer, size_t frames_to_do)
 {
-	return selector->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
+	size_t frames_done = 0;
+
+	while (frames_done != frames_to_do)
+	{
+		const size_t frames = selector->decoder_functions->GetSamples(selector->decoder, &((char*)buffer)[frames_done * selector->size_of_frame], frames_to_do - frames_done);
+
+		if (frames == 0)
+		{
+			if (selector->loop)
+				selector->decoder_functions->Rewind(selector->decoder);
+			else
+				break;
+		}
+
+		frames_done += frames;
+	}
+
+	return frames_done;
 }

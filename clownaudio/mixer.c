@@ -307,7 +307,7 @@ void Mixer_SetPan(Mixer_Sound instance, float pan)
 	MutexUnlock(&mixer_mutex);
 }
 
-void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
+void Mixer_MixSamples(float *output_buffer, size_t frames_to_do)
 {
 	MutexLock(&mixer_mutex);
 
@@ -320,17 +320,17 @@ void Mixer_MixSamples(float *output_buffer, unsigned long frames_to_do)
 		{
 			float *output_buffer_pointer = output_buffer;
 
-			unsigned long frames_done = 0;
-			for (unsigned long sub_frames_done; frames_done < frames_to_do; frames_done += sub_frames_done)
+			size_t frames_done = 0;
+			for (size_t sub_frames_done; frames_done < frames_to_do; frames_done += sub_frames_done)
 			{
 				float read_buffer[0x1000];
 
-				const unsigned long sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
+				const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
 				sub_frames_done = SplitDecoder_GetSamples(channel->split_decoder, read_buffer, sub_frames_to_do);
 
 				float *read_buffer_pointer = read_buffer;
 
-				for (unsigned long i = 0; i < sub_frames_done; ++i)
+				for (size_t i = 0; i < sub_frames_done; ++i)
 				{
 					float volume = channel->volume;
 

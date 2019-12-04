@@ -19,72 +19,37 @@
 
 #include "../../common.h"
 
-struct Decoder_DR_FLAC
+Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
 {
-	drflac *backend;
-	bool loop;
-};
+	drflac *backend = drflac_open_memory(data, data_size);
 
-Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
-{
-	Decoder_DR_FLAC *decoder = NULL;
-
-	if (data != NULL)
+	if (backend != NULL)
 	{
-		drflac *backend = drflac_open_memory(data, data_size);
-
-		if (backend != NULL)
-		{
-			decoder = malloc(sizeof(Decoder_DR_FLAC));
-
-			if (decoder != NULL)
-			{
-				decoder->backend = backend;
-				decoder->loop = loop;
-
-				info->sample_rate = decoder->backend->sampleRate;
-				info->channel_count = decoder->backend->channels;
-				info->format = DECODER_FORMAT_S32;
-			}
-			else
-			{
-				drflac_close(backend);
-			}
-		}
+		info->sample_rate = backend->sampleRate;
+		info->channel_count = backend->channels;
+		info->format = DECODER_FORMAT_S32;
 	}
 
-	return decoder;
+	return (Decoder_DR_FLAC*)backend;
 }
 
 void Decoder_DR_FLAC_Destroy(Decoder_DR_FLAC *decoder)
 {
-	if (decoder != NULL)
-	{
-		drflac_close(decoder->backend);
-		free(decoder);
-	}
+	drflac *backend = (drflac*)decoder;
+
+	drflac_close(backend);
 }
 
 void Decoder_DR_FLAC_Rewind(Decoder_DR_FLAC *decoder)
 {
-	drflac_seek_to_pcm_frame(decoder->backend, 0);
+	drflac *backend = (drflac*)decoder;
+
+	drflac_seek_to_pcm_frame(backend, 0);
 }
 
-unsigned long Decoder_DR_FLAC_GetSamples(Decoder_DR_FLAC *decoder, void *buffer_void, unsigned long frames_to_do)
+size_t Decoder_DR_FLAC_GetSamples(Decoder_DR_FLAC *decoder, void *buffer, size_t frames_to_do)
 {
-	drflac_int32 *buffer = buffer_void;
+	drflac *backend = (drflac*)decoder;
 
-	unsigned long frames_done = 0;
-
-	for (;;)
-	{
-		frames_done += (unsigned long)drflac_read_pcm_frames_s32(decoder->backend, frames_to_do - frames_done, &buffer[frames_done * decoder->backend->channels]);
-
-		if (frames_done != frames_to_do && decoder->loop)
-			Decoder_DR_FLAC_Rewind(decoder);
-		else
-			break;
-	}
-
-	return frames_done;
+	return drflac_read_pcm_frames_s32(backend, frames_to_do, buffer);
 }

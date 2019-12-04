@@ -121,11 +121,11 @@ void SplitDecoder_Rewind(SplitDecoder *split_decoder)
 	}
 }
 
-unsigned long SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_void, unsigned long frames_to_do)
+size_t SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_void, size_t frames_to_do)
 {
 	float *buffer = buffer_void;
 
-	unsigned long frames_done = 0;
+	size_t frames_done = 0;
 
 	for (;;)
 	{

@@ -137,11 +137,11 @@ void Predecoder_Rewind(Predecoder *predecoder)
 	ROMemoryStream_Rewind(predecoder->memory_stream);
 }
 
-unsigned long Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, unsigned long frames_to_do)
+size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, size_t frames_to_do)
 {
 	float *buffer = buffer_void;
 
-	unsigned long frames_done = 0;
+	size_t frames_done = 0;
 
 	for (;;)
 	{

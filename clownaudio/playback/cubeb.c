@@ -11,7 +11,7 @@
 
 struct BackendStream
 {
-	void (*user_callback)(void*, float*, unsigned long);
+	void (*user_callback)(void*, float*, size_t);
 	void *user_data;
 
 	cubeb_stream *cubeb_stream_pointer;
@@ -56,7 +56,7 @@ void Backend_Deinit(void)
 #endif
 }
 
-BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, unsigned long), void *user_data)
+BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
 {
 	BackendStream *stream = NULL;
 

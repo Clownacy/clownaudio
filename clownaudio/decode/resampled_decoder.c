@@ -143,9 +143,9 @@ void ResampledDecoder_Rewind(ResampledDecoder *resampled_decoder)
 	}
 }
 
-unsigned long ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *buffer, unsigned long frames_to_do)
+size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *buffer, size_t frames_to_do)
 {
-	return (unsigned long)ma_pcm_converter_read(&resampled_decoder->converter, buffer, frames_to_do);
+	return ma_pcm_converter_read(&resampled_decoder->converter, buffer, frames_to_do);
 }
 
 void ResampledDecoder_SetSampleRate(ResampledDecoder *resampled_decoder, unsigned long sample_rate)

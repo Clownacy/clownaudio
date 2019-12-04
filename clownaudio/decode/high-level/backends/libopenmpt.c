@@ -70,7 +70,7 @@ unsigned long Decoder_libOpenMPT_GetSamples(Decoder_libOpenMPT *decoder, void *b
 
 	unsigned long frames_done = 0;
 
-	for (;;)
+	while (frames_done != frames_to_do)
 	{
 		unsigned long frames = openmpt_module_read_interleaved_float_stereo(decoder->module, SAMPLE_RATE, frames_to_do - frames_done, &buffer[frames_done * CHANNEL_COUNT]);
 
@@ -78,9 +78,6 @@ unsigned long Decoder_libOpenMPT_GetSamples(Decoder_libOpenMPT *decoder, void *b
 			break;
 
 		frames_done += frames;
-
-		if (frames_done == frames_to_do)
-			break;
 	}
 
 	return frames_done;
