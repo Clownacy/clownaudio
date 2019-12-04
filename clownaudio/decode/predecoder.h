@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "common.h"
+#include "decoders/common.h"
 
 typedef struct PredecoderData PredecoderData;
 typedef struct Predecoder Predecoder;

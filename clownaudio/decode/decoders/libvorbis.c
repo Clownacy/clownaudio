@@ -6,8 +6,8 @@
 
 #include <vorbis/vorbisfile.h>
 
-#include "../common.h"
-#include "../memory_stream.h"
+#include "common.h"
+#include "memory_stream.h"
 
 struct Decoder_libVorbis
 {

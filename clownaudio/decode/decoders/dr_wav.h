@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "../common.h"
+#include "common.h"
 
 typedef struct Decoder_DR_WAV Decoder_DR_WAV;
 

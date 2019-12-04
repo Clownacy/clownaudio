@@ -21,7 +21,7 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include "../common.h"
+#include "common.h"
 
 Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
 {

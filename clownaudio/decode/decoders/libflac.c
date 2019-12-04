@@ -7,8 +7,8 @@
 
 #include <FLAC/stream_decoder.h>
 
-#include "../common.h"
-#include "../memory_stream.h"
+#include "common.h"
+#include "memory_stream.h"
 
 #undef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))

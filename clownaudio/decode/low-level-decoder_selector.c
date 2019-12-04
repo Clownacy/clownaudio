@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "common.h"
+#include "decoders/common.h"
 
 #ifdef USE_LIBVORBIS
 #include "decoders/libvorbis.h"

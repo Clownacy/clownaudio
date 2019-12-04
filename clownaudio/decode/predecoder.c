@@ -6,7 +6,7 @@
 
 #include "../miniaudio.h"
 
-#include "memory_stream.h"
+#include "decoders/memory_stream.h"
 #include "low-level-decoder_selector.h"
 
 #define CHANNEL_COUNT 2

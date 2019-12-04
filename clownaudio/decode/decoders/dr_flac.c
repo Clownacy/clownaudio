@@ -17,7 +17,7 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include "../common.h"
+#include "common.h"
 
 Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
 {

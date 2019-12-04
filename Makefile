@@ -1,14 +1,14 @@
-USE_LIBVORBIS = false
-USE_TREMOR = false
-USE_STB_VORBIS = false
-USE_LIBFLAC = false
+USE_LIBVORBIS = true
+USE_TREMOR = true
+USE_STB_VORBIS = true
+USE_LIBFLAC = true
 USE_DR_FLAC = true
-USE_DR_WAV = false
-USE_LIBSNDFILE = false
+USE_DR_WAV = true
+USE_LIBSNDFILE = true
 USE_LIBOPENMPT = false
 USE_LIBXMPLITE = false
 USE_SNES_SPC = false
-USE_PXTONE = false
+USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
 
@@ -47,11 +47,11 @@ SOURCES = \
 	clownaudio/clownaudio \
 	clownaudio/miniaudio \
 	clownaudio/mixer \
-	clownaudio/decode/low-level/decoder_selector \
+	clownaudio/decode/low-level-decoder_selector \
 	clownaudio/decode/predecoder \
 	clownaudio/decode/resampled_decoder \
 	clownaudio/decode/split_decoder \
-	clownaudio/decode/memory_stream
+	clownaudio/decode/decoders/memory_stream
 
 ifeq ($(USE_LIBVORBIS), true)
 SOURCES += clownaudio/decode/decoders/libvorbis
@@ -72,13 +72,13 @@ ALL_LIBS += -lm
 endif
 
 ifeq ($(USE_LIBFLAC), true)
-SOURCES += clownaudio/decode/low-level_backends/libflac
+SOURCES += clownaudio/decode/decoders/libflac
 ALL_CFLAGS += -DUSE_LIBFLAC `pkg-config flac --cflags`
 ALL_LIBS += `pkg-config flac --libs --static`
 endif
 
 ifeq ($(USE_DR_FLAC), true)
-SOURCES += clownaudio/decode/low-level/decoders/dr_flac
+SOURCES += clownaudio/decode/decoders/dr_flac
 ALL_CFLAGS += -DUSE_DR_FLAC
 endif
 

@@ -9,7 +9,7 @@
 
 #include "libs/dr_wav.h"
 
-#include "../common.h"
+#include "common.h"
 
 Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
 {

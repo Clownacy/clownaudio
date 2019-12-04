@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "../common.h"
+#include "common.h"
 
 typedef struct Decoder_STB_Vorbis Decoder_STB_Vorbis;
 
