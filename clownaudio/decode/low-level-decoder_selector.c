@@ -1,10 +1,10 @@
-#include "decoder_selector.h"
+#include "low-level-decoder_selector.h"
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "../common.h"
+#include "common.h"
 
 #ifdef USE_LIBVORBIS
 #include "decoders/libvorbis.h"

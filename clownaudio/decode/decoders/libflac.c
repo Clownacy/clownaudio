@@ -7,8 +7,8 @@
 
 #include <FLAC/stream_decoder.h>
 
-#include "common.h"
-#include "memory_stream.h"
+#include "../common.h"
+#include "../memory_stream.h"
 
 #undef MIN
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
@@ -18,7 +18,6 @@ struct Decoder_libFLAC
 	ROMemoryStream *memory_stream;
 	FLAC__StreamDecoder *flac_stream_decoder;
 	DecoderInfo *info;
-	bool loops;
 
 	unsigned int channel_count;
 
@@ -156,61 +155,55 @@ static void ErrorCallback(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__
 	decoder->error = true;
 }
 
-Decoder_libFLAC* Decoder_libFLAC_Create(DecoderData *data, bool loops, DecoderInfo *info)
+Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
 {
-	Decoder_libFLAC *decoder = NULL;
+	Decoder_libFLAC *decoder = malloc(sizeof(Decoder_libFLAC));
 
-	if (data != NULL)
+	if (decoder != NULL)
 	{
-		decoder = malloc(sizeof(Decoder_libFLAC));
+		decoder->flac_stream_decoder = FLAC__stream_decoder_new();
 
-		if (decoder != NULL)
+		if (decoder->flac_stream_decoder != NULL)
 		{
-			decoder->flac_stream_decoder = FLAC__stream_decoder_new();
+			decoder->memory_stream = ROMemoryStream_Create(data, data_size);
 
-			if (decoder->flac_stream_decoder != NULL)
+			if (decoder->memory_stream != NULL)
 			{
-				decoder->memory_stream = ROMemoryStream_Create(data->file_buffer, data->file_size);
-
-				if (decoder->memory_stream != NULL)
+				if (FLAC__stream_decoder_init_stream(decoder->flac_stream_decoder, fread_wrapper, fseek_wrapper, ftell_wrapper, GetSize, CheckEOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
 				{
-					if (FLAC__stream_decoder_init_stream(decoder->flac_stream_decoder, fread_wrapper, fseek_wrapper, ftell_wrapper, GetSize, CheckEOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
-					{
-						decoder->error = false;
-						decoder->info = info;
-						decoder->loops = loops;
-						FLAC__stream_decoder_process_until_end_of_metadata(decoder->flac_stream_decoder);
+					decoder->error = false;
+					decoder->info = info;
+					FLAC__stream_decoder_process_until_end_of_metadata(decoder->flac_stream_decoder);
 
-						if (decoder->error)
-						{
-							FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
-							FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
-							ROMemoryStream_Destroy(decoder->memory_stream);
-							free(decoder);
-							decoder = NULL;
-						}
-
-					}
-					else
+					if (decoder->error)
 					{
+						FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
 						FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
 						ROMemoryStream_Destroy(decoder->memory_stream);
 						free(decoder);
 						decoder = NULL;
 					}
+
 				}
 				else
 				{
 					FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
+					ROMemoryStream_Destroy(decoder->memory_stream);
 					free(decoder);
 					decoder = NULL;
 				}
 			}
 			else
 			{
+				FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
 				free(decoder);
 				decoder = NULL;
 			}
+		}
+		else
+		{
+			free(decoder);
+			decoder = NULL;
 		}
 	}
 
@@ -234,41 +227,23 @@ void Decoder_libFLAC_Rewind(Decoder_libFLAC *decoder)
 	FLAC__stream_decoder_seek_absolute(decoder->flac_stream_decoder, 0);
 }
 
-unsigned long Decoder_libFLAC_GetSamples(Decoder_libFLAC *decoder, void *buffer_void, unsigned long frames_to_do)
+size_t Decoder_libFLAC_GetSamples(Decoder_libFLAC *decoder, void *buffer, size_t frames_to_do)
 {
-	unsigned char *buffer = buffer_void;
-
-	unsigned long frames_done = 0;
-
-	while (frames_done != frames_to_do)
+	if (decoder->block_buffer_index == decoder->block_buffer_size)
 	{
-		if (decoder->block_buffer_index == decoder->block_buffer_size)
-		{
-			FLAC__stream_decoder_process_single(decoder->flac_stream_decoder);
+		FLAC__stream_decoder_process_single(decoder->flac_stream_decoder);
 
-			if (FLAC__stream_decoder_get_state(decoder->flac_stream_decoder) == FLAC__STREAM_DECODER_END_OF_STREAM)
-			{
-				if (decoder->loops)
-				{
-					Decoder_libFLAC_Rewind(decoder);
-					continue;
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
-
-		const unsigned int SIZE_OF_FRAME = sizeof(FLAC__int32) * decoder->channel_count;
-
-		const unsigned long block_frames_to_do = MIN(frames_to_do - frames_done, decoder->block_buffer_size - decoder->block_buffer_index);
-
-		memcpy(buffer + (frames_done * SIZE_OF_FRAME), &decoder->block_buffer[decoder->block_buffer_index * SIZE_OF_FRAME], block_frames_to_do * SIZE_OF_FRAME);
-
-		decoder->block_buffer_index += block_frames_to_do;
-		frames_done += block_frames_to_do;
+		if (FLAC__stream_decoder_get_state(decoder->flac_stream_decoder) == FLAC__STREAM_DECODER_END_OF_STREAM)
+			return 0;
 	}
 
-	return frames_done;
+	const unsigned int SIZE_OF_FRAME = sizeof(FLAC__int32) * decoder->channel_count;
+
+	const unsigned long block_frames_to_do = MIN(frames_to_do, decoder->block_buffer_size - decoder->block_buffer_index);
+
+	memcpy(buffer, &decoder->block_buffer[decoder->block_buffer_index * SIZE_OF_FRAME], block_frames_to_do * SIZE_OF_FRAME);
+
+	decoder->block_buffer_index += block_frames_to_do;
+
+	return block_frames_to_do;
 }

@@ -6,7 +6,7 @@
 
 #include "../miniaudio.h"
 
-#include "low-level/decoder_selector.h"
+#include "low-level-decoder_selector.h"
 #include "predecoder.h"
 
 struct ResampledDecoderData

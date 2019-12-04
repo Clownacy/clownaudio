@@ -17,7 +17,7 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include "../../common.h"
+#include "../common.h"
 
 Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
 {
@@ -35,21 +35,15 @@ Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_s
 
 void Decoder_DR_FLAC_Destroy(Decoder_DR_FLAC *decoder)
 {
-	drflac *backend = (drflac*)decoder;
-
-	drflac_close(backend);
+	drflac_close((drflac*)decoder);
 }
 
 void Decoder_DR_FLAC_Rewind(Decoder_DR_FLAC *decoder)
 {
-	drflac *backend = (drflac*)decoder;
-
-	drflac_seek_to_pcm_frame(backend, 0);
+	drflac_seek_to_pcm_frame((drflac*)decoder, 0);
 }
 
 size_t Decoder_DR_FLAC_GetSamples(Decoder_DR_FLAC *decoder, void *buffer, size_t frames_to_do)
 {
-	drflac *backend = (drflac*)decoder;
-
-	return drflac_read_pcm_frames_s32(backend, frames_to_do, buffer);
+	return drflac_read_pcm_frames_s32((drflac*)decoder, frames_to_do, buffer);
 }

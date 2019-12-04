@@ -21,84 +21,38 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include "common.h"
+#include "../common.h"
 
-struct Decoder_STB_Vorbis
+Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
 {
-	stb_vorbis *instance;
-	bool loop;
-};
+	stb_vorbis *instance = stb_vorbis_open_memory(data, data_size, NULL, NULL);
 
-Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(DecoderData *data, bool loop, DecoderInfo *info)
-{
-	Decoder_STB_Vorbis *decoder = NULL;
-
-	if (data != NULL)
+	if (instance != NULL)
 	{
-		stb_vorbis *instance = stb_vorbis_open_memory(data->file_buffer, data->file_size, NULL, NULL);
+		const stb_vorbis_info vorbis_info = stb_vorbis_get_info(instance);
 
-		if (instance != NULL)
-		{
-			decoder = malloc(sizeof(Decoder_STB_Vorbis));
-
-			if (decoder != NULL)
-			{
-				const stb_vorbis_info vorbis_info = stb_vorbis_get_info(instance);
-
-				decoder->instance = instance;
-				decoder->loop = loop;
-
-				info->sample_rate = vorbis_info.sample_rate;
-				info->channel_count = vorbis_info.channels;
-				info->format = DECODER_FORMAT_F32;
-			}
-			else
-			{
-				stb_vorbis_close(instance);
-			}
-		}
+		info->sample_rate = vorbis_info.sample_rate;
+		info->channel_count = vorbis_info.channels;
+		info->format = DECODER_FORMAT_F32;
 	}
 
-	return decoder;
+	return (Decoder_STB_Vorbis*)instance;
 }
 
 void Decoder_STB_Vorbis_Destroy(Decoder_STB_Vorbis *decoder)
 {
-	if (decoder != NULL)
-	{
-		stb_vorbis_close(decoder->instance);
-		free(decoder);
-	}
+	stb_vorbis_close((stb_vorbis*)decoder);
+	free(decoder);
 }
 
 void Decoder_STB_Vorbis_Rewind(Decoder_STB_Vorbis *decoder)
 {
-	stb_vorbis_seek_start(decoder->instance);
+	stb_vorbis_seek_start((stb_vorbis*)decoder);
 }
 
-unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *decoder, void *buffer_void, unsigned long frames_to_do)
+unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *decoder, void *buffer, unsigned long frames_to_do)
 {
-	float *buffer = buffer_void;
+	stb_vorbis *instance = (stb_vorbis*)decoder;
 
-	unsigned long frames_done = 0;
-
-	for (;;)
-	{
-		unsigned long frames = stb_vorbis_get_samples_float_interleaved(decoder->instance, decoder->instance->channels, &buffer[frames_done * decoder->instance->channels], (frames_to_do - frames_done) * decoder->instance->channels);
-
-		if (frames == 0)
-		{
-			if (decoder->loop)
-				Decoder_STB_Vorbis_Rewind(decoder);
-			else
-				break;
-		}
-
-		frames_done += frames;
-
-		if (frames_done == frames_to_do)
-			break;
-	}
-
-	return frames_done;
+	return stb_vorbis_get_samples_float_interleaved(instance, instance->channels, buffer, frames_to_do * instance->channels);
 }

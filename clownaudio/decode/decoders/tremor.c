@@ -5,13 +5,12 @@
 
 #include <tremor/ivorbisfile.h>
 
-#include "common.h"
-#include "memory_stream.h"
+#include "../common.h"
+#include "../memory_stream.h"
 
 struct Decoder_Tremor
 {
 	OggVorbis_File vorbis_file;
-	bool loop;
 	unsigned int bytes_per_frame;
 };
 
@@ -63,45 +62,41 @@ static const ov_callbacks ov_callback_memory = {
 	ftell_wrapper
 };
 
-Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loop, DecoderInfo *info)
+Decoder_Tremor* Decoder_Tremor_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
 {
 	Decoder_Tremor *decoder = NULL;
 
-	if (data != NULL)
+	if (data[0] == 'O' && data[1] == 'g' && data[2] == 'g' && data[3] == 'S')	// Detect .ogg files (because Tremor has a bad habit of trying to process .flac files, and corrupting the stack)
 	{
-		if (data->file_buffer[0] == 'O' && data->file_buffer[1] == 'g' && data->file_buffer[2] == 'g' && data->file_buffer[3] == 'S')	// Detect .ogg files (because Tremor has a bad habit of tring to process .flac files, and corrupting the stack)
+		ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
+
+		if (memory_stream != NULL)
 		{
-			ROMemoryStream *memory_stream = ROMemoryStream_Create(data->file_buffer, data->file_size);
+			OggVorbis_File vorbis_file;
 
-			if (memory_stream != NULL)
+			if (ov_open_callbacks(memory_stream, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
 			{
-				OggVorbis_File vorbis_file;
+				vorbis_info *v_info = ov_info(&vorbis_file, -1);
 
-				if (ov_open_callbacks(memory_stream, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
+				decoder = malloc(sizeof(Decoder_Tremor));
+
+				if (decoder != NULL)
 				{
-					vorbis_info *v_info = ov_info(&vorbis_file, -1);
+					decoder->vorbis_file = vorbis_file;
+					decoder->bytes_per_frame = v_info->channels * sizeof(short);
 
-					decoder = malloc(sizeof(Decoder_Tremor));
-
-					if (decoder != NULL)
-					{
-						decoder->vorbis_file = vorbis_file;
-						decoder->loop = loop;
-						decoder->bytes_per_frame = v_info->channels * sizeof(short);
-
-						info->sample_rate = v_info->rate;
-						info->channel_count = v_info->channels;
-						info->format = DECODER_FORMAT_S16;
-					}
-					else
-					{
-						ov_clear(&vorbis_file);
-					}
+					info->sample_rate = v_info->rate;
+					info->channel_count = v_info->channels;
+					info->format = DECODER_FORMAT_S16;	// Note to self: Tremor uses the 'short' type internally, which in theory could be more than two bytes
 				}
 				else
 				{
-					ROMemoryStream_Destroy(memory_stream);
+					ov_clear(&vorbis_file);
 				}
+			}
+			else
+			{
+				ROMemoryStream_Destroy(memory_stream);
 			}
 		}
 	}
@@ -111,11 +106,8 @@ Decoder_Tremor* Decoder_Tremor_Create(DecoderData *data, bool loop, DecoderInfo 
 
 void Decoder_Tremor_Destroy(Decoder_Tremor *decoder)
 {
-	if (decoder)
-	{
-		ov_clear(&decoder->vorbis_file);
-		free(decoder);
-	}
+	ov_clear(&decoder->vorbis_file);
+	free(decoder);
 }
 
 void Decoder_Tremor_Rewind(Decoder_Tremor *decoder)
@@ -123,31 +115,7 @@ void Decoder_Tremor_Rewind(Decoder_Tremor *decoder)
 	ov_time_seek(&decoder->vorbis_file, 0);
 }
 
-unsigned long Decoder_Tremor_GetSamples(Decoder_Tremor *decoder, void *buffer_void, unsigned long frames_to_do)
+unsigned long Decoder_Tremor_GetSamples(Decoder_Tremor *decoder, void *buffer, unsigned long frames_to_do)
 {
-	char *buffer = buffer_void;
-
-	const unsigned long bytes_to_do = frames_to_do * decoder->bytes_per_frame;
-
-	unsigned long bytes_done = 0;
-
-	for (;;)
-	{
-		unsigned long bytes = ov_read(&decoder->vorbis_file, &buffer[bytes_done], bytes_to_do - bytes_done, NULL);
-
-		if (bytes == 0)
-		{
-			if (decoder->loop)
-				Decoder_Tremor_Rewind(decoder);
-			else
-				break;
-		}
-
-		bytes_done += bytes;
-
-		if (bytes_done == bytes_to_do)
-			break;
-	}
-
-	return bytes_done / decoder->bytes_per_frame;
+	return ov_read(&decoder->vorbis_file, buffer, frames_to_do * decoder->bytes_per_frame, NULL) / decoder->bytes_per_frame;
 }
