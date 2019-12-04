@@ -1,14 +1,14 @@
 USE_LIBVORBIS = false
 USE_TREMOR = false
-USE_STB_VORBIS = true
+USE_STB_VORBIS = false
 USE_LIBFLAC = false
 USE_DR_FLAC = true
-USE_DR_WAV = true
+USE_DR_WAV = false
 USE_LIBSNDFILE = false
 USE_LIBOPENMPT = false
 USE_LIBXMPLITE = false
-USE_SNES_SPC = true
-USE_PXTONE = true
+USE_SNES_SPC = false
+USE_PXTONE = false
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
 
@@ -47,73 +47,72 @@ SOURCES = \
 	clownaudio/clownaudio \
 	clownaudio/miniaudio \
 	clownaudio/mixer \
-	clownaudio/decoder/decoder \
-	clownaudio/decoder/predecoder \
-	clownaudio/decoder/resampled_decoder \
-	clownaudio/decoder/split_decoder \
-	clownaudio/decoder/backends/memory_stream \
-	clownaudio/decoder/backends/misc_utilities
+	clownaudio/decode/low-level/decoder_selector \
+	clownaudio/decode/predecoder \
+	clownaudio/decode/resampled_decoder \
+	clownaudio/decode/split_decoder \
+	clownaudio/decode/memory_stream
 
 ifeq ($(USE_LIBVORBIS), true)
-SOURCES += clownaudio/decoder/backends/libvorbis
+SOURCES += clownaudio/decode/decoders/libvorbis
 ALL_CFLAGS += -DUSE_LIBVORBIS `pkg-config vorbisfile --cflags`
 ALL_LIBS += `pkg-config vorbisfile --libs --static`
 endif
 
 ifeq ($(USE_TREMOR), true)
-SOURCES += clownaudio/decoder/backends/tremor
+SOURCES += clownaudio/decode/decoders/tremor
 ALL_CFLAGS += -DUSE_TREMOR `pkg-config vorbisidec --cflags`
 ALL_LIBS += `pkg-config vorbisidec --libs --static`
 endif
 
 ifeq ($(USE_STB_VORBIS), true)
-SOURCES += clownaudio/decoder/backends/stb_vorbis
+SOURCES += clownaudio/decode/decoders/stb_vorbis
 ALL_CFLAGS += -DUSE_STB_VORBIS
 ALL_LIBS += -lm
 endif
 
 ifeq ($(USE_LIBFLAC), true)
-SOURCES += clownaudio/decoder/backends/libflac
+SOURCES += clownaudio/decode/low-level_backends/libflac
 ALL_CFLAGS += -DUSE_LIBFLAC `pkg-config flac --cflags`
 ALL_LIBS += `pkg-config flac --libs --static`
 endif
 
 ifeq ($(USE_DR_FLAC), true)
-SOURCES += clownaudio/decoder/backends/dr_flac
+SOURCES += clownaudio/decode/low-level/decoders/dr_flac
 ALL_CFLAGS += -DUSE_DR_FLAC
 endif
 
 ifeq ($(USE_DR_WAV), true)
-SOURCES += clownaudio/decoder/backends/dr_wav
+SOURCES += clownaudio/decode/decoders/dr_wav
 ALL_CFLAGS += -DUSE_DR_WAV
 endif
 
 ifeq ($(USE_LIBSNDFILE), true)
-SOURCES += clownaudio/decoder/backends/libsndfile
+SOURCES += clownaudio/decode/decoders/libsndfile
 ALL_CFLAGS += -DUSE_LIBSNDFILE `pkg-config sndfile --cflags`
 ALL_LIBS += `pkg-config sndfile --libs --static`
 endif
 
 ifeq ($(USE_LIBOPENMPT), true)
-SOURCES += clownaudio/decoder/backends/libopenmpt
+SOURCES += clownaudio/decode/decoders/libopenmpt
 ALL_CFLAGS += -DUSE_LIBOPENMPT `pkg-config libopenmpt --cflags`
 ALL_LIBS += `pkg-config libopenmpt --libs --static`
 endif
 
 ifeq ($(USE_LIBXMPLITE), true)
-SOURCES += clownaudio/decoder/backends/libxmp-lite
+SOURCES += clownaudio/decode/decoders/libxmp-lite
 ALL_CFLAGS += -DUSE_LIBXMPLITE `pkg-config libxmp-lite --cflags`
 ALL_LIBS += `pkg-config libxmp-lite --libs --static`
 endif
 
 ifeq ($(USE_SNES_SPC), true)
-SOURCES += clownaudio/decoder/backends/snes_spc
+SOURCES += clownaudio/decode/decoders/snes_spc
 ALL_CFLAGS += -DUSE_SNES_SPC
 ALL_LIBS += -lstdc++
 endif
 
 ifeq ($(USE_PXTONE), true)
-SOURCES += clownaudio/decoder/backends/pxtone clownaudio/decoder/backends/pxtone_noise
+SOURCES += clownaudio/decode/decoders/pxtone clownaudio/decode/decoders/pxtone_noise
 ALL_CFLAGS += -DUSE_PXTONE
 ALL_LIBS += -lstdc++
 # Apparently PxTone supports Vorbis-encoded samples
@@ -195,11 +194,11 @@ obj/main/%.o: %.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
 
-obj/spc/%.o: clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/%.cpp
+obj/spc/%.o: clownaudio/decode/decoders/libs/snes_spc-0.9.0/snes_spc/%.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ -c
 
-obj/pxtone/%.o: clownaudio/decoder/backends/libs/pxtone/%.cpp
+obj/pxtone/%.o: clownaudio/decode/decoders/libs/pxtone/%.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
 

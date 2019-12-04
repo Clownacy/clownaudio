@@ -17,7 +17,7 @@
 #pragma GCC diagnostic pop
 #endif
 
-#include "common.h"
+#include "../../common.h"
 
 struct Decoder_DR_FLAC
 {
@@ -25,13 +25,13 @@ struct Decoder_DR_FLAC
 	bool loop;
 };
 
-Decoder_DR_FLAC* Decoder_DR_FLAC_Create(DecoderData *data, bool loop, DecoderInfo *info)
+Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
 	Decoder_DR_FLAC *decoder = NULL;
 
 	if (data != NULL)
 	{
-		drflac *backend = drflac_open_memory(data->file_buffer, data->file_size);
+		drflac *backend = drflac_open_memory(data, data_size);
 
 		if (backend != NULL)
 		{

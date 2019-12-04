@@ -1,0 +1,124 @@
+#include "decoder_selector.h"
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdlib.h>
+
+#include "../common.h"
+
+#ifdef USE_LIBVORBIS
+#include "decoders/libvorbis.h"
+#endif
+#ifdef USE_TREMOR
+#include "decoders/tremor.h"
+#endif
+#ifdef USE_STB_VORBIS
+#include "decoders/stb_vorbis.h"
+#endif
+#ifdef USE_LIBFLAC
+#include "decoders/libflac.h"
+#endif
+#ifdef USE_DR_FLAC
+#include "decoders/dr_flac.h"
+#endif
+#ifdef USE_DR_WAV
+#include "decoders/dr_wav.h"
+#endif
+#ifdef USE_LIBSNDFILE
+#include "decoders/libsndfile.h"
+#endif
+#ifdef USE_PXTONE
+#include "decoders/pxtone_noise.h"
+#endif
+
+#define DECODER_FUNCTIONS(name) \
+{ \
+	(void*(*)(const unsigned char*,size_t,bool,DecoderInfo*))Decoder_##name##_Create, \
+	(void(*)(void*))Decoder_##name##_Destroy, \
+	(void(*)(void*))Decoder_##name##_Rewind, \
+	(unsigned long(*)(void*,void*,unsigned long))Decoder_##name##_GetSamples \
+}
+
+typedef struct LowLevelDecoderFunctions
+{
+	void* (*Create)(const unsigned char *data, size_t data_size, bool loops, DecoderInfo *info);
+	void (*Destroy)(void *decoder);
+	void (*Rewind)(void *decoder);
+	unsigned long (*GetSamples)(void *decoder, void *buffer, unsigned long frames_to_do);
+} LowLevelDecoderFunctions;
+
+struct LowLevelDecoderSelector
+{
+	void *decoder;
+	const LowLevelDecoderFunctions *decoder_functions;
+};
+
+static const LowLevelDecoderFunctions decoder_functions[] = {
+#ifdef USE_LIBVORBIS
+	DECODER_FUNCTIONS(libVorbis),
+#endif
+#ifdef USE_TREMOR
+	DECODER_FUNCTIONS(Tremor),
+#endif
+#ifdef USE_STB_VORBIS
+	DECODER_FUNCTIONS(STB_Vorbis),
+#endif
+#ifdef USE_LIBFLAC
+	DECODER_FUNCTIONS(libFLAC),
+#endif
+#ifdef USE_DR_FLAC
+	DECODER_FUNCTIONS(DR_FLAC),
+#endif
+#ifdef USE_DR_WAV
+	DECODER_FUNCTIONS(DR_WAV),
+#endif
+#ifdef USE_LIBSNDFILE
+	DECODER_FUNCTIONS(libSndfile),
+#endif
+#ifdef USE_PXTONE
+	DECODER_FUNCTIONS(PxToneNoise),
+#endif
+};
+
+LowLevelDecoderSelector* LowLevelDecoderSelector_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+{
+	for (unsigned int i = 0; i < sizeof(decoder_functions) / sizeof(decoder_functions[0]); ++i)
+	{
+		void *decoder = decoder_functions[i].Create(data, data_size, loop, info);
+
+		if (decoder != NULL)
+		{
+			LowLevelDecoderSelector *selector = malloc(sizeof(LowLevelDecoderSelector));
+
+			if (selector != NULL)
+			{
+				selector->decoder = decoder;
+				selector->decoder_functions = &decoder_functions[i];
+				return selector;
+			}
+
+			decoder_functions[i].Destroy(decoder);
+		}
+	}
+
+	return NULL;
+}
+
+void LowLevelDecoderSelector_Destroy(LowLevelDecoderSelector *selector)
+{
+	if (selector != NULL)
+	{
+		selector->decoder_functions->Destroy(selector->decoder);
+		free(selector);
+	}
+}
+
+void LowLevelDecoderSelector_Rewind(LowLevelDecoderSelector *selector)
+{
+	selector->decoder_functions->Rewind(selector->decoder);
+}
+
+unsigned long LowLevelDecoderSelector_GetSamples(LowLevelDecoderSelector *selector, void *buffer, unsigned long frames_to_do)
+{
+	return selector->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
+}

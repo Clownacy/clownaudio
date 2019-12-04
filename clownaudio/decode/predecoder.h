@@ -3,12 +3,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#include "backends/common.h"
+#include "common.h"
 
 typedef struct PredecoderData PredecoderData;
 typedef struct Predecoder Predecoder;
 
-PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t file_size);
+PredecoderData* Predecoder_DecodeData(const unsigned char *data, size_t data_size);
 void Predecoder_UnloadData(PredecoderData *data);
 Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info);
 void Predecoder_Destroy(Predecoder *predecoder);

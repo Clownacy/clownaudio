@@ -6,13 +6,15 @@
 
 #include "../miniaudio.h"
 
-#include "decoder.h"
+#include "low-level/decoder_selector.h"
 #include "predecoder.h"
 
 struct ResampledDecoderData
 {
 	bool predecode;
 	void *decoder_data;
+	const unsigned char *data;
+	size_t data_size;
 };
 
 struct ResampledDecoder
@@ -31,7 +33,7 @@ static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_
 	if (resampled_decoder->predecode)
 		return Predecoder_GetSamples(resampled_decoder->decoder, output_buffer, frames_to_do);
 	else
-		return Decoder_GetSamples(resampled_decoder->decoder, output_buffer, frames_to_do);
+		return LowLevelDecoderSelector_GetSamples(resampled_decoder->decoder, output_buffer, frames_to_do);
 }
 
 ResampledDecoderData* ResampledDecoder_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
@@ -43,9 +45,12 @@ ResampledDecoderData* ResampledDecoder_LoadData(const unsigned char *file_buffer
 		if (predecode)
 			data->decoder_data = Predecoder_DecodeData(file_buffer, file_size);
 		else
-			data->decoder_data = Decoder_LoadData(file_buffer, file_size);
+		{
+			data->data = file_buffer;
+			data->data_size = file_size;
+		}
 
-		if (data->decoder_data != NULL)
+		if (data->decoder_data != NULL || data->data != NULL)
 		{
 			data->predecode = predecode;
 			return data;
@@ -63,8 +68,8 @@ void ResampledDecoder_UnloadData(ResampledDecoderData *data)
 	{
 		if (data->predecode)
 			Predecoder_UnloadData(data->decoder_data);
-		else
-			Decoder_UnloadData(data->decoder_data);
+//		else
+//			LowLevelDecoderSelector_UnloadData(data->decoder_data);
 
 		free(data);
 	}
@@ -77,7 +82,7 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 	if (data->predecode)
 		decoder = Predecoder_Create(data->decoder_data, loop, &info);
 	else
-		decoder = Decoder_Create(data->decoder_data, loop, &info);
+		decoder = LowLevelDecoderSelector_Create(data->data, data->data_size, loop, &info);
 
 	if (decoder != NULL)
 	{
@@ -108,7 +113,7 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 		if (data->predecode)
 			Predecoder_Destroy(decoder);
 		else
-			Decoder_Destroy(decoder);
+			LowLevelDecoderSelector_Destroy(decoder);
 	}
 
 	return NULL;
@@ -121,7 +126,7 @@ void ResampledDecoder_Destroy(ResampledDecoder *resampled_decoder)
 		if (resampled_decoder->predecode)
 			Predecoder_Destroy(resampled_decoder->decoder);
 		else
-			Decoder_Destroy(resampled_decoder->decoder);
+			LowLevelDecoderSelector_Destroy(resampled_decoder->decoder);
 
 		free(resampled_decoder);
 	}
@@ -134,7 +139,7 @@ void ResampledDecoder_Rewind(ResampledDecoder *resampled_decoder)
 		if (resampled_decoder->predecode)
 			Predecoder_Rewind(resampled_decoder->decoder);
 		else
-			Decoder_Rewind(resampled_decoder->decoder);
+			LowLevelDecoderSelector_Rewind(resampled_decoder->decoder);
 	}
 }
 

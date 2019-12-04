@@ -6,8 +6,8 @@
 
 #include "../miniaudio.h"
 
-#include "decoder.h"
-#include "backends/memory_stream.h"
+#include "memory_stream.h"
+#include "low-level/decoder_selector.h"
 
 #define CHANNEL_COUNT 2
 
@@ -28,70 +28,63 @@ static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_
 {
 	(void)converter;
 
-	Decoder *decoder = (Decoder*)user_data;
+	LowLevelDecoderSelector *decoder = user_data;
 
-	return Decoder_GetSamples(decoder, output_buffer, frames_to_do);
+	return LowLevelDecoderSelector_GetSamples(decoder, output_buffer, frames_to_do);
 }
 
-PredecoderData* Predecoder_DecodeData(const unsigned char *file_buffer, size_t file_size)
+PredecoderData* Predecoder_DecodeData(const unsigned char *data, size_t data_size)
 {
 	PredecoderData *predecoder_data = NULL;
 
-	DecoderData *decoder_data = Decoder_LoadData(file_buffer, file_size);
+	DecoderInfo info;
+	LowLevelDecoderSelector *decoder = LowLevelDecoderSelector_Create(data, data_size, false, &info);
 
-	if (decoder_data != NULL)
+	if (decoder != NULL)
 	{
-		DecoderInfo info;
-		Decoder *decoder = Decoder_Create(decoder_data, false, &info);
+		MemoryStream *memory_stream = MemoryStream_Create(false);
 
-		if (decoder != NULL)
+		if (memory_stream != NULL)
 		{
-			MemoryStream *memory_stream = MemoryStream_Create(false);
+			ma_format format;
+			if (info.format == DECODER_FORMAT_S16)
+				format = ma_format_s16;
+			else if (info.format == DECODER_FORMAT_S32)
+				format = ma_format_s32;
+			else //if (info.format == DECODER_FORMAT_F32)
+				format = ma_format_f32;
 
-			if (memory_stream != NULL)
+			const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, 2, info.sample_rate, PCMConverterCallback, decoder);
+
+			ma_pcm_converter converter;
+			if (ma_pcm_converter_init(&config, &converter) == MA_SUCCESS)
 			{
-				ma_format format;
-				if (info.format == DECODER_FORMAT_S16)
-					format = ma_format_s16;
-				else if (info.format == DECODER_FORMAT_S32)
-					format = ma_format_s32;
-				else //if (info.format == DECODER_FORMAT_F32)
-					format = ma_format_f32;
+				predecoder_data = malloc(sizeof(PredecoderData));
 
-				const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, 2, info.sample_rate, PCMConverterCallback, decoder);
-
-				ma_pcm_converter converter;
-				if (ma_pcm_converter_init(&config, &converter) == MA_SUCCESS)
+				if (predecoder_data != NULL)
 				{
-					predecoder_data = malloc(sizeof(PredecoderData));
-
-					if (predecoder_data != NULL)
+					for (;;)
 					{
-						for (;;)
-						{
-							float buffer[0x1000];
+						float buffer[0x1000];
 
-							unsigned long samples_read = (unsigned long)ma_pcm_converter_read(&converter, buffer, 0x1000 / CHANNEL_COUNT) * CHANNEL_COUNT;
+						unsigned long samples_read = (unsigned long)ma_pcm_converter_read(&converter, buffer, 0x1000 / CHANNEL_COUNT) * CHANNEL_COUNT;
 
-							MemoryStream_Write(memory_stream, buffer, sizeof(float), samples_read);
+						MemoryStream_Write(memory_stream, buffer, sizeof(float), samples_read);
 
-							if (samples_read != 0x1000)
-								break;
-						}
-
-						predecoder_data->decoded_data = MemoryStream_GetBuffer(memory_stream);
-						predecoder_data->decoded_data_size = MemoryStream_GetPosition(memory_stream);
-						predecoder_data->sample_rate = info.sample_rate;
+						if (samples_read != 0x1000)
+							break;
 					}
-				}
 
-				MemoryStream_Destroy(memory_stream);
+					predecoder_data->decoded_data = MemoryStream_GetBuffer(memory_stream);
+					predecoder_data->decoded_data_size = MemoryStream_GetPosition(memory_stream);
+					predecoder_data->sample_rate = info.sample_rate;
+				}
 			}
 
-			Decoder_Destroy(decoder);
+			MemoryStream_Destroy(memory_stream);
 		}
 
-		Decoder_UnloadData(decoder_data);
+		LowLevelDecoderSelector_Destroy(decoder);
 	}
 
 	return predecoder_data;
