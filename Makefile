@@ -1,12 +1,12 @@
-USE_LIBVORBIS = true
-USE_TREMOR = true
+USE_LIBVORBIS = false
+USE_TREMOR = false
 USE_STB_VORBIS = true
-USE_LIBFLAC = true
+USE_LIBFLAC = false
 USE_DR_FLAC = true
 USE_DR_WAV = true
-USE_LIBSNDFILE = true
-USE_LIBOPENMPT = true
-USE_LIBXMPLITE = true
+USE_LIBSNDFILE = false
+USE_LIBOPENMPT = false
+USE_LIBXMPLITE = false
 USE_SNES_SPC = true
 USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
@@ -24,7 +24,7 @@ ifneq ($(RELEASE),)
 else
 	CXXFLAGS = -Og -ggdb
 endif
-ALL_CXXFLAGS = -std=c++98 -MMD -MP -MF $@.d $(CXXFLAGS)
+ALL_CXXFLAGS = -MMD -MP -MF $@.d $(CXXFLAGS)
 
 ifneq ($(RELEASE),)
 	LDFLAGS = -s
@@ -126,7 +126,7 @@ endif
 ifeq ($(BACKEND), miniaudio)
 SOURCES += clownaudio/playback/miniaudio
 ALL_CFLAGS += -DMINIAUDIO_ENABLE_DEVICE_IO
-ALL_LIBS += -ldl -lpthread -lm
+ALL_LIBS += -lpthread -lm
 else ifeq ($(BACKEND), SDL1)
 SOURCES += clownaudio/playback/sdl1
 ALL_CFLAGS += $(SDL1_CFLAGS)
@@ -194,15 +194,15 @@ obj/main/%.o: %.c
 
 obj/main/%.o: %.cpp
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
 obj/spc/%.o: clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%.cpp
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 $< -o $@ -c
 
 obj/pxtone/%.o: clownaudio/decoding/decoders/libs/pxtone/%.cpp
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
 test: $(OBJECTS)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $^ -o $@ $(ALL_LDFLAGS) $(ALL_LIBS)
