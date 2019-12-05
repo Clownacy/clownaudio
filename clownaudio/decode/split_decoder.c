@@ -26,8 +26,8 @@ SplitDecoderData* SplitDecoder_LoadData(const unsigned char *file_buffer1, size_
 
 	if (data != NULL)
 	{
-		data->resampled_decoder_data[0] = ResampledDecoder_LoadData(file_buffer1, file_size1, predecode);
-		data->resampled_decoder_data[1] = ResampledDecoder_LoadData(file_buffer2, file_size2, predecode);
+		data->resampled_decoder_data[0] = file_buffer1 != NULL ? ResampledDecoder_LoadData(file_buffer1, file_size1, predecode) : NULL;
+		data->resampled_decoder_data[1] = file_buffer2 != NULL ? ResampledDecoder_LoadData(file_buffer2, file_size2, predecode) : NULL;
 
 		if (data->resampled_decoder_data[0] != NULL || data->resampled_decoder_data[1] != NULL)
 			return data;

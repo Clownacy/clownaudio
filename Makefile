@@ -5,7 +5,7 @@ USE_LIBFLAC = true
 USE_DR_FLAC = true
 USE_DR_WAV = true
 USE_LIBSNDFILE = true
-USE_LIBOPENMPT = false
+USE_LIBOPENMPT = true
 USE_LIBXMPLITE = false
 USE_SNES_SPC = false
 USE_PXTONE = true
@@ -47,6 +47,8 @@ SOURCES = \
 	clownaudio/clownaudio \
 	clownaudio/miniaudio \
 	clownaudio/mixer \
+	clownaudio/decode/decoder_selector \
+	clownaudio/decode/high-level-decoder_selector \
 	clownaudio/decode/low-level-decoder_selector \
 	clownaudio/decode/predecoder \
 	clownaudio/decode/resampled_decoder \

@@ -9,12 +9,6 @@ typedef enum DecoderFormat
 	DECODER_FORMAT_F32
 } DecoderFormat;
 
-typedef struct DecoderData
-{
-	const unsigned char *file_buffer;
-	size_t file_size;
-} DecoderData;
-
 typedef struct DecoderInfo
 {
 	unsigned long sample_rate;

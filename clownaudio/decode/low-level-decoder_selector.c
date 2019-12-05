@@ -36,7 +36,7 @@
 	(void*(*)(const unsigned char*,size_t,DecoderInfo*))Decoder_##name##_Create, \
 	(void(*)(void*))Decoder_##name##_Destroy, \
 	(void(*)(void*))Decoder_##name##_Rewind, \
-	(unsigned long(*)(void*,void*,unsigned long))Decoder_##name##_GetSamples \
+	(size_t(*)(void*,void*,size_t))Decoder_##name##_GetSamples \
 }
 
 typedef struct LowLevelDecoderFunctions
@@ -44,7 +44,7 @@ typedef struct LowLevelDecoderFunctions
 	void* (*Create)(const unsigned char *data, size_t data_size, DecoderInfo *info);
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
-	unsigned long (*GetSamples)(void *decoder, void *buffer, unsigned long frames_to_do);
+	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
 } LowLevelDecoderFunctions;
 
 struct LowLevelDecoderSelector
