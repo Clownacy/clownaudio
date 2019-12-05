@@ -42,8 +42,12 @@ void SplitDecoder_UnloadData(SplitDecoderData *data)
 {
 	if (data != NULL)
 	{
-		ResampledDecoder_UnloadData(data->resampled_decoder_data[0]);
-		ResampledDecoder_UnloadData(data->resampled_decoder_data[1]);
+		if (data->resampled_decoder_data[0] != NULL)
+			ResampledDecoder_UnloadData(data->resampled_decoder_data[0]);
+
+		if (data->resampled_decoder_data[1] != NULL)
+			ResampledDecoder_UnloadData(data->resampled_decoder_data[1]);
+
 		free(data);
 	}
 }
@@ -106,8 +110,12 @@ void SplitDecoder_Destroy(SplitDecoder *split_decoder)
 {
 	if (split_decoder != NULL)
 	{
-		ResampledDecoder_Destroy(split_decoder->resampled_decoder[0]);
-		ResampledDecoder_Destroy(split_decoder->resampled_decoder[1]);
+		if (split_decoder->resampled_decoder[0] != NULL)
+			ResampledDecoder_Destroy(split_decoder->resampled_decoder[0]);
+
+		if (split_decoder->resampled_decoder[1] != NULL)
+			ResampledDecoder_Destroy(split_decoder->resampled_decoder[1]);
+
 		free(split_decoder);
 	}
 }

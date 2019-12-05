@@ -18,51 +18,45 @@ struct Decoder_libXMPLite
 	bool loop;
 };
 
-Decoder_libXMPLite* Decoder_libXMPLite_Create(DecoderData *data, bool loop, DecoderInfo *info)
+Decoder_libXMPLite* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
 	Decoder_libXMPLite *decoder = NULL;
 
-	if (data != NULL)
+	xmp_context context = xmp_create_context();
+
+	if (!xmp_load_module_from_memory(context, (void*)data, data_size))
 	{
-		xmp_context context = xmp_create_context();
+		xmp_start_player(context, SAMPLE_RATE, 0);
 
-		if (!xmp_load_module_from_memory(context, (void*)data->file_buffer, data->file_size))
+		decoder = malloc(sizeof(Decoder_libXMPLite));
+
+		if (decoder != NULL)
 		{
-			xmp_start_player(context, SAMPLE_RATE, 0);
+			decoder->context = context;
+			decoder->loop = loop;
 
-			decoder = malloc(sizeof(Decoder_libXMPLite));
+			info->sample_rate = SAMPLE_RATE;
+			info->channel_count = CHANNEL_COUNT;
+			info->format = DECODER_FORMAT_S16;
 
-			if (decoder != NULL)
-			{
-				decoder->context = context;
-				decoder->loop = loop;
-
-				info->sample_rate = SAMPLE_RATE;
-				info->channel_count = CHANNEL_COUNT;
-				info->format = DECODER_FORMAT_S16;
-
-				return decoder;
-			}
-
-			xmp_end_player(context);
-			xmp_release_module(context);
+			return decoder;
 		}
 
-		xmp_free_context(context);
+		xmp_end_player(context);
+		xmp_release_module(context);
 	}
+
+	xmp_free_context(context);
 
 	return NULL;
 }
 
 void Decoder_libXMPLite_Destroy(Decoder_libXMPLite *decoder)
 {
-	if (decoder != NULL)
-	{
-		xmp_end_player(decoder->context);
-		xmp_release_module(decoder->context);
-		xmp_free_context(decoder->context);
-		free(decoder);
-	}
+	xmp_end_player(decoder->context);
+	xmp_release_module(decoder->context);
+	xmp_free_context(decoder->context);
+	free(decoder);
 }
 
 void Decoder_libXMPLite_Rewind(Decoder_libXMPLite *decoder)

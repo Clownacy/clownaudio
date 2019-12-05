@@ -5,9 +5,9 @@ USE_LIBFLAC = true
 USE_DR_FLAC = true
 USE_DR_WAV = true
 USE_LIBSNDFILE = true
-USE_LIBOPENMPT = true
-USE_LIBXMPLITE = false
-USE_SNES_SPC = false
+USE_LIBOPENMPT = false
+USE_LIBXMPLITE = true
+USE_SNES_SPC = true
 USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
