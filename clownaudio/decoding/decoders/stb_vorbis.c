@@ -50,7 +50,7 @@ void Decoder_STB_Vorbis_Rewind(Decoder_STB_Vorbis *decoder)
 	stb_vorbis_seek_start((stb_vorbis*)decoder);
 }
 
-unsigned long Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *decoder, void *buffer, unsigned long frames_to_do)
+size_t Decoder_STB_Vorbis_GetSamples(Decoder_STB_Vorbis *decoder, void *buffer, size_t frames_to_do)
 {
 	stb_vorbis *instance = (stb_vorbis*)decoder;
 
