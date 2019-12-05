@@ -115,7 +115,7 @@ void Decoder_Tremor_Rewind(Decoder_Tremor *decoder)
 	ov_time_seek(&decoder->vorbis_file, 0);
 }
 
-unsigned long Decoder_Tremor_GetSamples(Decoder_Tremor *decoder, void *buffer, unsigned long frames_to_do)
+size_t Decoder_Tremor_GetSamples(Decoder_Tremor *decoder, void *buffer, size_t frames_to_do)
 {
 	return ov_read(&decoder->vorbis_file, buffer, frames_to_do * decoder->bytes_per_frame, NULL) / decoder->bytes_per_frame;
 }

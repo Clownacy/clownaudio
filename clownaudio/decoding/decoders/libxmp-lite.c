@@ -64,7 +64,7 @@ void Decoder_libXMPLite_Rewind(Decoder_libXMPLite *decoder)
 	xmp_seek_time(decoder->context, 0);
 }
 
-unsigned long Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *decoder, void *buffer, unsigned long frames_to_do)
+size_t Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *decoder, void *buffer, size_t frames_to_do)
 {
 	xmp_play_buffer(decoder->context, buffer, frames_to_do * CHANNEL_COUNT * sizeof(short), !decoder->loop);
 

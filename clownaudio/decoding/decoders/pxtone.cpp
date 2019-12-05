@@ -83,7 +83,7 @@ void Decoder_PxTone_Rewind(Decoder_PxTone *decoder)
 	decoder->pxtn->moo_preparation(&prep);
 }
 
-unsigned long Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, unsigned long frames_to_do)
+size_t Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, size_t frames_to_do)
 {
 	const size_t size_of_frame = sizeof(int16_t) * CHANNEL_COUNT;
 

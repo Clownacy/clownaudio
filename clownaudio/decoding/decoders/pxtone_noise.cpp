@@ -83,7 +83,7 @@ void Decoder_PxToneNoise_Rewind(Decoder_PxToneNoise *decoder)
 	ROMemoryStream_Rewind(decoder->memory_stream);
 }
 
-unsigned long Decoder_PxToneNoise_GetSamples(Decoder_PxToneNoise *decoder, void *buffer, unsigned long frames_to_do)
+size_t Decoder_PxToneNoise_GetSamples(Decoder_PxToneNoise *decoder, void *buffer, size_t frames_to_do)
 {
 	return ROMemoryStream_Read(decoder->memory_stream, buffer, sizeof(int16_t) * CHANNEL_COUNT, frames_to_do);
 }
