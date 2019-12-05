@@ -11,7 +11,7 @@
 #include <pthread.h>
 #endif
 
-#include "decode/split_decoder.h"
+#include "decoding/split_decoder.h"
 
 #define CHANNEL_COUNT 2
 
