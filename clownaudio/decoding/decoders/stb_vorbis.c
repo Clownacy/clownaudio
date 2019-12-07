@@ -42,7 +42,6 @@ Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t 
 void Decoder_STB_Vorbis_Destroy(Decoder_STB_Vorbis *decoder)
 {
 	stb_vorbis_close((stb_vorbis*)decoder);
-	free(decoder);
 }
 
 void Decoder_STB_Vorbis_Rewind(Decoder_STB_Vorbis *decoder)
