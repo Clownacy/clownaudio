@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 	}
 	else
 	{
-		FileToMemory("../audio_lib/test_intro.flac", &file_buffers[0], &file_sizes[0]);
-		FileToMemory("../audio_lib/test_loop.flac", &file_buffers[1], &file_sizes[1]);
+		FileToMemory("a/test_intro.flac", &file_buffers[0], &file_sizes[0]);
+		FileToMemory("a/test_loop.flac", &file_buffers[1], &file_sizes[1]);
 	}
 
 	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
