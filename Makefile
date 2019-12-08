@@ -4,6 +4,7 @@ USE_STB_VORBIS = true
 USE_LIBFLAC = false
 USE_DR_FLAC = true
 USE_DR_WAV = true
+USE_LIBOPUS = false
 USE_LIBSNDFILE = false
 USE_LIBOPENMPT = false
 USE_LIBXMPLITE = false
@@ -87,6 +88,12 @@ endif
 ifeq ($(USE_DR_WAV), true)
   SOURCES += clownaudio/decoding/decoders/dr_wav
   ALL_CFLAGS += -DUSE_DR_WAV
+endif
+
+ifeq ($(USE_LIBOPUS), true)
+  SOURCES += clownaudio/decoding/decoders/libopus
+  ALL_CFLAGS += -DUSE_LIBOPUS `pkg-config opusfile --cflags`
+  ALL_LIBS += `pkg-config opusfile --libs --static`
 endif
 
 ifeq ($(USE_LIBSNDFILE), true)

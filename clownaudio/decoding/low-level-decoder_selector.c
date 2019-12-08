@@ -24,6 +24,9 @@
 #ifdef USE_DR_WAV
 #include "decoders/dr_wav.h"
 #endif
+#ifdef USE_LIBOPUS
+#include "decoders/libopus.h"
+#endif
 #ifdef USE_LIBSNDFILE
 #include "decoders/libsndfile.h"
 #endif
@@ -73,6 +76,9 @@ static const LowLevelDecoderFunctions decoder_functions[] = {
 #endif
 #ifdef USE_DR_WAV
 	DECODER_FUNCTIONS(DR_WAV),
+#endif
+#ifdef USE_LIBOPUS
+	DECODER_FUNCTIONS(libOpus),
 #endif
 #ifdef USE_LIBSNDFILE
 	DECODER_FUNCTIONS(libSndfile),
