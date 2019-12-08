@@ -1,13 +1,12 @@
-USE_LIBVORBIS = false
-USE_TREMOR = false
+USE_LIBVORBIS = true
 USE_STB_VORBIS = true
-USE_LIBFLAC = false
+USE_LIBFLAC = true
 USE_DR_FLAC = true
 USE_DR_WAV = true
-USE_LIBOPUS = false
-USE_LIBSNDFILE = false
-USE_LIBOPENMPT = false
-USE_LIBXMPLITE = false
+USE_LIBOPUS = true
+USE_LIBSNDFILE = true
+USE_LIBOPENMPT = true
+USE_LIBXMPLITE = true
 USE_SNES_SPC = true
 USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
@@ -60,12 +59,6 @@ ifeq ($(USE_LIBVORBIS), true)
   SOURCES += clownaudio/decoding/decoders/libvorbis
   ALL_CFLAGS += -DUSE_LIBVORBIS `pkg-config vorbisfile --cflags`
   ALL_LIBS += `pkg-config vorbisfile --libs --static`
-endif
-
-ifeq ($(USE_TREMOR), true)
-  SOURCES += clownaudio/decoding/decoders/tremor
-  ALL_CFLAGS += -DUSE_TREMOR `pkg-config vorbisidec --cflags`
-  ALL_LIBS += `pkg-config vorbisidec --libs --static`
 endif
 
 ifeq ($(USE_STB_VORBIS), true)

@@ -9,9 +9,6 @@
 #ifdef USE_LIBVORBIS
 #include "decoders/libvorbis.h"
 #endif
-#ifdef USE_TREMOR
-#include "decoders/tremor.h"
-#endif
 #ifdef USE_STB_VORBIS
 #include "decoders/stb_vorbis.h"
 #endif
@@ -61,9 +58,6 @@ struct LowLevelDecoderSelector
 static const LowLevelDecoderFunctions decoder_functions[] = {
 #ifdef USE_LIBVORBIS
 	DECODER_FUNCTIONS(libVorbis),
-#endif
-#ifdef USE_TREMOR
-	DECODER_FUNCTIONS(Tremor),
 #endif
 #ifdef USE_STB_VORBIS
 	DECODER_FUNCTIONS(STB_Vorbis),
