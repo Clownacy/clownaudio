@@ -1,8 +1,6 @@
 #include "dr_flac.h"
 
-#include <stdbool.h>
 #include <stddef.h>
-#include <stdlib.h>
 
 #define DR_FLAC_IMPLEMENTATION
 #define DR_FLAC_NO_STDIO

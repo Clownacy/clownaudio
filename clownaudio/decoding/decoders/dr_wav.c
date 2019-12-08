@@ -1,8 +1,6 @@
 #include "dr_wav.h"
 
-#include <stdbool.h>
 #include <stddef.h>
-#include <stdlib.h>
 
 #define DR_WAV_IMPLEMENTATION
 #define DR_WAV_NO_STDIO

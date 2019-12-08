@@ -1,6 +1,5 @@
 #include "libsndfile.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +13,6 @@ struct Decoder_libSndfile
 {
 	ROMemoryStream *memory_stream;
 	SNDFILE *sndfile;
-	DecoderFormat format;
 };
 
 static sf_count_t fread_wrapper(void *output, sf_count_t count, void *user)
@@ -96,6 +94,7 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 				info->sample_rate = sf_info.samplerate;
 				info->channel_count = sf_info.channels;
 				info->format = DECODER_FORMAT_F32;
+
 				return decoder;
 			}
 

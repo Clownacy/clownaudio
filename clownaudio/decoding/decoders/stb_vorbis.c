@@ -1,8 +1,6 @@
 #include "stb_vorbis.h"
 
-#include <stdbool.h>
 #include <stddef.h>
-#include <stdlib.h>
 
 #define STB_VORBIS_IMPLEMENTATION
 #define STB_VORBIS_NO_STDIO

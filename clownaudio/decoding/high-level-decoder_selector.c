@@ -60,7 +60,7 @@ HighLevelDecoderSelector* HighLevelDecoderSelector_Create(const unsigned char *d
 {
 	if (data != NULL)
 	{
-		for (unsigned int i = 0; i < sizeof(decoder_functions) / sizeof(decoder_functions[0]); ++i)
+		for (size_t i = 0; i < sizeof(decoder_functions) / sizeof(decoder_functions[0]); ++i)
 		{
 			void *decoder = decoder_functions[i].Create(data, data_size, loop, info);
 

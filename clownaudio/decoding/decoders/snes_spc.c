@@ -2,7 +2,6 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #include "libs/snes_spc-0.9.0/snes_spc/spc.h"

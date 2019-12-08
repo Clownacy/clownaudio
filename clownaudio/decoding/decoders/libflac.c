@@ -175,39 +175,22 @@ Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_s
 					decoder->info = info;
 					FLAC__stream_decoder_process_until_end_of_metadata(decoder->flac_stream_decoder);
 
-					if (decoder->error)
-					{
-						FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
-						FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
-						ROMemoryStream_Destroy(decoder->memory_stream);
-						free(decoder);
-						decoder = NULL;
-					}
+					if (!decoder->error)
+						return decoder;
 
+					FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
 				}
-				else
-				{
-					FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
-					ROMemoryStream_Destroy(decoder->memory_stream);
-					free(decoder);
-					decoder = NULL;
-				}
+
+				ROMemoryStream_Destroy(decoder->memory_stream);
 			}
-			else
-			{
-				FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
-				free(decoder);
-				decoder = NULL;
-			}
+
+			FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
 		}
-		else
-		{
-			free(decoder);
-			decoder = NULL;
-		}
+
+		free(decoder);
 	}
 
-	return decoder;
+	return NULL;
 }
 
 void Decoder_libFLAC_Destroy(Decoder_libFLAC *decoder)
