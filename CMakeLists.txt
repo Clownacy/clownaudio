@@ -28,132 +28,132 @@ add_executable(test
 	"clownaudio/mixer.c"
 	"clownaudio/mixer.h"
 	"clownaudio/playback/playback.h"
-	"clownaudio/decoder/decoder.c"
-	"clownaudio/decoder/decoder.h"
-	"clownaudio/decoder/predecoder.c"
-	"clownaudio/decoder/predecoder.h"
-	"clownaudio/decoder/resampled_decoder.c"
-	"clownaudio/decoder/resampled_decoder.h"
-	"clownaudio/decoder/split_decoder.c"
-	"clownaudio/decoder/split_decoder.h"
-	"clownaudio/decoder/backends/common.h"
-	"clownaudio/decoder/backends/memory_stream.c"
-	"clownaudio/decoder/backends/memory_stream.h"
+	"clownaudio/decoding/decoder_selector.c"
+	"clownaudio/decoding/decoder_selector.h"
+	"clownaudio/decoding/predecoder.c"
+	"clownaudio/decoding/predecoder.h"
+	"clownaudio/decoding/resampled_decoder.c"
+	"clownaudio/decoding/resampled_decoder.h"
+	"clownaudio/decoding/split_decoder.c"
+	"clownaudio/decoding/split_decoder.h"
+	"clownaudio/decoding/decoders/common.h"
+	"clownaudio/decoding/decoders/memory_stream.c"
+	"clownaudio/decoding/decoders/memory_stream.h"
 )
 
 if(LIBVORBIS)
 	target_compile_definitions(test PRIVATE USE_LIBVORBIS)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/libvorbis.c" "clownaudio/decoder/backends/libvorbis.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/libvorbis.c" "clownaudio/decoding/decoders/libvorbis.h")
 endif()
 
 if(TREMOR)
 	target_compile_definitions(test PRIVATE USE_TREMOR)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/tremor.c" "clownaudio/decoder/backends/tremor.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/tremor.c" "clownaudio/decoding/decoders/tremor.h")
 endif()
 
 if(STB_VORBIS)
 	target_compile_definitions(test PRIVATE USE_STB_VORBIS)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/stb_vorbis.c" "clownaudio/decoder/backends/stb_vorbis.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/stb_vorbis.c" "clownaudio/decoding/decoders/stb_vorbis.h")
 endif()
 
 if(LIBFLAC)
 	target_compile_definitions(test PRIVATE USE_LIBFLAC)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/libflac.c" "clownaudio/decoder/backends/libflac.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/libflac.c" "clownaudio/decoding/decoders/libflac.h")
 endif()
 
 if(DR_FLAC)
 	target_compile_definitions(test PRIVATE USE_DR_FLAC)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/dr_flac.c" "clownaudio/decoder/backends/dr_flac.h" "clownaudio/decoder/backends/libs/dr_flac.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/dr_flac.c" "clownaudio/decoding/decoders/dr_flac.h" "clownaudio/decoding/decoders/libs/dr_flac.h")
 endif()
 
 if(DR_WAV)
 	target_compile_definitions(test PRIVATE USE_DR_WAV)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/dr_wav.c" "clownaudio/decoder/backends/dr_wav.h" "clownaudio/decoder/backends/libs/dr_wav.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/dr_wav.c" "clownaudio/decoding/decoders/dr_wav.h" "clownaudio/decoding/decoders/libs/dr_wav.h")
 endif()
 
 if(LIBSNDFILE)
 	target_compile_definitions(test PRIVATE USE_LIBSNDFILE)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/libsndfile.c" "clownaudio/decoder/backends/libsndfile.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/libsndfile.c" "clownaudio/decoding/decoders/libsndfile.h")
 endif()
 
 if(LIBOPENMPT)
 	target_compile_definitions(test PRIVATE USE_LIBOPENMPT)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/libopenmpt.c" "clownaudio/decoder/backends/libopenmpt.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/libopenmpt.c" "clownaudio/decoding/decoders/libopenmpt.h")
 endif()
 
 if(LIBXMPLITE)
 	target_compile_definitions(test PRIVATE USE_LIBXMPLITE)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/libxmp-lite.c" "clownaudio/decoder/backends/libxmp-lite.h")
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/libxmp-lite.c" "clownaudio/decoding/decoders/libxmp-lite.h")
 endif()
 
 if(SNES_SPC)
 	target_compile_definitions(test PRIVATE USE_SNES_SPC)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/snes_spc.c" "clownaudio/decoder/backends/snes_spc.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/blargg_common.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/blargg_config.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/blargg_endian.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/blargg_source.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/dsp.cpp"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/dsp.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SNES_SPC.cpp"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SNES_SPC.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SNES_SPC_misc.cpp"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SNES_SPC_state.cpp"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/spc.cpp"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/spc.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SPC_CPU.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SPC_DSP.cpp"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SPC_DSP.h"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.cpp"
-		"clownaudio/decoder/backends/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.h"
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/snes_spc.c" "clownaudio/decoding/decoders/snes_spc.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_common.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_config.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_endian.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_source.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/dsp.cpp"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/dsp.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC.cpp"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC_misc.cpp"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC_state.cpp"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/spc.cpp"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/spc.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_CPU.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_DSP.cpp"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_DSP.h"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.cpp"
+		"clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.h"
 	)
 endif()
 
 if(PXTONE)
 	target_compile_definitions(test PRIVATE USE_PXTONE)
-	target_sources(test PRIVATE "clownaudio/decoder/backends/pxtone.cpp" "clownaudio/decoder/backends/pxtone.h"
-		"clownaudio/decoder/backends/pxtone_noise.cpp" "clownaudio/decoder/backends/pxtone_noise.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtn.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnDelay.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnDelay.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnDescriptor.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnDescriptor.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnError.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnError.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnEvelist.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnEvelist.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnMaster.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnMaster.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnMax.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnMem.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnMem.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnOverDrive.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnOverDrive.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_Frequency.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_Frequency.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_Noise.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_Noise.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_NoiseBuilder.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_NoiseBuilder.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_Oggv.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_Oggv.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_Oscillator.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_Oscillator.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_PCM.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnPulse_PCM.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnService.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnService.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnService_moo.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnText.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnText.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnUnit.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnUnit.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnWoice.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnWoice.h"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnWoice_io.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtnWoicePTV.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtoneNoise.cpp"
-		"clownaudio/decoder/backends/libs/pxtone/pxtoneNoise.h"
+	target_sources(test PRIVATE "clownaudio/decoding/decoders/pxtone.cpp" "clownaudio/decoding/decoders/pxtone.h"
+		"clownaudio/decoding/decoders/pxtone_noise.cpp" "clownaudio/decoding/decoders/pxtone_noise.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtn.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnDelay.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnDelay.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnDescriptor.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnDescriptor.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnError.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnError.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnEvelist.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnEvelist.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnMaster.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnMaster.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnMax.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnMem.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnMem.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnOverDrive.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnOverDrive.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_Frequency.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_Frequency.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_Noise.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_Noise.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_NoiseBuilder.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_NoiseBuilder.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_Oggv.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_Oggv.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_Oscillator.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_Oscillator.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_PCM.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnPulse_PCM.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnService.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnService.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnService_moo.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnText.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnText.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnUnit.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnUnit.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnWoice.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnWoice.h"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnWoice_io.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtnWoicePTV.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtoneNoise.cpp"
+		"clownaudio/decoding/decoders/libs/pxtone/pxtoneNoise.h"
 	)
 endif()
 
