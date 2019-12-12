@@ -82,6 +82,22 @@ struct DecoderSelector
 	bool loop;
 };
 
+typedef struct LowLevelDecoderFunctions
+{
+	void* (*Create)(const unsigned char *data, size_t data_size, DecoderInfo *info);
+	void (*Destroy)(void *decoder);
+	void (*Rewind)(void *decoder);
+	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
+} LowLevelDecoderFunctions;
+
+typedef struct HighLevelDecoderFunctions
+{
+	void* (*Create)(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
+	void (*Destroy)(void *decoder);
+	void (*Rewind)(void *decoder);
+	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
+} HighLevelDecoderFunctions;
+
 static const LowLevelDecoderFunctions low_level_decoder_functions[] = {
 #ifdef USE_LIBVORBIS
 	LOW_LEVEL_DECODER_FUNCTIONS(libVorbis),
