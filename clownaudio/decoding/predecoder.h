@@ -8,7 +8,7 @@
 typedef struct PredecoderData PredecoderData;
 typedef struct Predecoder Predecoder;
 
-PredecoderData* Predecoder_DecodeData(const unsigned char *data, size_t data_size, const LowLevelDecoderFunctions *decoder_functions);
+PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (*decoder_get_samples_function)(void *decoder, void *buffer, size_t frames_to_do));
 void Predecoder_UnloadData(PredecoderData *data);
 Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info);
 void Predecoder_Destroy(Predecoder *predecoder);

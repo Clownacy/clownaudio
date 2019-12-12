@@ -141,33 +141,35 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 		if (decoder != NULL)
 		{
-			low_level_decoder_functions[i].Destroy(decoder);
-
 			decoder_type = DECODER_TYPE_LOW_LEVEL;
 			decoder_functions = &low_level_decoder_functions[i];
+
+			if (predecode)
+			{
+				predecoder_data = Predecoder_DecodeData(&info, decoder, low_level_decoder_functions[i].GetSamples);
+
+				if (predecoder_data != NULL)
+					decoder_type = DECODER_TYPE_PREDECODER;
+			}
+
+			low_level_decoder_functions[i].Destroy(decoder);
 		}
 	}
 
-	// If it is a low-level format, then predecode it if requested
-	if (decoder_functions != NULL && predecode)
-	{
-		predecoder_data = Predecoder_DecodeData(file_buffer, file_size, decoder_functions);
-
-		if (predecoder_data != NULL)
-			decoder_type = DECODER_TYPE_PREDECODER;
-	}
-
 	// Failing that, search the high-level formats instead
-	for (size_t i = 0; i < sizeof(high_level_decoder_functions) / sizeof(high_level_decoder_functions[0]); ++i)
+	if (decoder_functions == NULL)
 	{
-		void *decoder = high_level_decoder_functions[i].Create(file_buffer, file_size, false, &info);
-
-		if (decoder != NULL)
+		for (size_t i = 0; i < sizeof(high_level_decoder_functions) / sizeof(high_level_decoder_functions[0]); ++i)
 		{
-			high_level_decoder_functions[i].Destroy(decoder);
+			void *decoder = high_level_decoder_functions[i].Create(file_buffer, file_size, false, &info);
 
-			decoder_type = DECODER_TYPE_HIGH_LEVEL;
-			decoder_functions = &high_level_decoder_functions[i];
+			if (decoder != NULL)
+			{
+				high_level_decoder_functions[i].Destroy(decoder);
+
+				decoder_type = DECODER_TYPE_HIGH_LEVEL;
+				decoder_functions = &high_level_decoder_functions[i];
+			}
 		}
 	}
 
