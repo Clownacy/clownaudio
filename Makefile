@@ -48,8 +48,6 @@ SOURCES = \
   clownaudio/miniaudio \
   clownaudio/mixer \
   clownaudio/decoding/decoder_selector \
-  clownaudio/decoding/high-level-decoder_selector \
-  clownaudio/decoding/low-level-decoder_selector \
   clownaudio/decoding/predecoder \
   clownaudio/decoding/resampled_decoder \
   clownaudio/decoding/split_decoder \

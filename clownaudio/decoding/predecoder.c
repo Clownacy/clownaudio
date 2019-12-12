@@ -7,7 +7,6 @@
 #include "../miniaudio.h"
 
 #include "decoders/memory_stream.h"
-#include "low-level-decoder_selector.h"
 
 #define CHANNEL_COUNT 2
 
@@ -24,21 +23,27 @@ struct Predecoder
 	bool loop;
 };
 
+typedef struct DecoderMetadata
+{
+	void *decoder;
+	const LowLevelDecoderFunctions *functions;
+} DecoderMetadata;
+
 static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
 {
 	(void)converter;
 
-	LowLevelDecoderSelector *decoder = user_data;
+	DecoderMetadata *decoder_metadata = user_data;
 
-	return LowLevelDecoderSelector_GetSamples(decoder, output_buffer, frames_to_do);
+	return decoder_metadata->functions->GetSamples(decoder_metadata->decoder, output_buffer, frames_to_do);
 }
 
-PredecoderData* Predecoder_DecodeData(const unsigned char *data, size_t data_size)
+PredecoderData* Predecoder_DecodeData(const unsigned char *data, size_t data_size, const LowLevelDecoderFunctions *decoder_functions)
 {
 	PredecoderData *predecoder_data = NULL;
 
 	DecoderInfo info;
-	LowLevelDecoderSelector *decoder = LowLevelDecoderSelector_Create(data, data_size, false, &info);
+	void *decoder = decoder_functions->Create(data, data_size, &info);
 
 	if (decoder != NULL)
 	{
@@ -54,7 +59,11 @@ PredecoderData* Predecoder_DecodeData(const unsigned char *data, size_t data_siz
 			else //if (info.format == DECODER_FORMAT_F32)
 				format = ma_format_f32;
 
-			const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, 2, info.sample_rate, PCMConverterCallback, decoder);
+			DecoderMetadata decoder_metadata;
+			decoder_metadata.decoder = decoder;
+			decoder_metadata.functions = decoder_functions;
+
+			const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, 2, info.sample_rate, PCMConverterCallback, &decoder_metadata);
 
 			ma_pcm_converter converter;
 			if (ma_pcm_converter_init(&config, &converter) == MA_SUCCESS)
@@ -84,7 +93,7 @@ PredecoderData* Predecoder_DecodeData(const unsigned char *data, size_t data_siz
 			MemoryStream_Destroy(memory_stream);
 		}
 
-		LowLevelDecoderSelector_Destroy(decoder);
+		decoder_functions->Destroy(decoder);
 	}
 
 	return predecoder_data;
