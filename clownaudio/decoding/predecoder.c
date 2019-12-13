@@ -156,3 +156,8 @@ size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, size_t f
 
 	return frames_done;
 }
+
+void Predecoder_SetLoop(Predecoder *predecoder, bool loop)
+{
+	predecoder->loop = loop;
+}

@@ -124,8 +124,11 @@ void SplitDecoder_Rewind(SplitDecoder *split_decoder)
 {
 	if (split_decoder != NULL)
 	{
-		ResampledDecoder_Rewind(split_decoder->resampled_decoder[0]);
-		ResampledDecoder_Rewind(split_decoder->resampled_decoder[1]);
+		if (split_decoder->resampled_decoder[0] != NULL)
+			ResampledDecoder_Rewind(split_decoder->resampled_decoder[0]);
+
+		if (split_decoder->resampled_decoder[1] != NULL)
+			ResampledDecoder_Rewind(split_decoder->resampled_decoder[1]);
 	}
 }
 
@@ -153,11 +156,19 @@ size_t SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_void, s
 	return frames_done;
 }
 
+void SplitDecoder_SetLoop(SplitDecoder *split_decoder, bool loop)
+{
+	ResampledDecoder_SetLoop(split_decoder->resampled_decoder[split_decoder->last_decoder ? split_decoder->current_decoder : 1], loop);
+}
+
 void SplitDecoder_SetSampleRate(SplitDecoder *split_decoder, unsigned long sample_rate1, unsigned long sample_rate2)
 {
 	if (split_decoder != NULL)
 	{
-		ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[0], sample_rate1);
-		ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[1], sample_rate2);
+		if (split_decoder->resampled_decoder[0] != NULL)
+			ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[0], sample_rate1);
+
+		if (split_decoder->resampled_decoder[1] != NULL)
+			ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[1], sample_rate2);
 	}
 }

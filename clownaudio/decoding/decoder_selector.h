@@ -14,3 +14,4 @@ DecoderSelector* DecoderSelector_Create(DecoderSelectorData *data, bool loop, De
 void DecoderSelector_Destroy(DecoderSelector *selector);
 void DecoderSelector_Rewind(DecoderSelector *selector);
 size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_t frames_to_do);
+void DecoderSelector_SetLoop(DecoderSelector *selector, bool loop);

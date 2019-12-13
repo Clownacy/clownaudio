@@ -86,6 +86,11 @@ size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *bu
 	return ma_pcm_converter_read(&resampled_decoder->converter, buffer, frames_to_do);
 }
 
+void ResampledDecoder_SetLoop(ResampledDecoder *resampled_decoder, bool loop)
+{
+	DecoderSelector_SetLoop(resampled_decoder->decoder, loop);
+}
+
 void ResampledDecoder_SetSampleRate(ResampledDecoder *resampled_decoder, unsigned long sample_rate)
 {
 	if (resampled_decoder != NULL)

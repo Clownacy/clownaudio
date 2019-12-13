@@ -12,4 +12,5 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 void ResampledDecoder_Destroy(ResampledDecoder *resampled_decoder);
 void ResampledDecoder_Rewind(ResampledDecoder *resampled_decoder);
 size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *buffer, size_t frames_to_do);
+void ResampledDecoder_SetLoop(ResampledDecoder *resampled_decoder, bool loop);
 void ResampledDecoder_SetSampleRate(ResampledDecoder *resampled_decoder, unsigned long sample_rate);

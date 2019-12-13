@@ -14,3 +14,4 @@ Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info
 void Predecoder_Destroy(Predecoder *predecoder);
 void Predecoder_Rewind(Predecoder *predecoder);
 size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer, size_t frames_to_do);
+void Predecoder_SetLoop(Predecoder *predecoder, bool loop);

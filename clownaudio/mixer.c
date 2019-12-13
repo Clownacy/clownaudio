@@ -273,6 +273,18 @@ void Mixer_SetSoundVolume(Mixer_Sound instance, float volume)
 	MutexUnlock(&mixer_mutex);
 }
 
+void Mixer_SetSoundLoop(Mixer_Sound instance, bool loop)
+{
+	MutexLock(&mixer_mutex);
+
+	Channel *channel = FindChannel(instance);
+
+	if (channel != NULL)
+		SplitDecoder_SetLoop(channel->split_decoder, loop);
+
+	MutexUnlock(&mixer_mutex);
+}
+
 void Mixer_SetSoundSampleRate(Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
 {
 	MutexLock(&mixer_mutex);

@@ -340,3 +340,11 @@ size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_
 		return frames_done;
 	}
 }
+
+void DecoderSelector_SetLoop(DecoderSelector *selector, bool loop)
+{
+	if (selector->data->decoder_type == DECODER_TYPE_PREDECODER)
+		Predecoder_SetLoop(selector->decoder, loop);
+	else
+		selector->loop = loop;
+}
