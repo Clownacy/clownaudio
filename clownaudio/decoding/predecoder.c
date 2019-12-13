@@ -71,7 +71,7 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 				{
 					float buffer[0x1000];
 
-					unsigned long samples_read = (unsigned long)ma_pcm_converter_read(&converter, buffer, 0x1000 / CHANNEL_COUNT) * CHANNEL_COUNT;
+					size_t samples_read = ma_pcm_converter_read(&converter, buffer, 0x1000 / CHANNEL_COUNT) * CHANNEL_COUNT;
 
 					MemoryStream_Write(memory_stream, buffer, sizeof(float), samples_read);
 
@@ -93,39 +93,33 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 
 void Predecoder_UnloadData(PredecoderData *data)
 {
-	if (data != NULL)
-	{
-		free(data->decoded_data);
-		free(data);
-	}
+	free(data->decoded_data);
+	free(data);
 }
 
 Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info)
 {
-	Predecoder *predecoder = NULL;
+	Predecoder *predecoder = malloc(sizeof(Predecoder));
 
-	if (data != NULL)
+	if (predecoder != NULL)
 	{
-		predecoder = malloc(sizeof(Predecoder));
+		predecoder->memory_stream = ROMemoryStream_Create(data->decoded_data, data->decoded_data_size);
 
-		if (predecoder != NULL)
+		if (predecoder->memory_stream != NULL)
 		{
-			predecoder->memory_stream = ROMemoryStream_Create(data->decoded_data, data->decoded_data_size);
 			predecoder->loop = loop;
 
 			info->sample_rate = data->sample_rate;
 			info->channel_count = CHANNEL_COUNT;
 			info->format = DECODER_FORMAT_F32;
 
-			if (predecoder->memory_stream == NULL)
-			{
-				free(predecoder);
-				predecoder = NULL;
-			}
+			return predecoder;
 		}
+
+		free(predecoder);
 	}
 
-	return predecoder;
+	return NULL;
 }
 
 void Predecoder_Destroy(Predecoder *predecoder)

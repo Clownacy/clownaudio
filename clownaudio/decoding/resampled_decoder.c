@@ -93,6 +93,5 @@ void ResampledDecoder_SetLoop(ResampledDecoder *resampled_decoder, bool loop)
 
 void ResampledDecoder_SetSampleRate(ResampledDecoder *resampled_decoder, unsigned long sample_rate)
 {
-	if (resampled_decoder != NULL)
-		ma_pcm_converter_set_input_sample_rate(&resampled_decoder->converter, sample_rate);
+	ma_pcm_converter_set_input_sample_rate(&resampled_decoder->converter, sample_rate);
 }
