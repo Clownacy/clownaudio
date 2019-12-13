@@ -169,6 +169,8 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 			}
 
 			low_level_decoder_functions[i].Destroy(decoder);
+
+			break;
 		}
 	}
 
@@ -185,6 +187,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 				decoder_type = DECODER_TYPE_HIGH_LEVEL;
 				decoder_functions = &high_level_decoder_functions[i];
+				break;
 			}
 		}
 	}
