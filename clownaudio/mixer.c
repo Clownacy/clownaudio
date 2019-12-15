@@ -353,7 +353,7 @@ void Mixer_MixSamples(float *output_buffer, size_t frames_to_do)
 
 						volume *= (fade_out_volume * fade_out_volume);
 
-						if (channel->fade_counter)
+						if (channel->fade_counter != 0)
 							--channel->fade_counter;
 					}
 
