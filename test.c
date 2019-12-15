@@ -78,13 +78,57 @@ int main(int argc, char *argv[])
 		printf("Couldn't start sound\n");
 	fflush(stdout);
 
-	getchar();
-	ClownAudio_SetSoundSampleRate(instance, 8000, 8000);
-	getchar();
-	ClownAudio_FadeOutSound(instance, 5 * 1000);
-	getchar();
-	ClownAudio_FadeInSound(instance, 2 * 1000);
-	getchar();
+	float pan = 0.0f;
+	bool pause = false;
+
+	bool exit = false;
+	while (!exit)
+	{
+		char input = getchar();
+
+		switch (input)
+		{
+			case 'q':
+				exit = true;
+				break;
+
+			case 'r':
+				ClownAudio_RewindSound(instance);
+				break;
+
+			case 'o':
+				ClownAudio_FadeOutSound(instance, 2 * 1000);
+				break;
+
+			case 'i':
+				ClownAudio_FadeInSound(instance, 2 * 1000);
+				break;
+
+			case 'u':
+				ClownAudio_SetSoundSampleRate(instance, 8000, 8000);
+				break;
+
+			case 'p':
+				if (pause)
+					ClownAudio_UnpauseSound(instance);
+				else
+					ClownAudio_PauseSound(instance);
+
+				pause = !pause;
+
+				break;
+
+			case '[':
+				pan -= 0.25f;
+				ClownAudio_SetSoundPan(instance, pan);
+				break;
+
+			case ']':
+				pan += 0.25f;
+				ClownAudio_SetSoundPan(instance, pan);
+				break;
+		}
+	}
 
 	printf("Stopping sound\n");
 	fflush(stdout);
