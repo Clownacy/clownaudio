@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #define DR_WAV_IMPLEMENTATION
 #define DR_WAV_NO_STDIO
@@ -14,22 +15,32 @@ Decoder* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, bool
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	drwav *instance = drwav_open_memory(data, data_size);
+	drwav *instance = malloc(sizeof(drwav));
 
 	if (instance != NULL)
 	{
-		info->sample_rate = instance->sampleRate;
-		info->channel_count = instance->channels;
-		info->format = DECODER_FORMAT_F32;
-		info->complex = false;
+		if (drwav_init_memory(instance, data, data_size, NULL))
+		{
+			info->sample_rate = instance->sampleRate;
+			info->channel_count = instance->channels;
+			info->format = DECODER_FORMAT_F32;
+			info->complex = false;
+
+			return (Decoder*)instance;
+		}
+
+		free(instance);
 	}
 
-	return (Decoder*)instance;
+	return NULL;
 }
 
 void Decoder_DR_WAV_Destroy(Decoder *decoder)
 {
-	drwav_uninit((drwav*)decoder);
+	drwav *instance = (drwav*)decoder;
+
+	drwav_uninit(instance);
+	free(instance);
 }
 
 void Decoder_DR_WAV_Rewind(Decoder *decoder)

@@ -21,7 +21,7 @@ Decoder* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, boo
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	drflac *backend = drflac_open_memory(data, data_size);
+	drflac *backend = drflac_open_memory(data, data_size, NULL);
 
 	if (backend != NULL)
 	{
