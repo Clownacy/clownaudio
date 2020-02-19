@@ -50,6 +50,7 @@ Decoder_PxTone* Decoder_PxTone_Create(const unsigned char *data, size_t data_siz
 						info->sample_rate = SAMPLE_RATE;
 						info->channel_count = CHANNEL_COUNT;
 						info->format = DECODER_FORMAT_S16;	// PxTone uses int16_t internally
+						info->complex = true;
 
 						return decoder;
 					}

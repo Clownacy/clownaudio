@@ -42,15 +42,7 @@
 #include "decoders/pxtone_noise.h"
 #endif
 
-#define LOW_LEVEL_DECODER_FUNCTIONS(name) \
-{ \
-	(void*(*)(const unsigned char*,size_t,DecoderInfo*))Decoder_##name##_Create, \
-	(void(*)(void*))Decoder_##name##_Destroy, \
-	(void(*)(void*))Decoder_##name##_Rewind, \
-	(size_t(*)(void*,void*,size_t))Decoder_##name##_GetSamples \
-}
-
-#define HIGH_LEVEL_DECODER_FUNCTIONS(name) \
+#define DECODER_FUNCTIONS(name) \
 { \
 	(void*(*)(const unsigned char*,size_t,bool,DecoderInfo*))Decoder_##name##_Create, \
 	(void(*)(void*))Decoder_##name##_Destroy, \
@@ -65,12 +57,20 @@ typedef enum DecoderType
 	DECODER_TYPE_LOW_LEVEL
 } DecoderType;
 
+typedef struct DecoderFunctions
+{
+	void* (*Create)(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
+	void (*Destroy)(void *decoder);
+	void (*Rewind)(void *decoder);
+	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
+} DecoderFunctions;
+
 struct DecoderSelectorData
 {
 	const unsigned char *file_buffer;
 	size_t file_size;
 	DecoderType decoder_type;
-	const void *decoder_functions;
+	const DecoderFunctions *decoder_functions;
 	PredecoderData *predecoder_data;
 	size_t size_of_frame;
 };
@@ -82,113 +82,84 @@ struct DecoderSelector
 	bool loop;
 };
 
-typedef struct LowLevelDecoderFunctions
-{
-	void* (*Create)(const unsigned char *data, size_t data_size, DecoderInfo *info);
-	void (*Destroy)(void *decoder);
-	void (*Rewind)(void *decoder);
-	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
-} LowLevelDecoderFunctions;
-
-typedef struct HighLevelDecoderFunctions
-{
-	void* (*Create)(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
-	void (*Destroy)(void *decoder);
-	void (*Rewind)(void *decoder);
-	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
-} HighLevelDecoderFunctions;
-
-static const LowLevelDecoderFunctions low_level_decoder_functions[] = {
+static const DecoderFunctions decoder_function_list[] = {
 #ifdef USE_LIBVORBIS
-	LOW_LEVEL_DECODER_FUNCTIONS(libVorbis),
+	DECODER_FUNCTIONS(libVorbis),
 #endif
 #ifdef USE_STB_VORBIS
-	LOW_LEVEL_DECODER_FUNCTIONS(STB_Vorbis),
+	DECODER_FUNCTIONS(STB_Vorbis),
 #endif
 #ifdef USE_LIBFLAC
-	LOW_LEVEL_DECODER_FUNCTIONS(libFLAC),
+	DECODER_FUNCTIONS(libFLAC),
 #endif
 #ifdef USE_DR_FLAC
-	LOW_LEVEL_DECODER_FUNCTIONS(DR_FLAC),
+	DECODER_FUNCTIONS(DR_FLAC),
 #endif
 #ifdef USE_DR_WAV
-	LOW_LEVEL_DECODER_FUNCTIONS(DR_WAV),
+	DECODER_FUNCTIONS(DR_WAV),
 #endif
 #ifdef USE_LIBOPUS
-	LOW_LEVEL_DECODER_FUNCTIONS(libOpus),
+	DECODER_FUNCTIONS(libOpus),
 #endif
 #ifdef USE_LIBSNDFILE
-	LOW_LEVEL_DECODER_FUNCTIONS(libSndfile),
+	DECODER_FUNCTIONS(libSndfile),
+#endif
+#ifdef USE_LIBOPENMPT
+	DECODER_FUNCTIONS(libOpenMPT),
+#endif
+#ifdef USE_LIBXMPLITE
+	DECODER_FUNCTIONS(libXMPLite),
+#endif
+#ifdef USE_SNES_SPC
+	DECODER_FUNCTIONS(SNES_SPC),
 #endif
 #ifdef USE_PXTONE
-	LOW_LEVEL_DECODER_FUNCTIONS(PxToneNoise),
+	DECODER_FUNCTIONS(PxTone),
+#endif
+#ifdef USE_PXTONE
+	DECODER_FUNCTIONS(PxToneNoise),
 #endif
 };
 
-static const HighLevelDecoderFunctions high_level_decoder_functions[] = {
-#ifdef USE_LIBOPENMPT
-	HIGH_LEVEL_DECODER_FUNCTIONS(libOpenMPT),
-#endif
-#ifdef USE_LIBXMPLITE
-	HIGH_LEVEL_DECODER_FUNCTIONS(libXMPLite),
-#endif
-#ifdef USE_SNES_SPC
-	HIGH_LEVEL_DECODER_FUNCTIONS(SNES_SPC),
-#endif
-#ifdef USE_PXTONE
-	HIGH_LEVEL_DECODER_FUNCTIONS(PxTone),
-#endif
+static const DecoderFunctions predecoder_functions = {
+	NULL,
+	(void(*)(void*))Predecoder_Destroy,
+	(void(*)(void*))Predecoder_Rewind,
+	(size_t(*)(void*,void*,size_t))Predecoder_GetSamples
 };
 
 DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
 {
 	DecoderType decoder_type;
-	const void *decoder_functions = NULL;
+	const DecoderFunctions *decoder_functions = NULL;
 	PredecoderData *predecoder_data = NULL;
 
 	DecoderInfo info;
 
 	// Figure out what format this sound is
-
-	// Start with the low-level decoders
-	for (size_t i = 0; i < sizeof(low_level_decoder_functions) / sizeof(low_level_decoder_functions[0]); ++i)
+	for (size_t i = 0; i < sizeof(decoder_function_list) / sizeof(decoder_function_list[0]); ++i)
 	{
-		void *decoder = low_level_decoder_functions[i].Create(file_buffer, file_size, &info);
+		void *decoder = decoder_function_list[i].Create(file_buffer, file_size, false, &info);
 
 		if (decoder != NULL)
 		{
-			decoder_type = DECODER_TYPE_LOW_LEVEL;
-			decoder_functions = &low_level_decoder_functions[i];
+			decoder_type = info.complex ? DECODER_TYPE_HIGH_LEVEL : DECODER_TYPE_LOW_LEVEL;
+			decoder_functions = &decoder_function_list[i];
 
-			if (predecode)
+			if (decoder_type == DECODER_TYPE_LOW_LEVEL && predecode)
 			{
-				predecoder_data = Predecoder_DecodeData(&info, decoder, low_level_decoder_functions[i].GetSamples);
+				predecoder_data = Predecoder_DecodeData(&info, decoder, decoder_functions[i].GetSamples);
 
 				if (predecoder_data != NULL)
+				{
 					decoder_type = DECODER_TYPE_PREDECODER;
+					decoder_functions = &predecoder_functions;
+				}
 			}
 
-			low_level_decoder_functions[i].Destroy(decoder);
+			decoder_function_list[i].Destroy(decoder);
 
 			break;
-		}
-	}
-
-	// Failing that, search the high-level formats instead
-	if (decoder_functions == NULL)
-	{
-		for (size_t i = 0; i < sizeof(high_level_decoder_functions) / sizeof(high_level_decoder_functions[0]); ++i)
-		{
-			void *decoder = high_level_decoder_functions[i].Create(file_buffer, file_size, false, &info);
-
-			if (decoder != NULL)
-			{
-				high_level_decoder_functions[i].Destroy(decoder);
-
-				decoder_type = DECODER_TYPE_HIGH_LEVEL;
-				decoder_functions = &high_level_decoder_functions[i];
-				break;
-			}
 		}
 	}
 
@@ -241,20 +212,10 @@ DecoderSelector* DecoderSelector_Create(DecoderSelectorData *data, bool loop, De
 
 	if (selector != NULL)
 	{
-		switch (data->decoder_type)
-		{
-			case DECODER_TYPE_PREDECODER:
-				selector->decoder = Predecoder_Create(data->predecoder_data, loop, info);
-				break;
-
-			case DECODER_TYPE_HIGH_LEVEL:
-				selector->decoder = ((HighLevelDecoderFunctions*)data->decoder_functions)->Create(data->file_buffer, data->file_size, loop, info);
-				break;
-
-			case DECODER_TYPE_LOW_LEVEL:
-				selector->decoder = ((LowLevelDecoderFunctions*)data->decoder_functions)->Create(data->file_buffer, data->file_size, info);
-				break;
-		}
+		if (data->decoder_type == DECODER_TYPE_PREDECODER)
+			selector->decoder = Predecoder_Create(data->predecoder_data, loop, info);
+		else
+			selector->decoder = data->decoder_functions->Create(data->file_buffer, data->file_size, loop, info);
 
 		if (selector->decoder != NULL)
 		{
@@ -271,40 +232,13 @@ DecoderSelector* DecoderSelector_Create(DecoderSelectorData *data, bool loop, De
 
 void DecoderSelector_Destroy(DecoderSelector *selector)
 {
-	switch (selector->data->decoder_type)
-	{
-		case DECODER_TYPE_PREDECODER:
-			Predecoder_Destroy(selector->decoder);
-			break;
-
-		case DECODER_TYPE_HIGH_LEVEL:
-			((HighLevelDecoderFunctions*)selector->data->decoder_functions)->Destroy(selector->decoder);
-			break;
-
-		case DECODER_TYPE_LOW_LEVEL:
-			((LowLevelDecoderFunctions*)selector->data->decoder_functions)->Destroy(selector->decoder);
-			break;
-	}
-
+	selector->data->decoder_functions->Destroy(selector->decoder);
 	free(selector);
 }
 
 void DecoderSelector_Rewind(DecoderSelector *selector)
 {
-	switch (selector->data->decoder_type)
-	{
-		case DECODER_TYPE_PREDECODER:
-			Predecoder_Rewind(selector->decoder);
-			break;
-
-		case DECODER_TYPE_HIGH_LEVEL:
-			((HighLevelDecoderFunctions*)selector->data->decoder_functions)->Rewind(selector->decoder);
-			break;
-
-		case DECODER_TYPE_LOW_LEVEL:
-			((LowLevelDecoderFunctions*)selector->data->decoder_functions)->Rewind(selector->decoder);
-			break;
-	}
+	selector->data->decoder_functions->Rewind(selector->decoder);
 }
 
 size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_t frames_to_do)
@@ -315,7 +249,7 @@ size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_
 	}
 	else if (selector->data->decoder_type == DECODER_TYPE_HIGH_LEVEL)
 	{
-		return ((HighLevelDecoderFunctions*)selector->data->decoder_functions)->GetSamples(selector->decoder, buffer, frames_to_do);
+		return selector->data->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
 	}
 	else //if (selector->data->decoder_type == DECODER_TYPE_LOW_LEVEL)
 	{
@@ -324,12 +258,12 @@ size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_
 
 		while (frames_done != frames_to_do)
 		{
-			const size_t frames = ((LowLevelDecoderFunctions*)selector->data->decoder_functions)->GetSamples(selector->decoder, &((char*)buffer)[frames_done * selector->data->size_of_frame], frames_to_do - frames_done);
+			const size_t frames = selector->data->decoder_functions->GetSamples(selector->decoder, &((char*)buffer)[frames_done * selector->data->size_of_frame], frames_to_do - frames_done);
 
 			if (frames == 0)
 			{
 				if (selector->loop)
-					((LowLevelDecoderFunctions*)selector->data->decoder_functions)->Rewind(selector->decoder);
+					selector->data->decoder_functions->Rewind(selector->decoder);
 				else
 					break;
 			}
@@ -343,8 +277,18 @@ size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_
 
 void DecoderSelector_SetLoop(DecoderSelector *selector, bool loop)
 {
-	if (selector->data->decoder_type == DECODER_TYPE_PREDECODER)
-		Predecoder_SetLoop(selector->decoder, loop);
-	else
-		selector->loop = loop;
+	switch (selector->data->decoder_type)
+	{
+		case DECODER_TYPE_PREDECODER:
+			Predecoder_SetLoop(selector->decoder, loop);
+			break;
+
+		case DECODER_TYPE_LOW_LEVEL:
+			selector->loop = loop;
+			break;
+
+		case DECODER_TYPE_HIGH_LEVEL:
+			// TODO - This is impossible to implement
+			break;
+	}
 }

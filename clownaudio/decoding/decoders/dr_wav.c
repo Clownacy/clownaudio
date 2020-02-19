@@ -1,5 +1,6 @@
 #include "dr_wav.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #define DR_WAV_IMPLEMENTATION
@@ -9,8 +10,10 @@
 
 #include "common.h"
 
-Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
+Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
+	(void)loop;	// This is ignored in simple decoders
+
 	drwav *instance = drwav_open_memory(data, data_size);
 
 	if (instance != NULL)
@@ -18,6 +21,7 @@ Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_siz
 		info->sample_rate = instance->sampleRate;
 		info->channel_count = instance->channels;
 		info->format = DECODER_FORMAT_F32;
+		info->complex = false;
 	}
 
 	return (Decoder_DR_WAV*)instance;

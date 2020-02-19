@@ -1,5 +1,6 @@
 #include "libvorbis.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -62,8 +63,10 @@ static const ov_callbacks ov_callback_memory = {
 	ftell_wrapper
 };
 
-Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
+Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
+	(void)loop;	// This is ignored in simple decoders
+
 	Decoder_libVorbis *decoder = NULL;
 
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
@@ -86,6 +89,7 @@ Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t da
 				info->sample_rate = v_info->rate;
 				info->channel_count = v_info->channels;
 				info->format = DECODER_FORMAT_F32;
+				info->complex = false;
 			}
 			else
 			{

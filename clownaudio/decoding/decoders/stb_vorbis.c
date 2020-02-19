@@ -1,5 +1,6 @@
 #include "stb_vorbis.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #define STB_VORBIS_IMPLEMENTATION
@@ -21,8 +22,10 @@
 
 #include "common.h"
 
-Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
+Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
+	(void)loop;	// This is ignored in simple decoders
+
 	stb_vorbis *instance = stb_vorbis_open_memory(data, data_size, NULL, NULL);
 
 	if (instance != NULL)
@@ -32,6 +35,7 @@ Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t 
 		info->sample_rate = vorbis_info.sample_rate;
 		info->channel_count = vorbis_info.channels;
 		info->format = DECODER_FORMAT_F32;
+		info->complex = false;
 	}
 
 	return (Decoder_STB_Vorbis*)instance;

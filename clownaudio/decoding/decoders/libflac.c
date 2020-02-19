@@ -136,6 +136,7 @@ static void MetadataCallback(const FLAC__StreamDecoder *flac_stream_decoder, con
 	decoder->info->sample_rate = metadata->data.stream_info.sample_rate;
 	decoder->info->channel_count = decoder->channel_count = metadata->data.stream_info.channels;
 	decoder->info->format = DECODER_FORMAT_S32;	// libFLAC doesn't do float32
+	decoder->info->complex = false;
 
 	decoder->bits_per_sample = metadata->data.stream_info.bits_per_sample;
 
@@ -155,8 +156,10 @@ static void ErrorCallback(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__
 	decoder->error = true;
 }
 
-Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
+Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
+	(void)loop;	// This is ignored in simple decoders
+
 	Decoder_libFLAC *decoder = malloc(sizeof(Decoder_libFLAC));
 
 	if (decoder != NULL)

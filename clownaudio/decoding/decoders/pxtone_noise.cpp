@@ -1,5 +1,6 @@
 #include "pxtone_noise.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -18,8 +19,10 @@ struct Decoder_PxToneNoise
 	void *buffer;
 };
 
-Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
+Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
+	(void)loop;	// This is ignored in simple decoders
+
 	Decoder_PxToneNoise *decoder = NULL;
 
 	pxtoneNoise *pxtn = new pxtoneNoise();
@@ -51,6 +54,7 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_
 							info->sample_rate = SAMPLE_RATE;
 							info->channel_count = CHANNEL_COUNT;
 							info->format = DECODER_FORMAT_S16;	// PxTone uses int16_t internally
+							info->complex = false;
 
 							delete pxtn;
 							return decoder;

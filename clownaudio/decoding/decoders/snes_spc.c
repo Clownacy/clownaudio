@@ -20,7 +20,7 @@ struct Decoder_SNES_SPC
 
 Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
-	(void)loop;	// Unusable, sadly
+	(void)loop;	// Unusable, sadly - looping is up to the music file
 
 	Decoder_SNES_SPC *decoder = NULL;
 
@@ -46,6 +46,7 @@ Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data
 			info->sample_rate = spc_sample_rate;
 			info->channel_count = CHANNEL_COUNT;
 			info->format = DECODER_FORMAT_S16;
+			info->complex = true;
 
 			return decoder;
 		}

@@ -1,5 +1,6 @@
 #include "libsndfile.h"
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,8 +70,10 @@ static SF_VIRTUAL_IO sfvirtual = {
 	ftell_wrapper
 };
 
-Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, DecoderInfo *info)
+Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
+	(void)loop;	// This is ignored in simple decoders
+
 	Decoder_libSndfile *decoder = NULL;
 
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
@@ -94,6 +97,7 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 				info->sample_rate = sf_info.samplerate;
 				info->channel_count = sf_info.channels;
 				info->format = DECODER_FORMAT_F32;
+				info->complex = false;
 
 				return decoder;
 			}
