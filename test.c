@@ -36,6 +36,12 @@ static void FileToMemory(const char *filename, unsigned char **buffer, size_t *s
 
 int main(int argc, char *argv[])
 {
+	if (argc != 2 && argc != 3)
+	{
+		printf("clownaudio test program\n\nUsage: %s [intro file] [loop file (optional)]\n\n", argv[0]);
+		return 0;
+	}
+
 	if (ClownAudio_Init())
 	{
 		printf("Inited mixer\n");
@@ -53,11 +59,6 @@ int main(int argc, char *argv[])
 			FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
 			file_buffers[1] = NULL;
 			file_sizes[1] = 0;
-		}
-		else
-		{
-			FileToMemory("a/test_intro.flac", &file_buffers[0], &file_sizes[0]);
-			FileToMemory("a/test_loop.flac", &file_buffers[1], &file_sizes[1]);
 		}
 
 		ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
