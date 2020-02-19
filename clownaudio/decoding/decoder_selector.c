@@ -53,8 +53,8 @@
 typedef enum DecoderType
 {
 	DECODER_TYPE_PREDECODER,
-	DECODER_TYPE_HIGH_LEVEL,
-	DECODER_TYPE_LOW_LEVEL
+	DECODER_TYPE_COMPLEX,
+	DECODER_TYPE_SIMPLE
 } DecoderType;
 
 typedef struct DecoderFunctions
@@ -143,10 +143,10 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 		if (decoder != NULL)
 		{
-			decoder_type = info.complex ? DECODER_TYPE_HIGH_LEVEL : DECODER_TYPE_LOW_LEVEL;
+			decoder_type = info.complex ? DECODER_TYPE_COMPLEX : DECODER_TYPE_SIMPLE;
 			decoder_functions = &decoder_function_list[i];
 
-			if (decoder_type == DECODER_TYPE_LOW_LEVEL && predecode)
+			if (decoder_type == DECODER_TYPE_SIMPLE && predecode)
 			{
 				predecoder_data = Predecoder_DecodeData(&info, decoder, decoder_functions[i].GetSamples);
 
@@ -247,13 +247,13 @@ size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_
 	{
 		return Predecoder_GetSamples(selector->decoder, buffer, frames_to_do);
 	}
-	else if (selector->data->decoder_type == DECODER_TYPE_HIGH_LEVEL)
+	else if (selector->data->decoder_type == DECODER_TYPE_COMPLEX)
 	{
 		return selector->data->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
 	}
-	else //if (selector->data->decoder_type == DECODER_TYPE_LOW_LEVEL)
+	else //if (selector->data->decoder_type == DECODER_TYPE_SIMPLE)
 	{
-		// Handle looping here, since the low-level decoders don't do it by themselves
+		// Handle looping here, since the simple decoders don't do it by themselves
 		size_t frames_done = 0;
 
 		while (frames_done != frames_to_do)
@@ -283,11 +283,11 @@ void DecoderSelector_SetLoop(DecoderSelector *selector, bool loop)
 			Predecoder_SetLoop(selector->decoder, loop);
 			break;
 
-		case DECODER_TYPE_LOW_LEVEL:
+		case DECODER_TYPE_SIMPLE:
 			selector->loop = loop;
 			break;
 
-		case DECODER_TYPE_HIGH_LEVEL:
+		case DECODER_TYPE_COMPLEX:
 			// TODO - This is impossible to implement
 			break;
 	}
