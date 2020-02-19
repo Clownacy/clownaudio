@@ -37,113 +37,126 @@ static void FileToMemory(const char *filename, unsigned char **buffer, size_t *s
 int main(int argc, char *argv[])
 {
 	if (ClownAudio_Init())
+	{
 		printf("Inited mixer\n");
-	else
-		printf("Couldn't init mixer\n");
-	fflush(stdout);
+		fflush(stdout);
 
-	unsigned char *file_buffers[2];
-	size_t file_sizes[2];
-	if (argc == 3)
-	{
-		FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
-		FileToMemory(argv[2], &file_buffers[1], &file_sizes[1]);
-	}
-	else if (argc == 2)
-	{
-		FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
-		file_buffers[1] = NULL;
-		file_sizes[1] = 0;
-	}
-	else
-	{
-		FileToMemory("a/test_intro.flac", &file_buffers[0], &file_sizes[0]);
-		FileToMemory("a/test_loop.flac", &file_buffers[1], &file_sizes[1]);
-	}
-
-	ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
-
-	if (sound)
-		printf("Loaded sound\n");
-	else
-		printf("Couldn't load sound\n");
-	fflush(stdout);
-
-	ClownAudio_Sound instance = ClownAudio_CreateSound(sound, true, true);
-	ClownAudio_UnpauseSound(instance);
-
-	if (instance)
-		printf("Started sound\n");
-	else
-		printf("Couldn't start sound\n");
-	fflush(stdout);
-
-	float pan = 0.0f;
-	bool pause = false;
-
-	bool exit = false;
-	while (!exit)
-	{
-		char input = getchar();
-
-		switch (input)
+		unsigned char *file_buffers[2];
+		size_t file_sizes[2];
+		if (argc == 3)
 		{
-			case 'q':
-				exit = true;
-				break;
-
-			case 'r':
-				ClownAudio_RewindSound(instance);
-				break;
-
-			case 'o':
-				ClownAudio_FadeOutSound(instance, 2 * 1000);
-				break;
-
-			case 'i':
-				ClownAudio_FadeInSound(instance, 2 * 1000);
-				break;
-
-			case 'u':
-				ClownAudio_SetSoundSampleRate(instance, 8000, 8000);
-				break;
-
-			case 'p':
-				if (pause)
-					ClownAudio_UnpauseSound(instance);
-				else
-					ClownAudio_PauseSound(instance);
-
-				pause = !pause;
-
-				break;
-
-			case '[':
-				pan -= 0.25f;
-				ClownAudio_SetSoundPan(instance, pan);
-				break;
-
-			case ']':
-				pan += 0.25f;
-				ClownAudio_SetSoundPan(instance, pan);
-				break;
+			FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
+			FileToMemory(argv[2], &file_buffers[1], &file_sizes[1]);
 		}
+		else if (argc == 2)
+		{
+			FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
+			file_buffers[1] = NULL;
+			file_sizes[1] = 0;
+		}
+		else
+		{
+			FileToMemory("a/test_intro.flac", &file_buffers[0], &file_sizes[0]);
+			FileToMemory("a/test_loop.flac", &file_buffers[1], &file_sizes[1]);
+		}
+
+		ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
+
+		if (sound != NULL)
+		{
+			printf("Loaded sound\n");
+			fflush(stdout);
+
+			ClownAudio_Sound instance = ClownAudio_CreateSound(sound, true, true);
+			ClownAudio_UnpauseSound(instance);
+
+			if (instance != 0)
+			{
+				printf("Started sound\n");
+				fflush(stdout);
+
+				float pan = 0.0f;
+				bool pause = false;
+
+				bool exit = false;
+				while (!exit)
+				{
+					char input = getchar();
+
+					switch (input)
+					{
+						case 'q':
+							exit = true;
+							break;
+
+						case 'r':
+							ClownAudio_RewindSound(instance);
+							break;
+
+						case 'o':
+							ClownAudio_FadeOutSound(instance, 2 * 1000);
+							break;
+
+						case 'i':
+							ClownAudio_FadeInSound(instance, 2 * 1000);
+							break;
+
+						case 'u':
+							ClownAudio_SetSoundSampleRate(instance, 8000, 8000);
+							break;
+
+						case 'p':
+							if (pause)
+								ClownAudio_UnpauseSound(instance);
+							else
+								ClownAudio_PauseSound(instance);
+
+							pause = !pause;
+
+							break;
+
+						case '[':
+							pan -= 0.25f;
+							ClownAudio_SetSoundPan(instance, pan);
+							break;
+
+						case ']':
+							pan += 0.25f;
+							ClownAudio_SetSoundPan(instance, pan);
+							break;
+					}
+				}
+
+				printf("Stopping sound\n");
+				fflush(stdout);
+				ClownAudio_DestroySound(instance);
+			}
+			else
+			{
+				printf("Couldn't start sound\n");
+			}
+
+			printf("Unloading sound\n");
+			fflush(stdout);
+			ClownAudio_UnloadSoundData(sound);
+
+			free(file_buffers[1]);
+			free(file_buffers[0]);
+		}
+		else
+		{
+			printf("Couldn't load sound\n");
+		}
+
+		printf("Deiniting mixer\n");
+		fflush(stdout);
+		ClownAudio_Deinit();
+	}
+	else
+	{
+		printf("Couldn't init mixer\n");
 	}
 
-	printf("Stopping sound\n");
-	fflush(stdout);
-	ClownAudio_DestroySound(instance);
-
-	printf("Unloading sound\n");
-	fflush(stdout);
-	ClownAudio_UnloadSoundData(sound);
-
-	free(file_buffers[1]);
-	free(file_buffers[0]);
-
-	printf("Deiniting mixer\n");
-	fflush(stdout);
-	ClownAudio_Deinit();
 
 //	stb_leakcheck_dumpmem();
 
