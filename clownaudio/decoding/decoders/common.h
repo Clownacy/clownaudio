@@ -16,3 +16,5 @@ typedef struct DecoderInfo
 	DecoderFormat format;
 	bool complex;
 } DecoderInfo;
+
+typedef struct Decoder Decoder;

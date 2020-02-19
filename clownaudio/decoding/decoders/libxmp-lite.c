@@ -12,15 +12,15 @@
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
-struct Decoder_libXMPLite
+struct Decoder
 {
 	xmp_context context;
 	bool loop;
 };
 
-Decoder_libXMPLite* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
-	Decoder_libXMPLite *decoder = NULL;
+	Decoder *decoder = NULL;
 
 	xmp_context context = xmp_create_context();
 
@@ -28,7 +28,7 @@ Decoder_libXMPLite* Decoder_libXMPLite_Create(const unsigned char *data, size_t 
 	{
 		xmp_start_player(context, SAMPLE_RATE, 0);
 
-		decoder = malloc(sizeof(Decoder_libXMPLite));
+		decoder = malloc(sizeof(Decoder));
 
 		if (decoder != NULL)
 		{
@@ -52,7 +52,7 @@ Decoder_libXMPLite* Decoder_libXMPLite_Create(const unsigned char *data, size_t 
 	return NULL;
 }
 
-void Decoder_libXMPLite_Destroy(Decoder_libXMPLite *decoder)
+void Decoder_libXMPLite_Destroy(Decoder *decoder)
 {
 	xmp_end_player(decoder->context);
 	xmp_release_module(decoder->context);
@@ -60,12 +60,12 @@ void Decoder_libXMPLite_Destroy(Decoder_libXMPLite *decoder)
 	free(decoder);
 }
 
-void Decoder_libXMPLite_Rewind(Decoder_libXMPLite *decoder)
+void Decoder_libXMPLite_Rewind(Decoder *decoder)
 {
 	xmp_seek_time(decoder->context, 0);
 }
 
-size_t Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *decoder, void *buffer, size_t frames_to_do)
+size_t Decoder_libXMPLite_GetSamples(Decoder *decoder, void *buffer, size_t frames_to_do)
 {
 	xmp_play_buffer(decoder->context, buffer, frames_to_do * CHANNEL_COUNT * sizeof(short), !decoder->loop);
 

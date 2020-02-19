@@ -10,7 +10,7 @@
 
 #include "common.h"
 
-Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
 	(void)loop;	// This is ignored in simple decoders
 
@@ -24,20 +24,20 @@ Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_siz
 		info->complex = false;
 	}
 
-	return (Decoder_DR_WAV*)instance;
+	return (Decoder*)instance;
 }
 
-void Decoder_DR_WAV_Destroy(Decoder_DR_WAV *decoder)
+void Decoder_DR_WAV_Destroy(Decoder *decoder)
 {
 	drwav_uninit((drwav*)decoder);
 }
 
-void Decoder_DR_WAV_Rewind(Decoder_DR_WAV *decoder)
+void Decoder_DR_WAV_Rewind(Decoder *decoder)
 {
 	drwav_seek_to_pcm_frame((drwav*)decoder, 0);
 }
 
-size_t Decoder_DR_WAV_GetSamples(Decoder_DR_WAV *decoder, void *buffer, size_t frames_to_do)
+size_t Decoder_DR_WAV_GetSamples(Decoder *decoder, void *buffer, size_t frames_to_do)
 {
 	return drwav_read_pcm_frames_f32((drwav*)decoder, frames_to_do, buffer);
 }

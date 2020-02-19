@@ -13,17 +13,17 @@
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
-struct Decoder_PxToneNoise
+struct Decoder
 {
 	ROMemoryStream *memory_stream;
 	void *buffer;
 };
 
-Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	Decoder_PxToneNoise *decoder = NULL;
+	Decoder *decoder = NULL;
 
 	pxtoneNoise *pxtn = new pxtoneNoise();
 
@@ -44,7 +44,7 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_
 
 					if (memory_stream != NULL)
 					{
-						decoder = (Decoder_PxToneNoise*)malloc(sizeof(Decoder_PxToneNoise));
+						decoder = (Decoder*)malloc(sizeof(Decoder));
 
 						if (decoder != NULL)
 						{
@@ -74,19 +74,19 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_
 	return decoder;
 }
 
-void Decoder_PxToneNoise_Destroy(Decoder_PxToneNoise *decoder)
+void Decoder_PxToneNoise_Destroy(Decoder *decoder)
 {
 	ROMemoryStream_Destroy(decoder->memory_stream);
 	free(decoder->buffer);
 	free(decoder);
 }
 
-void Decoder_PxToneNoise_Rewind(Decoder_PxToneNoise *decoder)
+void Decoder_PxToneNoise_Rewind(Decoder *decoder)
 {
 	ROMemoryStream_Rewind(decoder->memory_stream);
 }
 
-size_t Decoder_PxToneNoise_GetSamples(Decoder_PxToneNoise *decoder, void *buffer, size_t frames_to_do)
+size_t Decoder_PxToneNoise_GetSamples(Decoder *decoder, void *buffer, size_t frames_to_do)
 {
 	return ROMemoryStream_Read(decoder->memory_stream, buffer, sizeof(int16_t) * CHANNEL_COUNT, frames_to_do);
 }

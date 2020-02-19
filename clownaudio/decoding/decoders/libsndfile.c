@@ -10,7 +10,7 @@
 #include "common.h"
 #include "memory_stream.h"
 
-struct Decoder_libSndfile
+struct Decoder
 {
 	ROMemoryStream *memory_stream;
 	SNDFILE *sndfile;
@@ -70,11 +70,11 @@ static SF_VIRTUAL_IO sfvirtual = {
 	ftell_wrapper
 };
 
-Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	Decoder_libSndfile *decoder = NULL;
+	Decoder *decoder = NULL;
 
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
 
@@ -87,7 +87,7 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 
 		if (sndfile != NULL)
 		{
-			decoder = malloc(sizeof(Decoder_libSndfile));
+			decoder = malloc(sizeof(Decoder));
 
 			if (decoder != NULL)
 			{
@@ -111,19 +111,19 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 	return NULL;
 }
 
-void Decoder_libSndfile_Destroy(Decoder_libSndfile *decoder)
+void Decoder_libSndfile_Destroy(Decoder *decoder)
 {
 	sf_close(decoder->sndfile);
 	ROMemoryStream_Destroy(decoder->memory_stream);
 	free(decoder);
 }
 
-void Decoder_libSndfile_Rewind(Decoder_libSndfile *decoder)
+void Decoder_libSndfile_Rewind(Decoder *decoder)
 {
 	sf_seek(decoder->sndfile, 0, SEEK_SET);
 }
 
-size_t Decoder_libSndfile_GetSamples(Decoder_libSndfile *decoder, void *buffer, size_t frames_to_do)
+size_t Decoder_libSndfile_GetSamples(Decoder *decoder, void *buffer, size_t frames_to_do)
 {
 	return sf_readf_float(decoder->sndfile, buffer, frames_to_do);
 }

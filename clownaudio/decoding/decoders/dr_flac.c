@@ -17,7 +17,7 @@
 
 #include "common.h"
 
-Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
 	(void)loop;	// This is ignored in simple decoders
 
@@ -31,20 +31,20 @@ Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_s
 		info->complex = false;
 	}
 
-	return (Decoder_DR_FLAC*)backend;
+	return (Decoder*)backend;
 }
 
-void Decoder_DR_FLAC_Destroy(Decoder_DR_FLAC *decoder)
+void Decoder_DR_FLAC_Destroy(Decoder *decoder)
 {
 	drflac_close((drflac*)decoder);
 }
 
-void Decoder_DR_FLAC_Rewind(Decoder_DR_FLAC *decoder)
+void Decoder_DR_FLAC_Rewind(Decoder *decoder)
 {
 	drflac_seek_to_pcm_frame((drflac*)decoder, 0);
 }
 
-size_t Decoder_DR_FLAC_GetSamples(Decoder_DR_FLAC *decoder, void *buffer, size_t frames_to_do)
+size_t Decoder_DR_FLAC_GetSamples(Decoder *decoder, void *buffer, size_t frames_to_do)
 {
 	return drflac_read_pcm_frames_s32((drflac*)decoder, frames_to_do, buffer);
 }
