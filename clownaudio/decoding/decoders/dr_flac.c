@@ -6,14 +6,7 @@
 #define DR_FLAC_IMPLEMENTATION
 #define DR_FLAC_NO_STDIO
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
 #include "libs/dr_flac.h"
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 #include "common.h"
 
