@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
 	if (ClownAudio_Init())
 	{
-		printf("Inited mixer\n");
+		printf("Initialised mixer\n");
 		fflush(stdout);
 
 		unsigned char *file_buffers[2];
@@ -61,14 +61,14 @@ int main(int argc, char *argv[])
 			file_sizes[1] = 0;
 		}
 
-		ClownAudio_SoundData *sound = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
+		ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
 
-		if (sound != NULL)
+		if (sound_data != NULL)
 		{
-			printf("Loaded sound\n");
+			printf("Loaded sound data\n");
 			fflush(stdout);
 
-			ClownAudio_Sound instance = ClownAudio_CreateSound(sound, true, true);
+			ClownAudio_Sound instance = ClownAudio_CreateSound(sound_data, true, true);
 			ClownAudio_UnpauseSound(instance);
 
 			if (instance != 0)
@@ -137,25 +137,25 @@ int main(int argc, char *argv[])
 				printf("Couldn't start sound\n");
 			}
 
-			printf("Unloading sound\n");
+			printf("Unloading sound data\n");
 			fflush(stdout);
-			ClownAudio_UnloadSoundData(sound);
+			ClownAudio_UnloadSoundData(sound_data);
 
 			free(file_buffers[1]);
 			free(file_buffers[0]);
 		}
 		else
 		{
-			printf("Couldn't load sound\n");
+			printf("Couldn't load sound data\n");
 		}
 
-		printf("Deiniting mixer\n");
+		printf("Deinitialising mixer\n");
 		fflush(stdout);
 		ClownAudio_Deinit();
 	}
 	else
 	{
-		printf("Couldn't init mixer\n");
+		printf("Couldn't initialise mixer\n");
 	}
 
 
