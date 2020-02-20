@@ -19,7 +19,7 @@ void ClownAudio_Unpause(void);
 ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode);
 void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound);
 
-// If `free_when_done` is true, the sound will be destroyed once if finishes playing
+// If `free_when_done` is true, the sound will be destroyed once it finishes playing
 ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done);
 void ClownAudio_DestroySound(ClownAudio_Sound instance);
 
