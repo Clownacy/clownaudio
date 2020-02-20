@@ -106,6 +106,11 @@ void ClownAudio_FadeInSound(ClownAudio_Sound instance, unsigned int duration)
 	Mixer_FadeInSound(instance, duration);
 }
 
+void ClownAudio_CancelFade(ClownAudio_Sound instance)
+{
+	Mixer_CancelFade(instance);
+}
+
 int ClownAudio_GetSoundStatus(ClownAudio_Sound instance)
 {
 	return Mixer_GetSoundStatus(instance);
