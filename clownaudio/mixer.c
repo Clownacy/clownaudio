@@ -261,6 +261,19 @@ void Mixer_CancelFade(Mixer_Sound instance)
 	MutexUnlock(&mixer_mutex);
 }
 
+int Mixer_GetSoundStatus(Mixer_Sound instance)
+{
+	MutexLock(&mixer_mutex);
+
+	Channel *channel = FindChannel(instance);
+
+	int status = (channel == NULL) ? -1 : channel->paused;
+
+	MutexUnlock(&mixer_mutex);
+
+	return status;
+}
+
 void Mixer_SetSoundVolume(Mixer_Sound instance, float volume)
 {
 	MutexLock(&mixer_mutex);

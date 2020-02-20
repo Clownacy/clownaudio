@@ -18,6 +18,7 @@ void Mixer_UnpauseSound(Mixer_Sound instance);
 void Mixer_FadeOutSound(Mixer_Sound instance, unsigned int duration);
 void Mixer_FadeInSound(Mixer_Sound instance, unsigned int duration);
 void Mixer_CancelFade(Mixer_Sound instance);
+int Mixer_GetSoundStatus(Mixer_Sound instance);
 void Mixer_SetSoundVolume(Mixer_Sound instance, float volume);
 void Mixer_SetSoundLoop(Mixer_Sound instance, bool loop);
 void Mixer_SetSoundSampleRate(Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
