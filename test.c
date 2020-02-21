@@ -76,6 +76,19 @@ int main(int argc, char *argv[])
 				printf("Started sound\n");
 				fflush(stdout);
 
+				printf("\n"
+				       "Controls:\n"
+				       " q - Quit\n"
+				       " r - Rewind sound\n"
+				       " o - Fade-out sound\n"
+				       " i - Fade-in sound\n"
+				       " u - Set sample-rate to 8KHz\n"
+				       " p - Pause/unpause sound\n"
+				       " [ - Pan to the left\n"
+				       " ] - Pan to the right\n\n"
+				);
+				fflush(stdout);
+
 				float pan = 0.0f;
 				bool pause = false;
 
@@ -87,41 +100,72 @@ int main(int argc, char *argv[])
 					switch (input)
 					{
 						case 'q':
+							printf("Quitting\n");
+							fflush(stdout);
+
 							exit = true;
 							break;
 
 						case 'r':
+							printf("Rewinding sound\n");
+							fflush(stdout);
+
 							ClownAudio_RewindSound(instance);
 							break;
 
 						case 'o':
+							printf("Fading-out sound\n");
+							fflush(stdout);
+
 							ClownAudio_FadeOutSound(instance, 2 * 1000);
 							break;
 
 						case 'i':
+							printf("Fading-in sound\n");
+							fflush(stdout);
+
 							ClownAudio_FadeInSound(instance, 2 * 1000);
 							break;
 
 						case 'u':
+							printf("Setting sample-rate to 8KHz sound\n");
+							fflush(stdout);
+
 							ClownAudio_SetSoundSampleRate(instance, 8000, 8000);
 							break;
 
 						case 'p':
 							if (pause)
+							{
+								printf("Unpausing sound\n");
+								fflush(stdout);
+
 								ClownAudio_UnpauseSound(instance);
+							}
 							else
+							{
+								printf("Pausing sound\n");
+								fflush(stdout);
+
 								ClownAudio_PauseSound(instance);
+							}
 
 							pause = !pause;
 
 							break;
 
 						case '[':
+							printf("Panning sound to the left\n");
+							fflush(stdout);
+
 							pan -= 0.25f;
 							ClownAudio_SetSoundPan(instance, pan);
 							break;
 
 						case ']':
+							printf("Panning sound to the right\n");
+							fflush(stdout);
+
 							pan += 0.25f;
 							ClownAudio_SetSoundPan(instance, pan);
 							break;
