@@ -20,11 +20,14 @@ process.
 That said, clownaudio's internals are modular, meaning you can easily extract
 its mixer and use it as part of your own audio system if needed.
 
+
+## Decoding backends
+
 In order to support a range of audio formats, clownaudio leverages numerous
 open-source libraries, dubbed 'decoding backends'. These libraries include...
 
-Branch | Format | Licence | Included in-tree
--------|--------|---------|--------
+Library | Format | Licence | Included in-tree
+--------|--------|---------|-----------------
 libogg/libvorbis/libvorbisfile | Ogg Vorbis | BSD | No
 stb_vorbis | Ogg Vorbis | Public-domain/MIT-0 | Yes
 libFLAC | FLAC | BSD | No
@@ -41,6 +44,20 @@ clownaudio aims to be bloat-free and dependency-free: each decoding backend can
 be toggled at compile-time, and an effort is made to provide multiple backends
 for individual formats, to allow the user a choice between standard libraries
 (such as libvorbis), and lightweight in-tree libraries (such as stb_vorbis).
+
+
+## Playback backends
+
+In addition, clownaudio utilises open-source libraries to provide
+audio-playback:
+
+Library   | Licence  | Included in-tree
+----------|----------|-----------------
+Cubeb     | ISC      | No
+miniaudio | Public-domain/MIT-0 | Yes
+PortAudio | MIT      | No
+SDL1.2    | LGPL 2.1 | No
+SDL2      | zlib     | No
 
 
 ## Licensing
