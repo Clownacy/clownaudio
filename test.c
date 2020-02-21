@@ -78,14 +78,15 @@ int main(int argc, char *argv[])
 
 				printf("\n"
 				       "Controls:\n"
-				       " q - Quit\n"
-				       " r - Rewind sound\n"
-				       " o - Fade-out sound\n"
-				       " i - Fade-in sound\n"
-				       " u - Set sample-rate to 8KHz\n"
-				       " p - Pause/unpause sound\n"
-				       " [ - Pan to the left\n"
-				       " ] - Pan to the right\n\n"
+				       " q            - Quit\n"
+				       " r            - Rewind sound\n"
+				       " o [duration] - Fade-out sound\n"
+				       " i [duration] - Fade-in sound\n"
+				       " c            - Cancel fade\n"
+				       " u [rate]     - Set sample-rate\n"
+				       " p            - Pause/unpause sound\n"
+				       " [            - Pan to the left\n"
+				       " ]            - Pan to the right\n\n"
 				);
 				fflush(stdout);
 
@@ -95,9 +96,23 @@ int main(int argc, char *argv[])
 				bool exit = false;
 				while (!exit)
 				{
-					char input = getchar();
+					char buffer[128];
+					fgets(buffer, sizeof(buffer), stdin);
 
-					switch (input)
+					char mode;
+					bool no_param;
+					unsigned int param;
+					for (;;)
+					{
+						int inputs_read = sscanf(buffer, "%c %u\n", &mode, &param);
+
+						no_param = inputs_read == 1;
+
+						if (inputs_read == 1 || inputs_read == 2)
+							break;
+					}
+
+					switch (mode)
 					{
 						case 'q':
 							printf("Quitting\n");
@@ -114,24 +129,40 @@ int main(int argc, char *argv[])
 							break;
 
 						case 'o':
-							printf("Fading-out sound\n");
+							if (no_param)
+								param = 1000 * 2;
+
+							printf("Fading-out sound over %u milliseconds\n", param);
 							fflush(stdout);
 
-							ClownAudio_FadeOutSound(instance, 2 * 1000);
+							ClownAudio_FadeOutSound(instance, param);
 							break;
 
 						case 'i':
-							printf("Fading-in sound\n");
+							if (no_param)
+								param = 1000 * 2;
+
+							printf("Fading-in sound over %u milliseconds\n", param);
 							fflush(stdout);
 
-							ClownAudio_FadeInSound(instance, 2 * 1000);
+							ClownAudio_FadeInSound(instance, param);
+							break;
+
+						case 'c':
+							printf("Cancelling fade\n");
+							fflush(stdout);
+
+							ClownAudio_CancelFade(instance);
 							break;
 
 						case 'u':
-							printf("Setting sample-rate to 8KHz sound\n");
+							if (no_param)
+								param = 8000;
+
+							printf("Setting sample-rate to %uHz\n", param);
 							fflush(stdout);
 
-							ClownAudio_SetSoundSampleRate(instance, 8000, 8000);
+							ClownAudio_SetSoundSampleRate(instance, param, param);
 							break;
 
 						case 'p':
