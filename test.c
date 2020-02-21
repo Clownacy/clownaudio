@@ -80,11 +80,12 @@ int main(int argc, char *argv[])
 				       "Controls:\n"
 				       " q            - Quit\n"
 				       " r            - Rewind sound\n"
-				       " o [duration] - Fade-out sound\n"
-				       " i [duration] - Fade-in sound\n"
+				       " o [duration] - Fade-out sound (milliseconds)\n"
+				       " i [duration] - Fade-in sound (milliseconds)\n"
 				       " c            - Cancel fade\n"
-				       " u [rate]     - Set sample-rate\n"
+				       " u [rate]     - Set sample-rate (Hz)\n"
 				       " p            - Pause/unpause sound\n"
+				       " v [volume]   - Set sound volume (0.0-1.0)\n"
 				       " [            - Pan to the left\n"
 				       " ]            - Pan to the right\n\n"
 				);
@@ -100,17 +101,7 @@ int main(int argc, char *argv[])
 					fgets(buffer, sizeof(buffer), stdin);
 
 					char mode;
-					bool no_param;
-					unsigned int param;
-					for (;;)
-					{
-						int inputs_read = sscanf(buffer, "%c %u\n", &mode, &param);
-
-						no_param = inputs_read == 1;
-
-						if (inputs_read == 1 || inputs_read == 2)
-							break;
-					}
+					while (sscanf(buffer, "%c", &mode) != 1);
 
 					switch (mode)
 					{
@@ -129,7 +120,9 @@ int main(int argc, char *argv[])
 							break;
 
 						case 'o':
-							if (no_param)
+						{
+							unsigned int param;
+							if (sscanf(buffer, "%c %u", &mode, &param) != 2)
 								param = 1000 * 2;
 
 							printf("Fading-out sound over %u milliseconds\n", param);
@@ -137,9 +130,12 @@ int main(int argc, char *argv[])
 
 							ClownAudio_FadeOutSound(instance, param);
 							break;
+						}
 
 						case 'i':
-							if (no_param)
+						{
+							unsigned int param;
+							if (sscanf(buffer, "%c %u", &mode, &param) != 2)
 								param = 1000 * 2;
 
 							printf("Fading-in sound over %u milliseconds\n", param);
@@ -147,6 +143,7 @@ int main(int argc, char *argv[])
 
 							ClownAudio_FadeInSound(instance, param);
 							break;
+						}
 
 						case 'c':
 							printf("Cancelling fade\n");
@@ -156,7 +153,9 @@ int main(int argc, char *argv[])
 							break;
 
 						case 'u':
-							if (no_param)
+						{
+							unsigned int param;
+							if (sscanf(buffer, "%c %u", &mode, &param) != 2)
 								param = 8000;
 
 							printf("Setting sample-rate to %uHz\n", param);
@@ -164,6 +163,7 @@ int main(int argc, char *argv[])
 
 							ClownAudio_SetSoundSampleRate(instance, param, param);
 							break;
+						}
 
 						case 'p':
 							if (pause)
@@ -184,6 +184,19 @@ int main(int argc, char *argv[])
 							pause = !pause;
 
 							break;
+
+						case 'v':
+						{
+							float param;
+							if (sscanf(buffer, "%c %f", &mode, &param) != 2)
+								param = 1.0f;
+
+							printf("Setting volume to %f\n", param);
+							fflush(stdout);
+
+							ClownAudio_SetSoundVolume(instance, param);
+							break;
+						}
 
 						case '[':
 							printf("Panning sound to the left\n");
