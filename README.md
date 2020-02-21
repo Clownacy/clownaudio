@@ -60,6 +60,14 @@ SDL1.2    | LGPL 2.1 | No
 SDL2      | zlib     | No
 
 
+## Building
+
+Producing a shared/static library is not currently possible. For now, projects
+should integrate clownaudio into themselves directly.
+
+Example `Makefile` and `CMakeLists.txt` files for a demo tool are provided.
+
+
 ## Licensing
 
 clownaudio itself is under the zlib licence.
