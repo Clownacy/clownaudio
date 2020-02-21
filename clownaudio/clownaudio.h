@@ -35,7 +35,7 @@ void ClownAudio_CancelFade(ClownAudio_Sound instance);
 // Returns -1 if the sound doesn't exist, 0 if it's unpaused, or 1 if it is paused
 int ClownAudio_GetSoundStatus(ClownAudio_Sound instance);
 
-void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume);
+void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume);	// Volume is logarithmic, between 0.0f and 1.0f
 void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop);
 void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
 void ClownAudio_SetSoundPan(ClownAudio_Sound instance, float pan);	// -1.0f is full-left; 1.0f is full-right

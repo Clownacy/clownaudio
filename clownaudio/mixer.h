@@ -27,7 +27,7 @@ void Mixer_CancelFade(Mixer_Sound instance);
 // Returns -1 if the sound doesn't exist, 0 if it's unpaused, or 1 if it is paused
 int Mixer_GetSoundStatus(Mixer_Sound instance);
 
-void Mixer_SetSoundVolume(Mixer_Sound instance, float volume);
+void Mixer_SetSoundVolume(Mixer_Sound instance, float volume);	// Volume is logarithmic, between 0.0f and 1.0f
 void Mixer_SetSoundLoop(Mixer_Sound instance, bool loop);
 void Mixer_SetSoundSampleRate(Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
 void Mixer_SetPan(Mixer_Sound instance, float pan);	// -1.0f is full-left; 1.0f is full-right
