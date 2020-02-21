@@ -222,8 +222,16 @@ void Mixer_FadeOutSound(Mixer_Sound instance, unsigned int duration)
 
 	if (channel != NULL)
 	{
-		channel->fade_out_counter_max = (output_sample_rate * duration) / 1000;
-		channel->fade_counter = channel->fade_in_counter_max ? (channel->fade_in_counter_max - channel->fade_counter) * ((float)channel->fade_out_counter_max / (float)channel->fade_in_counter_max) : channel->fade_out_counter_max;
+		unsigned long new_fade_out_counter_max = (output_sample_rate * duration) / 1000;
+
+		if (channel->fade_in_counter_max != 0)
+			channel->fade_counter = (unsigned long)((channel->fade_in_counter_max - channel->fade_counter) * ((float)new_fade_out_counter_max / (float)channel->fade_in_counter_max));
+		else if (channel->fade_out_counter_max != 0)
+			channel->fade_counter = (unsigned long)(channel->fade_counter * ((float)new_fade_out_counter_max / (float)channel->fade_out_counter_max));
+		else
+			channel->fade_counter = new_fade_out_counter_max;
+
+		channel->fade_out_counter_max = new_fade_out_counter_max;
 		channel->fade_in_counter_max = 0;
 	}
 
@@ -238,8 +246,16 @@ void Mixer_FadeInSound(Mixer_Sound instance, unsigned int duration)
 
 	if (channel != NULL)
 	{
-		channel->fade_in_counter_max = (output_sample_rate * duration) / 1000;
-		channel->fade_counter = channel->fade_out_counter_max ? (channel->fade_out_counter_max - channel->fade_counter) * ((float)channel->fade_in_counter_max / (float)channel->fade_out_counter_max) : channel->fade_in_counter_max;
+		unsigned long new_fade_in_counter_max = (output_sample_rate * duration) / 1000;
+
+		if (channel->fade_out_counter_max != 0)
+			channel->fade_counter = (unsigned long)((channel->fade_out_counter_max - channel->fade_counter) * ((float)new_fade_in_counter_max / (float)channel->fade_out_counter_max));
+		else if (channel->fade_in_counter_max != 0)
+			channel->fade_counter = (unsigned long)(channel->fade_counter * ((float)new_fade_in_counter_max / (float)channel->fade_in_counter_max));
+		else
+			channel->fade_counter = new_fade_in_counter_max;
+
+		channel->fade_in_counter_max = new_fade_in_counter_max;
 		channel->fade_out_counter_max = 0;
 	}
 
