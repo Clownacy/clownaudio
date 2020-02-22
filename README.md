@@ -48,7 +48,7 @@ for individual formats, to allow the user a choice between standard libraries
 
 ## Playback backends
 
-In addition, clownaudio utilises open-source libraries to provide
+In addition, clownaudio utilises the following libraries to provide
 audio-playback:
 
 Library   | Licence  | Included in-tree
@@ -72,5 +72,5 @@ Example `Makefile` and `CMakeLists.txt` files for a demo tool are provided.
 
 clownaudio itself is under the zlib licence.
 
-Be aware that libraries used by the various decoding backends are subject to
+Be aware that libraries used by the various backends are subject to
 their own licences.
