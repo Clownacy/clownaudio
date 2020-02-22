@@ -1,7 +1,7 @@
 ## About
 
-clownaudio is a sound engine, capable of playing and mixing sounds in a variety
-of formats.
+clownaudio is a stereo sound engine, capable of playing and mixing sounds in a
+variety of formats.
 
 Supported formats include...
 * Ogg Vorbis
