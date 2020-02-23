@@ -38,7 +38,7 @@ Decoder* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, 
 			info->sample_rate = SAMPLE_RATE;
 			info->channel_count = CHANNEL_COUNT;
 			info->format = DECODER_FORMAT_S16;
-			info->complex = true;
+			info->is_complex = true;
 
 			return decoder;
 		}

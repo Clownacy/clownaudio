@@ -19,7 +19,7 @@ Decoder* Decoder_libOpenMPT_Create(const unsigned char *data, size_t data_size, 
 		info->sample_rate = SAMPLE_RATE;
 		info->channel_count = CHANNEL_COUNT;
 		info->format = DECODER_FORMAT_F32;
-		info->complex = true;
+		info->is_complex = true;
 
 		if (loop)
 			openmpt_module_set_repeat_count(module, -1);

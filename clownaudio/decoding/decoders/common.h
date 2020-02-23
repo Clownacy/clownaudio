@@ -14,7 +14,7 @@ typedef struct DecoderInfo
 	unsigned long sample_rate;
 	unsigned int channel_count;
 	DecoderFormat format;
-	bool complex;
+	bool is_complex;
 } DecoderInfo;
 
 typedef struct Decoder Decoder;

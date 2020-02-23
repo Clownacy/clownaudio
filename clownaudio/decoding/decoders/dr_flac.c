@@ -21,7 +21,7 @@ Decoder* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, boo
 		info->sample_rate = backend->sampleRate;
 		info->channel_count = backend->channels;
 		info->format = DECODER_FORMAT_S32;
-		info->complex = false;
+		info->is_complex = false;
 	}
 
 	return (Decoder*)backend;

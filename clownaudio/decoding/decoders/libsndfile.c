@@ -97,7 +97,7 @@ Decoder* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, 
 				info->sample_rate = sf_info.samplerate;
 				info->channel_count = sf_info.channels;
 				info->format = DECODER_FORMAT_F32;
-				info->complex = false;
+				info->is_complex = false;
 
 				return decoder;
 			}

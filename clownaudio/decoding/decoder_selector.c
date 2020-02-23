@@ -195,7 +195,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 		if (decoder != NULL)
 		{
-			decoder_type = info.complex ? DECODER_TYPE_COMPLEX : DECODER_TYPE_SIMPLE;
+			decoder_type = info.is_complex ? DECODER_TYPE_COMPLEX : DECODER_TYPE_SIMPLE;
 			decoder_functions = &decoder_function_list[i];
 
 			if (decoder_type == DECODER_TYPE_SIMPLE && predecode)

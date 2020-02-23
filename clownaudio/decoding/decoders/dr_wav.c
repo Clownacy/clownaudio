@@ -24,7 +24,7 @@ Decoder* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, bool
 			info->sample_rate = instance->sampleRate;
 			info->channel_count = instance->channels;
 			info->format = DECODER_FORMAT_F32;
-			info->complex = false;
+			info->is_complex = false;
 
 			return (Decoder*)instance;
 		}

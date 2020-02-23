@@ -89,7 +89,7 @@ Decoder* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, b
 				info->sample_rate = v_info->rate;
 				info->channel_count = v_info->channels;
 				info->format = DECODER_FORMAT_F32;
-				info->complex = false;
+				info->is_complex = false;
 			}
 			else
 			{
