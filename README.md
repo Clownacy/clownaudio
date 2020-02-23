@@ -43,12 +43,12 @@ snes_spc | SNES SPC | LGPL 2.1 | Yes
 clownaudio aims to be bloat-free and dependency-free: each decoding backend can
 be toggled at compile-time, and an effort is made to provide multiple backends
 for individual formats, to allow the user a choice between standard libraries
-(such as libvorbis), and lightweight in-tree libraries (such as stb_vorbis).
+(such as libvorbis), and lighter in-tree libraries (such as stb_vorbis).
 
 
 ## Playback backends
 
-In addition, clownaudio utilises the following libraries to provide
+In addition, clownaudio utilises one of the following libraries to provide
 audio-playback:
 
 Library   | Licence  | Included in-tree
