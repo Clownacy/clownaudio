@@ -62,10 +62,14 @@ SDL2      | zlib     | No
 
 ## Building
 
-Producing a shared/static library is not currently possible. For now, projects
+Producing a shared/static library is currently incomplete. For now, projects
 should integrate clownaudio directly.
 
-Example `Makefile` and `CMakeLists.txt` files for a demo tool are provided.
+clownaudio comes with a `CMakeLists.txt` file, allowing projects using CMake to
+include it with ease, using `add_subdirectory`. Currently this method only
+supports a subset of decoder/playback backends.
+
+Example `Makefile` and `CMakeLists.txt` files for a demo tool are also provided.
 
 
 ## Licensing
