@@ -1,4 +1,5 @@
-/obj
 /build
-/test
-/test.exe
+/test/build
+/test/obj
+/test/test
+/test/test.exe
