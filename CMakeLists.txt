@@ -11,7 +11,8 @@ option(CLOWNAUDIO_DR_WAV "Enable the dr_wav decoder backend" OFF)
 option(CLOWNAUDIO_LIBXMPLITE "Enable the libxmp-lite decoder backend" OFF)
 option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
 option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
-set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
+#set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
+set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', and 'SDL2'")
 
 list(APPEND CMAKE_MODULE_PATH
 	"${CMAKE_CURRENT_LIST_DIR}/cmake"
