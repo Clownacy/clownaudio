@@ -31,16 +31,17 @@ set(SOURCES src/virtual.c
 )
 
 add_library(libxmp-lite ${SOURCES})
-target_compile_definitions(libxmp-lite PRIVATE
-            LIBXMP_CORE_PLAYER=1
-            inline=__inline
-            _USE_MATH_DEFINES=1
-	    BUILDING_STATIC=1
-)
+target_compile_definitions(libxmp-lite PRIVATE LIBXMP_CORE_PLAYER=1)
+
+if(BUILD_SHARED_LIBS AND WIN32)
+	target_compile_definitions(libxmp-lite PRIVATE BUILDING_DLL=1)
+else()
+	target_compile_definitions(libxmp-lite PRIVATE BUILDING_STATIC=1)
+endif()
 
 target_include_directories(libxmp-lite PUBLIC include/libxmp-lite)
 target_include_directories(libxmp-lite PRIVATE src)
 
 if(MSVC)
-	target_compile_definitions(libxmp-lite PRIVATE _CRT_SECURE_NO_WARNINGS=1)
+	target_compile_definitions(libxmp-lite PRIVATE _CRT_SECURE_NO_WARNINGS=1 inline=__inline _USE_MATH_DEFINES=1)
 endif()
