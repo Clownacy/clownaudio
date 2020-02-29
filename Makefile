@@ -103,7 +103,7 @@ ifeq ($(USE_LIBXMPLITE), true)
   SOURCES += clownaudio/decoding/decoders/libxmp-lite
   ALL_CFLAGS += -DUSE_LIBXMPLITE
 
-  ifeq ($(shell pkg-config libxmsp-lite --exists && echo 1), 1)
+  ifeq ($(shell pkg-config libxmp-lite --exists && echo 1), 1)
     ALL_CFLAGS += $(shell pkg-config libxmp-lite --cflags)
     ALL_LIBS += $(shell pkg-config libxmp-lite --libs --static)
   else
@@ -209,7 +209,7 @@ PXTONE_SOURCES = \
 
 OBJECTS += $(addprefix obj/main/, $(addsuffix .o, $(SOURCES)))
 ifeq ($(USE_LIBXMPLITE), true)
-  ifneq ($(shell pkg-config libxsmp-lite --exists && echo 1), 1)
+  ifneq ($(shell pkg-config libxmp-lite --exists && echo 1), 1)
     OBJECTS += $(addprefix obj/libxmp-lite/, $(addsuffix .o, $(LIBXMPLITE_SOURCES)))
   endif
 endif
