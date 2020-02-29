@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.14.6)
 
 #option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
-option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" OFF)
+option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" ON)
 #option(CLOWNAUDIO_LIBFLAC "Enable the libFLAC decoder backend" OFF)
-option(CLOWNAUDIO_DR_FLAC "Enable the dr_flac decoder backend" OFF)
-option(CLOWNAUDIO_DR_WAV "Enable the dr_wav decoder backend" OFF)
+option(CLOWNAUDIO_DR_FLAC "Enable the dr_flac decoder backend" ON)
+option(CLOWNAUDIO_DR_WAV "Enable the dr_wav decoder backend" ON)
 #option(CLOWNAUDIO_LIBOPUS "Enable the libopus decoder backend" OFF)
 #option(CLOWNAUDIO_LIBSNDFILE "Enable the libsndfile decoder backend" OFF)
 #option(CLOWNAUDIO_LIBOPENMPT "Enable the libopenmpt decoder backend" OFF)
