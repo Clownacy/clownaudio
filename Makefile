@@ -36,11 +36,11 @@ ALL_LDFLAGS = $(LDFLAGS)
 LIBS =
 ALL_LIBS = $(LIBS)
 
-SDL1_CFLAGS = `pkg-config sdl --cflags`
-SDL1_LIBS = `pkg-config sdl --libs --static`
+SDL1_CFLAGS = $(shell pkg-config sdl --cflags)
+SDL1_LIBS = $(shell pkg-config sdl --libs --static)
 
-SDL2_CFLAGS = `pkg-config sdl2 --cflags`
-SDL2_LIBS = `pkg-config sdl2 --libs --static`
+SDL2_CFLAGS = $(shell pkg-config sdl2 --cflags)
+SDL2_LIBS = $(shell pkg-config sdl2 --libs --static)
 
 SOURCES = \
   test \
@@ -55,8 +55,8 @@ SOURCES = \
 
 ifeq ($(USE_LIBVORBIS), true)
   SOURCES += clownaudio/decoding/decoders/libvorbis
-  ALL_CFLAGS += -DUSE_LIBVORBIS `pkg-config vorbisfile --cflags`
-  ALL_LIBS += `pkg-config vorbisfile --libs --static`
+  ALL_CFLAGS += -DUSE_LIBVORBIS $(shell pkg-config vorbisfile --cflags)
+  ALL_LIBS += $(shell pkg-config vorbisfile --libs --static)
 endif
 
 ifeq ($(USE_STB_VORBIS), true)
@@ -67,8 +67,8 @@ endif
 
 ifeq ($(USE_LIBFLAC), true)
   SOURCES += clownaudio/decoding/decoders/libflac
-  ALL_CFLAGS += -DUSE_LIBFLAC `pkg-config flac --cflags`
-  ALL_LIBS += `pkg-config flac --libs --static`
+  ALL_CFLAGS += -DUSE_LIBFLAC $(shell pkg-config flac --cflags)
+  ALL_LIBS += $(shell pkg-config flac --libs --static)
 endif
 
 ifeq ($(USE_DR_FLAC), true)
@@ -83,20 +83,20 @@ endif
 
 ifeq ($(USE_LIBOPUS), true)
   SOURCES += clownaudio/decoding/decoders/libopus
-  ALL_CFLAGS += -DUSE_LIBOPUS `pkg-config opusfile --cflags`
-  ALL_LIBS += `pkg-config opusfile --libs --static`
+  ALL_CFLAGS += -DUSE_LIBOPUS $(shell pkg-config opusfile --cflags)
+  ALL_LIBS += $(shell pkg-config opusfile --libs --static)
 endif
 
 ifeq ($(USE_LIBSNDFILE), true)
   SOURCES += clownaudio/decoding/decoders/libsndfile
-  ALL_CFLAGS += -DUSE_LIBSNDFILE `pkg-config sndfile --cflags`
-  ALL_LIBS += `pkg-config sndfile --libs --static`
+  ALL_CFLAGS += -DUSE_LIBSNDFILE $(shell pkg-config sndfile --cflags)
+  ALL_LIBS += $(shell pkg-config sndfile --libs --static)
 endif
 
 ifeq ($(USE_LIBOPENMPT), true)
   SOURCES += clownaudio/decoding/decoders/libopenmpt
-  ALL_CFLAGS += -DUSE_LIBOPENMPT `pkg-config libopenmpt --cflags`
-  ALL_LIBS += `pkg-config libopenmpt --libs --static`
+  ALL_CFLAGS += -DUSE_LIBOPENMPT $(shell pkg-config libopenmpt --cflags)
+  ALL_LIBS += $(shell pkg-config libopenmpt --libs --static)
 endif
 
 ifeq ($(USE_LIBXMPLITE), true)
@@ -104,8 +104,8 @@ ifeq ($(USE_LIBXMPLITE), true)
   ALL_CFLAGS += -DUSE_LIBXMPLITE
 
   ifeq ($(shell pkg-config libxmsp-lite --exists && echo 1), 1)
-    ALL_CFLAGS += `pkg-config libxmp-lite --cflags`
-    ALL_LIBS += `pkg-config libxmp-lite --libs --static`
+    ALL_CFLAGS += $(shell pkg-config libxmp-lite --cflags)
+    ALL_LIBS += $(shell pkg-config libxmp-lite --libs --static)
   else
     ALL_CFLAGS += -Iclownaudio/decoding/decoders/libs/libxmp-lite/include/libxmp-lite
   endif
@@ -144,8 +144,8 @@ else ifeq ($(BACKEND), Cubeb)
   ALL_LIBS += -lcubeb
 else ifeq ($(BACKEND), PortAudio)
   SOURCES += clownaudio/playback/portaudio
-  ALL_CFLAGS += `pkg-config portaudio-2.0 --cflags`
-  ALL_LIBS += `pkg-config portaudio-2.0 --libs --static`
+  ALL_CFLAGS += $(shell pkg-config portaudio-2.0 --cflags)
+  ALL_LIBS += $(shell pkg-config portaudio-2.0 --libs --static)
 endif
 
 LIBXMPLITE_SOURCES = \
