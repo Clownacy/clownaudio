@@ -35,7 +35,7 @@ dr_flac | FLAC | Public-domain/MIT-0 | Yes
 dr_wav | WAV | Public-domain/MIT-0 | Yes
 libopus | Opus | BSD | No
 libsndfile | Various (includes Ogg Vorbis, FLAC, WAV, AIFF, and others) | LGPL 2.1 | No
-libxmp-lite | .mod, .it, .xm, .s3m | MIT | No
+libxmp-lite | .mod, .it, .xm, .s3m | MIT | Yes
 libopenmpt | Various (includes .mod, .it, .xm, .s3m, .mptm, and **many** others) | BSD | No
 PxTone | PxTone Music/PxTone Noise | Custom (appears to be permissive) | Yes
 snes_spc | SNES SPC | LGPL 2.1 | Yes
