@@ -6,7 +6,7 @@ USE_DR_WAV = true
 USE_LIBOPUS = false
 USE_LIBSNDFILE = false
 USE_LIBOPENMPT = false
-USE_LIBXMPLITE = false
+USE_LIBXMPLITE = true
 USE_SNES_SPC = true
 USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
@@ -101,8 +101,14 @@ endif
 
 ifeq ($(USE_LIBXMPLITE), true)
   SOURCES += clownaudio/decoding/decoders/libxmp-lite
-  ALL_CFLAGS += -DUSE_LIBXMPLITE `pkg-config libxmp-lite --cflags`
-  ALL_LIBS += `pkg-config libxmp-lite --libs --static`
+  ALL_CFLAGS += -DUSE_LIBXMPLITE
+
+  ifeq ($(shell pkg-config libxmsp-lite --exists && echo 1), 1)
+    ALL_CFLAGS += `pkg-config libxmp-lite --cflags`
+    ALL_LIBS += `pkg-config libxmp-lite --libs --static`
+  else
+    ALL_CFLAGS += -Iclownaudio/decoding/decoders/libs/libxmp-lite/include/libxmp-lite
+  endif
 endif
 
 ifeq ($(USE_SNES_SPC), true)
@@ -142,6 +148,33 @@ else ifeq ($(BACKEND), PortAudio)
   ALL_LIBS += `pkg-config portaudio-2.0 --libs --static`
 endif
 
+LIBXMPLITE_SOURCES = \
+  src/virtual \
+  src/format \
+  src/period \
+  src/player \
+  src/read_event \
+  src/dataio \
+  src/lfo \
+  src/scan \
+  src/control \
+  src/filter \
+  src/effects \
+  src/mixer \
+  src/mix_all \
+  src/load_helpers \
+  src/load \
+  src/hio \
+  src/smix \
+  src/memio \
+  src/loaders/common \
+  src/loaders/itsex \
+  src/loaders/sample \
+  src/loaders/xm_load \
+  src/loaders/mod_load \
+  src/loaders/s3m_load \
+  src/loaders/it_load
+
 SPC_SOURCES = \
   dsp \
   SNES_SPC \
@@ -175,6 +208,11 @@ PXTONE_SOURCES = \
   pxtoneNoise
 
 OBJECTS += $(addprefix obj/main/, $(addsuffix .o, $(SOURCES)))
+ifeq ($(USE_LIBXMPLITE), true)
+  ifneq ($(shell pkg-config libxsmp-lite --exists && echo 1), 1)
+    OBJECTS += $(addprefix obj/libxmp-lite/, $(addsuffix .o, $(LIBXMPLITE_SOURCES)))
+  endif
+endif
 ifeq ($(USE_SNES_SPC), true)
   OBJECTS += $(addprefix obj/spc/, $(addsuffix .o, $(SPC_SOURCES)))
 endif
@@ -193,6 +231,10 @@ obj/main/%.o: %.c
 obj/main/%.o: %.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
+
+obj/libxmp-lite/%.o: clownaudio/decoding/decoders/libs/libxmp-lite/%.c
+	@mkdir -p $(@D)
+	@$(CC) $(ALL_CFLAGS) -std=gnu11 -Wall -Wextra -pedantic -Iclownaudio/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 -Dinline=__inline -D_USE_MATH_DEFINES=1 -DBUILDING_STATIC=1 $< -o $@ -c
 
 obj/spc/%.o: clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%.cpp
 	@mkdir -p $(@D)
