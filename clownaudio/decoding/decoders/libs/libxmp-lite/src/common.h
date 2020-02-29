@@ -109,7 +109,8 @@ void __inline CLIB_DECL D_(const char *text, ...) { do {} while (0); }
 		__FILE__, __LINE__); printf (args); printf ("\x1b[0m\n"); \
 	} while (0)
 #else
-#define D_(args...) do {} while (0)
+//#define D_(args...) do {} while (0)
+#define D_(...)
 #endif
 
 #endif	/* !_MSC_VER */
