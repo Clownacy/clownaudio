@@ -149,63 +149,63 @@ else ifeq ($(BACKEND), PortAudio)
 endif
 
 LIBXMPLITE_SOURCES = \
-  src/virtual \
-  src/format \
-  src/period \
-  src/player \
-  src/read_event \
-  src/dataio \
-  src/lfo \
-  src/scan \
-  src/control \
-  src/filter \
-  src/effects \
-  src/mixer \
-  src/mix_all \
-  src/load_helpers \
-  src/load \
-  src/hio \
-  src/smix \
-  src/memio \
-  src/loaders/common \
-  src/loaders/itsex \
-  src/loaders/sample \
-  src/loaders/xm_load \
-  src/loaders/mod_load \
-  src/loaders/s3m_load \
-  src/loaders/it_load
+  src/virtual.c \
+  src/format.c \
+  src/period.c \
+  src/player.c \
+  src/read_event.c \
+  src/dataio.c \
+  src/lfo.c \
+  src/scan.c \
+  src/control.c \
+  src/filter.c \
+  src/effects.c \
+  src/mixer.c \
+  src/mix_all.c \
+  src/load_helpers.c \
+  src/load.c \
+  src/hio.c \
+  src/smix.c \
+  src/memio.c \
+  src/loaders/common.c \
+  src/loaders/itsex.c \
+  src/loaders/sample.c \
+  src/loaders/xm_load.c \
+  src/loaders/mod_load.c \
+  src/loaders/s3m_load.c \
+  src/loaders/it_load.c
 
 SPC_SOURCES = \
-  dsp \
-  SNES_SPC \
-  SNES_SPC_misc \
-  SNES_SPC_state \
-  spc \
-  SPC_DSP \
-  SPC_Filter
+  dsp.cpp \
+  SNES_SPC.cpp \
+  SNES_SPC_misc.cpp \
+  SNES_SPC_state.cpp \
+  spc.cpp \
+  SPC_DSP.cpp \
+  SPC_Filter.cpp
 
 PXTONE_SOURCES = \
-  pxtnDelay \
-  pxtnDescriptor \
-  pxtnError \
-  pxtnEvelist \
-  pxtnMaster \
-  pxtnMem \
-  pxtnOverDrive \
-  pxtnPulse_Frequency \
-  pxtnPulse_Noise \
-  pxtnPulse_NoiseBuilder \
-  pxtnPulse_Oggv \
-  pxtnPulse_Oscillator \
-  pxtnPulse_PCM \
-  pxtnService \
-  pxtnService_moo \
-  pxtnText \
-  pxtnUnit \
-  pxtnWoice \
-  pxtnWoice_io \
-  pxtnWoicePTV \
-  pxtoneNoise
+  pxtnDelay.cpp \
+  pxtnDescriptor.cpp \
+  pxtnError.cpp \
+  pxtnEvelist.cpp \
+  pxtnMaster.cpp \
+  pxtnMem.cpp \
+  pxtnOverDrive.cpp \
+  pxtnPulse_Frequency.cpp \
+  pxtnPulse_Noise.cpp \
+  pxtnPulse_NoiseBuilder.cpp \
+  pxtnPulse_Oggv.cpp \
+  pxtnPulse_Oscillator.cpp \
+  pxtnPulse_PCM.cpp \
+  pxtnService.cpp \
+  pxtnService_moo.cpp \
+  pxtnText.cpp \
+  pxtnUnit.cpp \
+  pxtnWoice.cpp \
+  pxtnWoice_io.cpp \
+  pxtnWoicePTV.cpp \
+  pxtoneNoise.cpp
 
 OBJECTS += $(addprefix obj/main/, $(addsuffix .o, $(SOURCES)))
 ifeq ($(USE_LIBXMPLITE), true)
@@ -232,15 +232,15 @@ obj/main/%.o: %.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
-obj/libxmp-lite/%.o: clownaudio/decoding/decoders/libs/libxmp-lite/%.c
+obj/libxmp-lite/%.o: clownaudio/decoding/decoders/libs/libxmp-lite/%
 	@mkdir -p $(@D)
 	@$(CC) $(ALL_CFLAGS) -std=gnu11 -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -Iclownaudio/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 -Dinline=__inline -D_USE_MATH_DEFINES=1 -DBUILDING_STATIC=1 $< -o $@ -c
 
-obj/spc/%.o: clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%.cpp
+obj/spc/%.o: clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 $< -o $@ -c
 
-obj/pxtone/%.o: clownaudio/decoding/decoders/libs/pxtone/%.cpp
+obj/pxtone/%.o: clownaudio/decoding/decoders/libs/pxtone/%
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
