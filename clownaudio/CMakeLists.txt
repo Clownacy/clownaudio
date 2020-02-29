@@ -13,6 +13,10 @@ option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
 option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
 set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
 
+list(APPEND CMAKE_MODULE_PATH
+	"${CMAKE_CURRENT_LIST_DIR}/cmake"
+)
+
 project(clownaudio LANGUAGES C CXX)
 
 set(SOURCES
@@ -213,7 +217,7 @@ if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
 
 	if(SDL_FOUND)
 		target_include_directories(clownaudio PRIVATE ${SDL_INCLUDE_DIR})
-		target_link_libraries(clownaudio ${SDL_LIBRARY})
+		target_link_libraries(clownaudio PRIVATE ${SDL_LIBRARY})
 	endif()
 endif()
 
@@ -222,10 +226,24 @@ if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
 
 	if(TARGET SDL2::SDL2)
 		# CMake-generated config (Arch, vcpkg, Raspbian)
-		target_link_libraries(clownaudio SDL2::SDL2 SDL2::SDL2main)
+		target_link_libraries(clownaudio PRIVATE SDL2::SDL2 SDL2::SDL2main)
 	elseif(SDL2_FOUND)
 		# Autotools-generated config (MSYS2)
 		target_include_directories(clownaudio PRIVATE ${SDL2_INCLUDE_DIRS})
-		target_link_libraries(clownaudio ${SDL2_LIBRARIES})
+		target_link_libraries(clownaudio PRIVATE ${SDL2_LIBRARIES})
+	endif()
+endif()
+
+if(CLOWNAUDIO_LIBXMPLITE)
+	find_package(LibXMPLite)
+
+	if(libxmp-lite_FOUND)
+		message(STATUS "Using system libxmp-lite")
+		target_link_libraries(clownaudio PRIVATE libxmp-lite)
+	else()
+		# Compile it ourselves
+		message(STATUS "Using local libxmp-lite")
+		add_subdirectory("decoding/decoders/libs/libxmp-lite" EXCLUDE_FROM_ALL)
+		target_link_libraries(clownaudio PRIVATE libxmp-lite)
 	endif()
 endif()
