@@ -641,7 +641,7 @@ static int xm_load(struct module_data *m, HIO_HANDLE * f, const int start)
 				PERIOD_LINEAR : PERIOD_AMIGA;
 
 	memcpy(mod->xxo, xfh.order, mod->len);
-	tracker_name[20] = 0;
+	/*tracker_name[20] = 0;*/
 	snprintf(tracker_name, 21, "%-20.20s", xfh.tracker);
 	for (i = 20; i >= 0; i--) {
 		if (tracker_name[i] == 0x20)
