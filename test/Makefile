@@ -44,7 +44,7 @@ SDL1_LIBS = $(shell pkg-config sdl --libs --static)
 SDL2_CFLAGS = $(shell pkg-config sdl2 --cflags)
 SDL2_LIBS = $(shell pkg-config sdl2 --libs --static)
 
-SOURCES = \
+CLOWNAUDIO_SOURCES = \
   clownaudio.c \
   miniaudio.c \
   mixer.c \
@@ -55,30 +55,30 @@ SOURCES = \
   decoding/decoders/memory_stream.c
 
 ifeq ($(USE_LIBVORBIS), true)
-  SOURCES += decoding/decoders/libvorbis.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/libvorbis.c
   ALL_CFLAGS += -DUSE_LIBVORBIS $(shell pkg-config vorbisfile --cflags)
   ALL_LIBS += $(shell pkg-config vorbisfile --libs --static)
 endif
 
 ifeq ($(USE_STB_VORBIS), true)
-  SOURCES += decoding/decoders/stb_vorbis.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/stb_vorbis.c
   ALL_CFLAGS += -DUSE_STB_VORBIS
   ALL_LIBS += -lm
 endif
 
 ifeq ($(USE_LIBFLAC), true)
-  SOURCES += decoding/decoders/libflac.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/libflac.c
   ALL_CFLAGS += -DUSE_LIBFLAC $(shell pkg-config flac --cflags)
   ALL_LIBS += $(shell pkg-config flac --libs --static)
 endif
 
 ifeq ($(USE_DR_FLAC), true)
-  SOURCES += decoding/decoders/dr_flac.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/dr_flac.c
   ALL_CFLAGS += -DUSE_DR_FLAC
 endif
 
 ifeq ($(USE_DR_WAV), true)
-  SOURCES += decoding/decoders/dr_wav.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/dr_wav.c
   ALL_CFLAGS += -DUSE_DR_WAV
 endif
 
@@ -89,19 +89,19 @@ ifeq ($(USE_LIBOPUS), true)
 endif
 
 ifeq ($(USE_LIBSNDFILE), true)
-  SOURCES += decoding/decoders/libsndfile.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/libsndfile.c
   ALL_CFLAGS += -DUSE_LIBSNDFILE $(shell pkg-config sndfile --cflags)
   ALL_LIBS += $(shell pkg-config sndfile --libs --static)
 endif
 
 ifeq ($(USE_LIBOPENMPT), true)
-  SOURCES += decoding/decoders/libopenmpt.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/libopenmpt.c
   ALL_CFLAGS += -DUSE_LIBOPENMPT $(shell pkg-config libopenmpt --cflags)
   ALL_LIBS += $(shell pkg-config libopenmpt --libs --static)
 endif
 
 ifeq ($(USE_LIBXMPLITE), true)
-  SOURCES += decoding/decoders/libxmp-lite.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/libxmp-lite.c
   ALL_CFLAGS += -DUSE_LIBXMPLITE
 
   ifeq ($(shell pkg-config libxmp-lite --exists && echo 1), 1)
@@ -113,13 +113,13 @@ ifeq ($(USE_LIBXMPLITE), true)
 endif
 
 ifeq ($(USE_SNES_SPC), true)
-  SOURCES += decoding/decoders/snes_spc.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/snes_spc.c
   ALL_CFLAGS += -DUSE_SNES_SPC
   ALL_LIBS += -lstdc++
 endif
 
 ifeq ($(USE_PXTONE), true)
-  SOURCES += decoding/decoders/pxtone.cpp decoding/decoders/pxtone_noise.cpp
+  CLOWNAUDIO_SOURCES += decoding/decoders/pxtone.cpp decoding/decoders/pxtone_noise.cpp
   ALL_CFLAGS += -DUSE_PXTONE
   ALL_LIBS += -lstdc++
   # Apparently PxTone supports Vorbis-encoded samples
@@ -129,22 +129,22 @@ ifeq ($(USE_PXTONE), true)
 endif
 
 ifeq ($(BACKEND), miniaudio)
-  SOURCES += playback/miniaudio.c
+  CLOWNAUDIO_SOURCES += playback/miniaudio.c
   ALL_CFLAGS += -DMINIAUDIO_ENABLE_DEVICE_IO
   ALL_LIBS += -ldl -lpthread -lm
 else ifeq ($(BACKEND), SDL1)
-  SOURCES += playback/sdl1.c
+  CLOWNAUDIO_SOURCES += playback/sdl1.c
   ALL_CFLAGS += $(SDL1_CFLAGS)
   ALL_LIBS += $(SDL1_LIBS)
 else ifeq ($(BACKEND), SDL2)
-  SOURCES += playback/sdl2.c
+  CLOWNAUDIO_SOURCES += playback/sdl2.c
   ALL_CFLAGS += $(SDL2_CFLAGS)
   ALL_LIBS += $(SDL2_LIBS)
 else ifeq ($(BACKEND), Cubeb)
-  SOURCES += playback/cubeb.c
+  CLOWNAUDIO_SOURCES += playback/cubeb.c
   ALL_LIBS += -lcubeb
 else ifeq ($(BACKEND), PortAudio)
-  SOURCES += playback/portaudio.c
+  CLOWNAUDIO_SOURCES += playback/portaudio.c
   ALL_CFLAGS += $(shell pkg-config portaudio-2.0 --cflags)
   ALL_LIBS += $(shell pkg-config portaudio-2.0 --libs --static)
 endif
@@ -209,7 +209,7 @@ PXTONE_SOURCES = \
   pxtoneNoise.cpp
 
 OBJECTS += obj/test.o
-OBJECTS += $(addprefix obj/clownaudio/, $(addsuffix .o, $(SOURCES)))
+OBJECTS += $(addprefix obj/clownaudio/, $(addsuffix .o, $(CLOWNAUDIO_SOURCES)))
 ifeq ($(USE_LIBXMPLITE), true)
   ifneq ($(shell pkg-config libxmp-lite --exists && echo 1), 1)
     OBJECTS += $(addprefix obj/libxmp-lite/, $(addsuffix .o, $(LIBXMPLITE_SOURCES)))
