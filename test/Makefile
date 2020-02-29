@@ -227,30 +227,37 @@ DEPENDENCIES = $(addsuffix .d, $(OBJECTS))
 all: test
 
 obj/test.o: test.c
+	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -I$(CLOWNAUDIO_DIR) $< -o $@ -c
 
 obj/clownaudio/%.c.o: $(CLOWNAUDIO_DIR)/%.c
+	$(info Compiling $<)
 	@mkdir -p $(@D)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
 
 obj/clownaudio/%.cpp.o: $(CLOWNAUDIO_DIR)/%.cpp
+	$(info Compiling $<)
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
 obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
+	$(info Compiling $<)
 	@mkdir -p $(@D)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -I$(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 -Dinline=__inline -D_USE_MATH_DEFINES=1 -DBUILDING_STATIC=1 $< -o $@ -c
 
 obj/spc/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
+	$(info Compiling $<)
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 $< -o $@ -c
 
 obj/pxtone/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/pxtone/%
+	$(info Compiling $<)
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
 test: $(OBJECTS)
+	$(info Linking $<)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $^ -o $@ $(ALL_LDFLAGS) $(ALL_LIBS)
 
 include $(wildcard $(DEPENDENCIES))

@@ -43,15 +43,36 @@ set(SOURCES
 
 if(BUILD_SHARED_LIBS)
 	add_library(clownaudio SHARED ${SOURCES})
-
-	if(WIN32)
-		target_compile_definitions(clownaudio PRIVATE BUILDING_DLL)
-	endif()
 else()
 	add_library(clownaudio STATIC ${SOURCES})
 endif()
 
+####################
+# Misc. settings
+####################
+
+target_include_directories(clownaudio INTERFACE ".")
+
+if(BUILD_SHARED_LIBS AND WIN32)
+	target_compile_definitions(clownaudio PRIVATE BUILDING_DLL)
+endif()
+
 set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "clownaudio.h")
+
+set_target_properties(clownaudio PROPERTIES
+	C_STANDARD 99
+	C_EXTENSIONS OFF
+	CXX_STANDARD 11
+	CXX_EXTENSIONS OFF
+)
+
+if(MSVC)
+	target_compile_definitions(clownaudio PRIVATE _CRT_SECURE_NO_WARNINGS)	# Shut up those stupid MSVC warnings
+endif()
+
+####################
+# Decoding backends
+####################
 
 if(CLOWNAUDIO_LIBVORBIS)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBVORBIS)
@@ -171,6 +192,10 @@ if(CLOWNAUDIO_PXTONE)
 	)
 endif()
 
+####################
+# Playback backends
+####################
+
 if(CLOWNAUDIO_BACKEND STREQUAL "miniaudio")
 	target_sources(clownaudio PRIVATE "playback/miniaudio.c")
 	target_compile_definitions(clownaudio PRIVATE MINIAUDIO_ENABLE_DEVICE_IO)
@@ -200,19 +225,10 @@ else()
 	message(FATAL_ERROR "Invalid BACKEND selected")
 endif()
 
-set_target_properties(clownaudio PROPERTIES
-	C_STANDARD 99
-	C_EXTENSIONS OFF
-	CXX_STANDARD 11
-	CXX_EXTENSIONS OFF
-)
+####################
+# Find dependencies
+####################
 
-# MSVC tweak
-if(MSVC)
-	target_compile_definitions(clownaudio PRIVATE _CRT_SECURE_NO_WARNINGS)	# Shut up those stupid warnings
-endif()
-
-# Find libraries
 if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
 	find_package(SDL REQUIRED)
 
