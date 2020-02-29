@@ -26,7 +26,7 @@
 //#define STB_LEAKCHECK_IMPLEMENTATION
 //#include "stb_leakcheck.h"
 
-#include "clownaudio/clownaudio.h"
+#include "../clownaudio.h"
 
 static void FileToMemory(const char *filename, unsigned char **buffer, size_t *size)
 {

@@ -12,6 +12,8 @@ USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
 
+CLOWNAUDIO_DIR = ..
+
 ifneq ($(RELEASE),)
   CFLAGS = -O2 -flto
 else
@@ -43,82 +45,81 @@ SDL2_CFLAGS = $(shell pkg-config sdl2 --cflags)
 SDL2_LIBS = $(shell pkg-config sdl2 --libs --static)
 
 SOURCES = \
-  test \
-  clownaudio/clownaudio \
-  clownaudio/miniaudio \
-  clownaudio/mixer \
-  clownaudio/decoding/decoder_selector \
-  clownaudio/decoding/predecoder \
-  clownaudio/decoding/resampled_decoder \
-  clownaudio/decoding/split_decoder \
-  clownaudio/decoding/decoders/memory_stream
+  clownaudio \
+  miniaudio \
+  mixer \
+  decoding/decoder_selector \
+  decoding/predecoder \
+  decoding/resampled_decoder \
+  decoding/split_decoder \
+  decoding/decoders/memory_stream
 
 ifeq ($(USE_LIBVORBIS), true)
-  SOURCES += clownaudio/decoding/decoders/libvorbis
+  SOURCES += decoding/decoders/libvorbis
   ALL_CFLAGS += -DUSE_LIBVORBIS $(shell pkg-config vorbisfile --cflags)
   ALL_LIBS += $(shell pkg-config vorbisfile --libs --static)
 endif
 
 ifeq ($(USE_STB_VORBIS), true)
-  SOURCES += clownaudio/decoding/decoders/stb_vorbis
+  SOURCES += decoding/decoders/stb_vorbis
   ALL_CFLAGS += -DUSE_STB_VORBIS
   ALL_LIBS += -lm
 endif
 
 ifeq ($(USE_LIBFLAC), true)
-  SOURCES += clownaudio/decoding/decoders/libflac
+  SOURCES += decoding/decoders/libflac
   ALL_CFLAGS += -DUSE_LIBFLAC $(shell pkg-config flac --cflags)
   ALL_LIBS += $(shell pkg-config flac --libs --static)
 endif
 
 ifeq ($(USE_DR_FLAC), true)
-  SOURCES += clownaudio/decoding/decoders/dr_flac
+  SOURCES += decoding/decoders/dr_flac
   ALL_CFLAGS += -DUSE_DR_FLAC
 endif
 
 ifeq ($(USE_DR_WAV), true)
-  SOURCES += clownaudio/decoding/decoders/dr_wav
+  SOURCES += decoding/decoders/dr_wav
   ALL_CFLAGS += -DUSE_DR_WAV
 endif
 
 ifeq ($(USE_LIBOPUS), true)
-  SOURCES += clownaudio/decoding/decoders/libopus
+  SOURCES += decoding/decoders/libopus
   ALL_CFLAGS += -DUSE_LIBOPUS $(shell pkg-config opusfile --cflags)
   ALL_LIBS += $(shell pkg-config opusfile --libs --static)
 endif
 
 ifeq ($(USE_LIBSNDFILE), true)
-  SOURCES += clownaudio/decoding/decoders/libsndfile
+  SOURCES += decoding/decoders/libsndfile
   ALL_CFLAGS += -DUSE_LIBSNDFILE $(shell pkg-config sndfile --cflags)
   ALL_LIBS += $(shell pkg-config sndfile --libs --static)
 endif
 
 ifeq ($(USE_LIBOPENMPT), true)
-  SOURCES += clownaudio/decoding/decoders/libopenmpt
+  SOURCES += decoding/decoders/libopenmpt
   ALL_CFLAGS += -DUSE_LIBOPENMPT $(shell pkg-config libopenmpt --cflags)
   ALL_LIBS += $(shell pkg-config libopenmpt --libs --static)
 endif
 
 ifeq ($(USE_LIBXMPLITE), true)
-  SOURCES += clownaudio/decoding/decoders/libxmp-lite
+  SOURCES += decoding/decoders/libxmp-lite
   ALL_CFLAGS += -DUSE_LIBXMPLITE
 
   ifeq ($(shell pkg-config libxmp-lite --exists && echo 1), 1)
     ALL_CFLAGS += $(shell pkg-config libxmp-lite --cflags)
     ALL_LIBS += $(shell pkg-config libxmp-lite --libs --static)
   else
-    ALL_CFLAGS += -Iclownaudio/decoding/decoders/libs/libxmp-lite/include/libxmp-lite
+    ALL_CFLAGS += -I$(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/include/libxmp-lite
   endif
 endif
 
 ifeq ($(USE_SNES_SPC), true)
-  SOURCES += clownaudio/decoding/decoders/snes_spc
+  SOURCES += decoding/decoders/snes_spc
   ALL_CFLAGS += -DUSE_SNES_SPC
   ALL_LIBS += -lstdc++
 endif
 
 ifeq ($(USE_PXTONE), true)
-  SOURCES += clownaudio/decoding/decoders/pxtone clownaudio/decoding/decoders/pxtone_noise
+  SOURCES += decoding/decoders/pxtone decoding/decoders/pxtone_noise
   ALL_CFLAGS += -DUSE_PXTONE
   ALL_LIBS += -lstdc++
   # Apparently PxTone supports Vorbis-encoded samples
@@ -128,22 +129,22 @@ ifeq ($(USE_PXTONE), true)
 endif
 
 ifeq ($(BACKEND), miniaudio)
-  SOURCES += clownaudio/playback/miniaudio
+  SOURCES += playback/miniaudio
   ALL_CFLAGS += -DMINIAUDIO_ENABLE_DEVICE_IO
   ALL_LIBS += -ldl -lpthread -lm
 else ifeq ($(BACKEND), SDL1)
-  SOURCES += clownaudio/playback/sdl1
+  SOURCES += playback/sdl1
   ALL_CFLAGS += $(SDL1_CFLAGS)
   ALL_LIBS += $(SDL1_LIBS)
 else ifeq ($(BACKEND), SDL2)
-  SOURCES += clownaudio/playback/sdl2
+  SOURCES += playback/sdl2
   ALL_CFLAGS += $(SDL2_CFLAGS)
   ALL_LIBS += $(SDL2_LIBS)
 else ifeq ($(BACKEND), Cubeb)
-  SOURCES += clownaudio/playback/cubeb
+  SOURCES += playback/cubeb
   ALL_LIBS += -lcubeb
 else ifeq ($(BACKEND), PortAudio)
-  SOURCES += clownaudio/playback/portaudio
+  SOURCES += playback/portaudio
   ALL_CFLAGS += $(shell pkg-config portaudio-2.0 --cflags)
   ALL_LIBS += $(shell pkg-config portaudio-2.0 --libs --static)
 endif
@@ -207,7 +208,8 @@ PXTONE_SOURCES = \
   pxtnWoicePTV.cpp \
   pxtoneNoise.cpp
 
-OBJECTS += $(addprefix obj/main/, $(addsuffix .o, $(SOURCES)))
+OBJECTS += obj/test.o
+OBJECTS += $(addprefix obj/clownaudio/, $(addsuffix .o, $(SOURCES)))
 ifeq ($(USE_LIBXMPLITE), true)
   ifneq ($(shell pkg-config libxmp-lite --exists && echo 1), 1)
     OBJECTS += $(addprefix obj/libxmp-lite/, $(addsuffix .o, $(LIBXMPLITE_SOURCES)))
@@ -224,23 +226,27 @@ DEPENDENCIES = $(addsuffix .d, $(OBJECTS))
 
 all: test
 
-obj/main/%.o: %.c
+obj/test.o: test.c
 	@mkdir -p $(@D)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
 
-obj/main/%.o: %.cpp
+obj/clownaudio/%.o: $(CLOWNAUDIO_DIR)/%.c
+	@mkdir -p $(@D)
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
+
+obj/clownaudio/%.o: $(CLOWNAUDIO_DIR)/%.cpp
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
-obj/libxmp-lite/%.o: clownaudio/decoding/decoders/libs/libxmp-lite/%
+obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -Iclownaudio/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 -Dinline=__inline -D_USE_MATH_DEFINES=1 -DBUILDING_STATIC=1 $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -I$(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 -Dinline=__inline -D_USE_MATH_DEFINES=1 -DBUILDING_STATIC=1 $< -o $@ -c
 
-obj/spc/%.o: clownaudio/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
+obj/spc/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 $< -o $@ -c
 
-obj/pxtone/%.o: clownaudio/decoding/decoders/libs/pxtone/%
+obj/pxtone/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/pxtone/%
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
