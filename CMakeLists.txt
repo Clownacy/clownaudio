@@ -293,7 +293,7 @@ endif()
 
 # pkg-config
 
-find_package(PkgConfig)
+find_package(PkgConfig QUIET)
 
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
 
