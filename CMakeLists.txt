@@ -71,6 +71,17 @@ if(MSVC)
 endif()
 
 ####################
+# Install
+####################
+
+include(GNUInstallDirs)
+
+install(TARGETS clownaudio
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+####################
 # Decoding backends
 ####################
 
