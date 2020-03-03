@@ -65,11 +65,13 @@ typedef struct Mutex
 #endif
 } Mutex;
 
-static Channel *channel_list_head;
-
-static Mutex mixer_mutex;
-
-static unsigned long output_sample_rate;
+typedef struct Mixer
+{
+	Channel *channel_list_head;
+	Mutex mutex;
+	unsigned long sample_rate;
+	Mixer_Sound instance_allocator;
+} Mixer;
 
 static void MutexInit(Mutex *mutex)
 {
@@ -107,25 +109,36 @@ static void MutexUnlock(Mutex *mutex)
 #endif
 }
 
-static Channel* FindChannel(Mixer_Sound instance)
+static Channel* FindChannel(Mixer *mixer, Mixer_Sound instance)
 {
-	for (Channel *channel = channel_list_head; channel != NULL; channel = channel->next)
+	for (Channel *channel = mixer->channel_list_head; channel != NULL; channel = channel->next)
 		if (channel->instance == instance)
 			return channel;
 
 	return NULL;
 }
 
-void Mixer_Init(unsigned long sample_rate)
+Mixer* Mixer_Create(unsigned long sample_rate)
 {
-	output_sample_rate = sample_rate;
+	Mixer *mixer = malloc(sizeof(Mixer));
 
-	MutexInit(&mixer_mutex);
+	if (mixer != NULL)
+	{
+		mixer->channel_list_head = NULL;
+
+		mixer->sample_rate = sample_rate;
+
+		MutexInit(&mixer->mutex);
+	}
+
+	return mixer;
 }
 
-void Mixer_Deinit(void)
+void Mixer_Destroy(Mixer *mixer)
 {
-	MutexDeinit(&mixer_mutex);
+	MutexDeinit(&mixer->mutex);
+
+	free(mixer);
 }
 
 Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
@@ -138,17 +151,15 @@ void Mixer_UnloadSoundData(Mixer_SoundData *sound)
 	SplitDecoder_UnloadData((SplitDecoderData*)sound);
 }
 
-Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop, bool free_when_done)
+Mixer_Sound Mixer_CreateSound(Mixer *mixer, Mixer_SoundData *sound, bool loop, bool free_when_done)
 {
-	static Mixer_Sound instance_allocator;
-
 	Mixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
-	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, output_sample_rate);
+	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, mixer->sample_rate);
 
 	if (split_decoder != NULL)
 	{
-		instance = ++instance_allocator;
+		instance = ++mixer->instance_allocator;
 
 		Channel *channel = malloc(sizeof(Channel));
 
@@ -164,22 +175,22 @@ Mixer_Sound Mixer_CreateSound(Mixer_SoundData *sound, bool loop, bool free_when_
 		channel->fade_out_counter_max = 0;
 		channel->fade_in_counter_max = 0;
 
-		MutexLock(&mixer_mutex);
-		channel->next = channel_list_head;
-		channel_list_head = channel;
-		MutexUnlock(&mixer_mutex);
+		MutexLock(&mixer->mutex);
+		channel->next = mixer->channel_list_head;
+		mixer->channel_list_head = channel;
+		MutexUnlock(&mixer->mutex);
 	}
 
 	return instance;
 }
 
-void Mixer_DestroySound(Mixer_Sound instance)
+void Mixer_DestroySound(Mixer *mixer, Mixer_Sound instance)
 {
 	Channel *channel = NULL;
 
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	for (Channel **channel_pointer = &channel_list_head; *channel_pointer != NULL; channel_pointer = &(*channel_pointer)->next)
+	for (Channel **channel_pointer = &mixer->channel_list_head; *channel_pointer != NULL; channel_pointer = &(*channel_pointer)->next)
 	{
 		if ((*channel_pointer)->instance == instance)
 		{
@@ -189,7 +200,7 @@ void Mixer_DestroySound(Mixer_Sound instance)
 		}
 	}
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 
 	if (channel != NULL)
 	{
@@ -198,51 +209,51 @@ void Mixer_DestroySound(Mixer_Sound instance)
 	}
 }
 
-void Mixer_RewindSound(Mixer_Sound instance)
+void Mixer_RewindSound(Mixer *mixer, Mixer_Sound instance)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 		SplitDecoder_Rewind(channel->split_decoder);
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_PauseSound(Mixer_Sound instance)
+void Mixer_PauseSound(Mixer *mixer, Mixer_Sound instance)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 		channel->paused = true;
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_UnpauseSound(Mixer_Sound instance)
+void Mixer_UnpauseSound(Mixer *mixer, Mixer_Sound instance)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 		channel->paused = false;
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_FadeOutSound(Mixer_Sound instance, unsigned int duration)
+void Mixer_FadeOutSound(Mixer *mixer, Mixer_Sound instance, unsigned int duration)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 	{
-		unsigned long new_fade_out_counter_max = (output_sample_rate * duration) / 1000;
+		unsigned long new_fade_out_counter_max = (mixer->sample_rate * duration) / 1000;
 
 		if (channel->fade_in_counter_max != 0)
 			channel->fade_counter = (unsigned long)((channel->fade_in_counter_max - channel->fade_counter) * ((float)new_fade_out_counter_max / (float)channel->fade_in_counter_max));
@@ -255,18 +266,18 @@ void Mixer_FadeOutSound(Mixer_Sound instance, unsigned int duration)
 		channel->fade_in_counter_max = 0;
 	}
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_FadeInSound(Mixer_Sound instance, unsigned int duration)
+void Mixer_FadeInSound(Mixer *mixer, Mixer_Sound instance, unsigned int duration)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 	{
-		unsigned long new_fade_in_counter_max = (output_sample_rate * duration) / 1000;
+		unsigned long new_fade_in_counter_max = (mixer->sample_rate * duration) / 1000;
 
 		if (channel->fade_out_counter_max != 0)
 			channel->fade_counter = (unsigned long)((channel->fade_out_counter_max - channel->fade_counter) * ((float)new_fade_in_counter_max / (float)channel->fade_out_counter_max));
@@ -279,14 +290,14 @@ void Mixer_FadeInSound(Mixer_Sound instance, unsigned int duration)
 		channel->fade_out_counter_max = 0;
 	}
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_CancelFade(Mixer_Sound instance)
+void Mixer_CancelFade(Mixer *mixer, Mixer_Sound instance)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 	{
@@ -294,63 +305,63 @@ void Mixer_CancelFade(Mixer_Sound instance)
 		channel->fade_out_counter_max = 0;
 	}
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-int Mixer_GetSoundStatus(Mixer_Sound instance)
+int Mixer_GetSoundStatus(Mixer *mixer, Mixer_Sound instance)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	int status = (channel == NULL) ? -1 : channel->paused;
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 
 	return status;
 }
 
-void Mixer_SetSoundVolume(Mixer_Sound instance, float volume)
+void Mixer_SetSoundVolume(Mixer *mixer, Mixer_Sound instance, float volume)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
-		channel->volume = volume * volume;
+		channel->volume = volume * volume;	// Don't do this - leave making it logarithmic up to the user
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_SetSoundLoop(Mixer_Sound instance, bool loop)
+void Mixer_SetSoundLoop(Mixer *mixer, Mixer_Sound instance, bool loop)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 		SplitDecoder_SetLoop(channel->split_decoder, loop);
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_SetSoundSampleRate(Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
+void Mixer_SetSoundSampleRate(Mixer *mixer, Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 		SplitDecoder_SetSampleRate(channel->split_decoder, sample_rate1, sample_rate2);
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_SetPan(Mixer_Sound instance, float pan)
+void Mixer_SetPan(Mixer *mixer, Mixer_Sound instance, float pan)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel *channel = FindChannel(instance);
+	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
 	{
@@ -365,14 +376,14 @@ void Mixer_SetPan(Mixer_Sound instance, float pan)
 		channel->left_pan[1] = 1.0f - channel->left_pan[0];
 	}
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }
 
-void Mixer_MixSamples(float *output_buffer, size_t frames_to_do)
+void Mixer_MixSamples(Mixer *mixer, float *output_buffer, size_t frames_to_do)
 {
-	MutexLock(&mixer_mutex);
+	MutexLock(&mixer->mutex);
 
-	Channel **channel_pointer = &channel_list_head;
+	Channel **channel_pointer = &mixer->channel_list_head;
 	while (*channel_pointer != NULL)
 	{
 		Channel *channel = *channel_pointer;
@@ -459,5 +470,5 @@ void Mixer_MixSamples(float *output_buffer, size_t frames_to_do)
 		channel_pointer = &(*channel_pointer)->next;
 	}
 
-	MutexUnlock(&mixer_mutex);
+	MutexUnlock(&mixer->mutex);
 }

@@ -26,49 +26,53 @@
 #include "mixer.h"
 #include "playback/playback.h"
 
+static Mixer *mixer;
 static BackendStream *stream;
 
 static void CallbackStream(void *user_data, float *output_buffer, size_t frames_to_do)
 {
-	(void)user_data;
+	Mixer *mixer = user_data;
 
 	for (size_t i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
 		output_buffer[i] = 0.0f;
 
-	Mixer_MixSamples(output_buffer, frames_to_do);
+	Mixer_MixSamples(mixer, output_buffer, frames_to_do);
 }
 
 DLL_API bool ClownAudio_Init(void)
 {
 	bool success = false;
 
-	if (Backend_Init())
+	mixer = Mixer_Create(STREAM_SAMPLE_RATE);
+
+	if (mixer != NULL)
 	{
-		stream = Backend_CreateStream(CallbackStream, NULL);
-
-		if (stream != NULL)
+		if (Backend_Init())
 		{
-			Mixer_Init(STREAM_SAMPLE_RATE);
+			stream = Backend_CreateStream(CallbackStream, mixer);
 
-			if (Backend_ResumeStream(stream))
-				success = true;
-			else
-				ClownAudio_Deinit();
-		}
-		else
-		{
+			if (stream != NULL)
+			{
+				if (Backend_ResumeStream(stream))
+					return true;
+
+				Backend_DestroyStream(stream);
+			}
+
 			Backend_Deinit();
 		}
+
+		Mixer_Destroy(mixer);
 	}
 
-	return success;
+	return false;
 }
 
 DLL_API void ClownAudio_Deinit(void)
 {
 	Backend_DestroyStream(stream);
 	Backend_Deinit();
-	Mixer_Deinit();
+	Mixer_Destroy(mixer);
 }
 
 DLL_API void ClownAudio_Pause(void)
@@ -93,65 +97,65 @@ DLL_API void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
 
 DLL_API ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done)
 {
-	return Mixer_CreateSound((Mixer_SoundData*)sound, loop, free_when_done);
+	return Mixer_CreateSound(mixer, (Mixer_SoundData*)sound, loop, free_when_done);
 }
 
 DLL_API void ClownAudio_DestroySound(ClownAudio_Sound instance)
 {
-	Mixer_DestroySound(instance);
+	Mixer_DestroySound(mixer, instance);
 }
 
 DLL_API void ClownAudio_RewindSound(ClownAudio_Sound instance)
 {
-	Mixer_RewindSound(instance);
+	Mixer_RewindSound(mixer, instance);
 }
 
 DLL_API void ClownAudio_PauseSound(ClownAudio_Sound instance)
 {
-	Mixer_PauseSound(instance);
+	Mixer_PauseSound(mixer, instance);
 }
 
 DLL_API void ClownAudio_UnpauseSound(ClownAudio_Sound instance)
 {
-	Mixer_UnpauseSound(instance);
+	Mixer_UnpauseSound(mixer, instance);
 }
 
 DLL_API void ClownAudio_FadeOutSound(ClownAudio_Sound instance, unsigned int duration)
 {
-	Mixer_FadeOutSound(instance, duration);
+	Mixer_FadeOutSound(mixer, instance, duration);
 }
 
 DLL_API void ClownAudio_FadeInSound(ClownAudio_Sound instance, unsigned int duration)
 {
-	Mixer_FadeInSound(instance, duration);
+	Mixer_FadeInSound(mixer, instance, duration);
 }
 
 DLL_API void ClownAudio_CancelFade(ClownAudio_Sound instance)
 {
-	Mixer_CancelFade(instance);
+	Mixer_CancelFade(mixer, instance);
 }
 
 DLL_API int ClownAudio_GetSoundStatus(ClownAudio_Sound instance)
 {
-	return Mixer_GetSoundStatus(instance);
+	return Mixer_GetSoundStatus(mixer, instance);
 }
 
 DLL_API void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume)
 {
-	Mixer_SetSoundVolume(instance, volume);
+	Mixer_SetSoundVolume(mixer, instance, volume);
 }
 
 DLL_API void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop)
 {
-	Mixer_SetSoundLoop(instance, loop);
+	Mixer_SetSoundLoop(mixer, instance, loop);
 }
 
 DLL_API void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
 {
-	Mixer_SetSoundSampleRate(instance, sample_rate1, sample_rate2);
+	Mixer_SetSoundSampleRate(mixer, instance, sample_rate1, sample_rate2);
 }
 
 DLL_API void ClownAudio_SetSoundPan(ClownAudio_Sound instance, float pan)
 {
-	Mixer_SetPan(instance, pan);
+	Mixer_SetPan(mixer, instance, pan);
 }
