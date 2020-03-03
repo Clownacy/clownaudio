@@ -58,7 +58,7 @@ if(BUILD_SHARED_LIBS AND WIN32)
 	target_compile_definitions(clownaudio PRIVATE BUILDING_DLL)
 endif()
 
-set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h")
+set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h")
 
 set_target_properties(clownaudio PROPERTIES
 	C_STANDARD 99
