@@ -1,19 +1,18 @@
 cmake_minimum_required(VERSION 3.14.6)
 
-#option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
+option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
 option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" ON)
-#option(CLOWNAUDIO_LIBFLAC "Enable the libFLAC decoder backend" OFF)
+option(CLOWNAUDIO_LIBFLAC "Enable the libFLAC decoder backend" OFF)
 option(CLOWNAUDIO_DR_FLAC "Enable the dr_flac decoder backend" ON)
 option(CLOWNAUDIO_DR_WAV "Enable the dr_wav decoder backend" ON)
-#option(CLOWNAUDIO_LIBOPUS "Enable the libopus decoder backend" OFF)
-#option(CLOWNAUDIO_LIBSNDFILE "Enable the libsndfile decoder backend" OFF)
-#option(CLOWNAUDIO_LIBOPENMPT "Enable the libopenmpt decoder backend" OFF)
+option(CLOWNAUDIO_LIBOPUS "Enable the libopus decoder backend" OFF)
+option(CLOWNAUDIO_LIBSNDFILE "Enable the libsndfile decoder backend" OFF)
+option(CLOWNAUDIO_LIBOPENMPT "Enable the libopenmpt decoder backend" OFF)
 option(CLOWNAUDIO_LIBXMPLITE "Enable the libxmp-lite decoder backend" OFF)
 option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
 option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
 option(CLOWNAUDIO_NO_PLAYBACK "Disables playback capabilities" OFF)
-#set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
-set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', and 'SDL2'")
+set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
 
 list(APPEND CMAKE_MODULE_PATH
 	"${CMAKE_CURRENT_LIST_DIR}/cmake"
@@ -244,6 +243,8 @@ endif()
 # Find dependencies
 ####################
 
+# CMake
+
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
 
 if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
@@ -268,6 +269,12 @@ if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
 	endif()
 endif()
 
+if(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
+	find_package(cubeb REQUIRED)
+
+	target_link_libraries(clownaudio PRIVATE cubeb::cubeb)
+endif()
+
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
@@ -282,6 +289,68 @@ if(CLOWNAUDIO_LIBXMPLITE)
 		add_subdirectory("src/decoding/decoders/libs/libxmp-lite" EXCLUDE_FROM_ALL)
 		target_link_libraries(clownaudio PRIVATE libxmp-lite)
 	endif()
+endif()
+
+# pkg-config
+
+find_package(PkgConfig)
+
+if(NOT CLOWNAUDIO_NO_PLAYBACK)
+
+if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(portaudio REQUIRED IMPORTED_TARGET portaudio-2.0)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::portaudio)
+endif()
+
+endif()
+
+if(CLOWNAUDIO_LIBVORBIS)
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(vorbisfile REQUIRED IMPORTED_TARGET vorbisfile)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::vorbisfile)
+endif()
+
+if(CLOWNAUDIO_LIBFLAC)
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(flac REQUIRED IMPORTED_TARGET flac)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::flac)
+endif()
+
+if(CLOWNAUDIO_LIBOPUS)
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(opusfile REQUIRED IMPORTED_TARGET opusfile)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::opusfile)
+endif()
+
+if(CLOWNAUDIO_LIBSNDFILE)
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(sndfile REQUIRED IMPORTED_TARGET sndfile)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::sndfile)
+endif()
+
+if(CLOWNAUDIO_LIBOPENMPT)
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(libopenmpt REQUIRED IMPORTED_TARGET libopenmpt)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::libopenmpt)
 endif()
 
 ####################
