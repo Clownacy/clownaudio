@@ -62,14 +62,16 @@ SDL2      | zlib     | No
 
 ## Building
 
-Producing a shared/static library is currently incomplete. For now, projects
-should integrate clownaudio directly.
+clownaudio is built with CMake - both shared and static libraries can be
+produced. A `pkg-config` file is also provided.
 
-clownaudio comes with a `CMakeLists.txt` file, allowing projects using CMake to
-include it with ease, using `add_subdirectory`. Currently this method only
-supports a subset of decoder/playback backends.
+As an alternative, projects can embed clownaudio directly, using CMake's
+`add_subdirectory`.
 
-Example `Makefile` and `CMakeLists.txt` files for a demo tool are also provided.
+Example `Makefile` and `CMakeLists.txt` files for a demo tool are provided: the
+`Makefile` demonstrates linking clownaudio with pkg-config, and the
+`CMakeLists.txt` file demonstrates embedding clownaudio using
+`add_subdirectory`.
 
 
 ## Licensing
