@@ -11,6 +11,7 @@ option(CLOWNAUDIO_DR_WAV "Enable the dr_wav decoder backend" ON)
 option(CLOWNAUDIO_LIBXMPLITE "Enable the libxmp-lite decoder backend" OFF)
 option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
 option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
+option(CLOWNAUDIO_NO_PLAYBACK "Disables playback capabilities" OFF)
 #set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
 set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', and 'SDL2'")
 
@@ -21,13 +22,10 @@ list(APPEND CMAKE_MODULE_PATH
 project(clownaudio LANGUAGES C CXX)
 
 set(SOURCES
-	"include/clownaudio/clownaudio.h"
 	"include/clownaudio/mixer.h"
-	"src/clownaudio.c"
 	"src/miniaudio.c"
 	"src/miniaudio.h"
 	"src/mixer.c"
-	"src/playback/playback.h"
 	"src/decoding/decoder_selector.c"
 	"src/decoding/decoder_selector.h"
 	"src/decoding/predecoder.c"
@@ -40,6 +38,14 @@ set(SOURCES
 	"src/decoding/decoders/memory_stream.c"
 	"src/decoding/decoders/memory_stream.h"
 )
+
+if(NOT CLOWNAUDIO_NO_PLAYBACK)
+	list(APPEND SOURCES
+		"include/clownaudio/clownaudio.h"
+		"src/clownaudio.c"
+		"src/playback/playback.h"
+	)
+endif()
 
 if(BUILD_SHARED_LIBS)
 	add_library(clownaudio SHARED ${SOURCES})
@@ -58,7 +64,11 @@ if(BUILD_SHARED_LIBS AND WIN32)
 	target_compile_definitions(clownaudio PRIVATE BUILDING_DLL)
 endif()
 
-set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h")
+if(CLOWNAUDIO_NO_PLAYBACK)
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h")
+else()
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h")
+endif()
 
 set_target_properties(clownaudio PROPERTIES
 	C_STANDARD 99
@@ -197,6 +207,8 @@ endif()
 # Playback backends
 ####################
 
+if(NOT CLOWNAUDIO_NO_PLAYBACK)
+
 if(CLOWNAUDIO_BACKEND STREQUAL "miniaudio")
 	target_sources(clownaudio PRIVATE "src/playback/miniaudio.c")
 	target_compile_definitions(clownaudio PRIVATE MINIAUDIO_ENABLE_DEVICE_IO)
@@ -226,9 +238,13 @@ else()
 	message(FATAL_ERROR "Invalid BACKEND selected")
 endif()
 
+endif()
+
 ####################
 # Find dependencies
 ####################
+
+if(NOT CLOWNAUDIO_NO_PLAYBACK)
 
 if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
 	find_package(SDL REQUIRED)
@@ -250,6 +266,8 @@ if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
 		target_include_directories(clownaudio PRIVATE ${SDL2_INCLUDE_DIRS})
 		target_link_libraries(clownaudio PRIVATE ${SDL2_LIBRARIES})
 	endif()
+endif()
+
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
@@ -274,10 +292,10 @@ include(GNUInstallDirs)
 
 # Install directories
 install(TARGETS clownaudio
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/clownaudio
+	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/clownaudio"
 )
 
 # pkg-config
-configure_file(clownaudio.pc.in clownaudio.pc @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/clownaudio.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+configure_file("clownaudio.pc.in" clownaudio.pc @ONLY)
+install(FILES "${CMAKE_BINARY_DIR}/clownaudio.pc" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig")
