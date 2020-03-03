@@ -30,14 +30,8 @@ set(SOURCES src/virtual.c
             src/loaders/it_load.c
 )
 
-add_library(libxmp-lite ${SOURCES})
-target_compile_definitions(libxmp-lite PRIVATE LIBXMP_CORE_PLAYER=1)
-
-if(BUILD_SHARED_LIBS AND WIN32)
-	target_compile_definitions(libxmp-lite PRIVATE BUILDING_DLL=1)
-else()
-	target_compile_definitions(libxmp-lite PRIVATE BUILDING_STATIC=1)
-endif()
+add_library(libxmp-lite STATIC ${SOURCES})
+target_compile_definitions(libxmp-lite PRIVATE LIBXMP_CORE_PLAYER=1 BUILDING_STATIC=1)
 
 target_include_directories(libxmp-lite PUBLIC include/libxmp-lite)
 target_include_directories(libxmp-lite PRIVATE src)
