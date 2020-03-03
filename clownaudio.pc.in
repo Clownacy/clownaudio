@@ -9,5 +9,5 @@ Version: 0.2
 
 Requires:
 Libs: -L${libdir} -lclownaudio
+Libs.private: @PKG_CONFIG_STATIC_LIBS@
 Cflags: -I${includedir}
-

@@ -200,6 +200,7 @@ if(CLOWNAUDIO_PXTONE)
 		"src/decoding/decoders/libs/pxtone/pxtoneNoise.cpp"
 		"src/decoding/decoders/libs/pxtone/pxtoneNoise.h"
 	)
+	list(APPEND STATIC_LIBS stdc++)
 endif()
 
 ####################
@@ -273,16 +274,19 @@ if(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
 	find_package(cubeb REQUIRED)
 
 	target_link_libraries(clownaudio PRIVATE cubeb::cubeb)
+	get_target_property(CUBEB_LIBRARIES cubeb::cubeb LINK_LIBRARIES)
+	list(APPEND STATIC_LIBS ${CUBEB_LIBRARIES})
 endif()
 
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
-	find_package(LibXMPLite)
+	find_package(LibXMPLite)	# TODO - replace this with pkg-config
 
 	if(libxmp-lite_FOUND)
 		message(STATUS "Using system libxmp-lite")
 		target_link_libraries(clownaudio PRIVATE libxmp-lite)
+		list(APPEND STATIC_LIBS ${LIBXMPLITE_LIBRARIES})
 	else()
 		# Compile it ourselves
 		message(STATUS "Using local libxmp-lite")
@@ -304,6 +308,7 @@ if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
 
 	pkg_check_modules(portaudio REQUIRED IMPORTED_TARGET portaudio-2.0)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::portaudio)
+	list(APPEND STATIC_LIBS ${portaudio_LIBRARIES})
 endif()
 
 endif()
@@ -315,6 +320,7 @@ if(CLOWNAUDIO_LIBVORBIS)
 
 	pkg_check_modules(vorbisfile REQUIRED IMPORTED_TARGET vorbisfile)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::vorbisfile)
+	list(APPEND STATIC_LIBS ${vorbisfile_STATIC_LIBRARIES})
 endif()
 
 if(CLOWNAUDIO_LIBFLAC)
@@ -324,6 +330,7 @@ if(CLOWNAUDIO_LIBFLAC)
 
 	pkg_check_modules(flac REQUIRED IMPORTED_TARGET flac)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::flac)
+	list(APPEND STATIC_LIBS ${flac_STATIC_LIBRARIES})
 endif()
 
 if(CLOWNAUDIO_LIBOPUS)
@@ -333,6 +340,7 @@ if(CLOWNAUDIO_LIBOPUS)
 
 	pkg_check_modules(opusfile REQUIRED IMPORTED_TARGET opusfile)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::opusfile)
+	list(APPEND STATIC_LIBS ${opusfile_STATIC_LIBRARIES})
 endif()
 
 if(CLOWNAUDIO_LIBSNDFILE)
@@ -342,6 +350,7 @@ if(CLOWNAUDIO_LIBSNDFILE)
 
 	pkg_check_modules(sndfile REQUIRED IMPORTED_TARGET sndfile)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::sndfile)
+	list(APPEND STATIC_LIBS ${sndfile_STATIC_LIBRARIES})
 endif()
 
 if(CLOWNAUDIO_LIBOPENMPT)
@@ -351,6 +360,7 @@ if(CLOWNAUDIO_LIBOPENMPT)
 
 	pkg_check_modules(libopenmpt REQUIRED IMPORTED_TARGET libopenmpt)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::libopenmpt)
+	list(APPEND STATIC_LIBS ${libopenmpt_STATIC_LIBRARIES})
 endif()
 
 ####################
@@ -366,5 +376,10 @@ install(TARGETS clownaudio
 )
 
 # pkg-config
+list(REMOVE_DUPLICATES STATIC_LIBS)
+foreach(ITEM ${STATIC_LIBS})
+	set(PKG_CONFIG_STATIC_LIBS "-l${ITEM} ${PKG_CONFIG_STATIC_LIBS}")
+endforeach()
+
 configure_file("clownaudio.pc.in" clownaudio.pc @ONLY)
 install(FILES "${CMAKE_BINARY_DIR}/clownaudio.pc" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig")
