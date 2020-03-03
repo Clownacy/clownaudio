@@ -71,17 +71,6 @@ if(MSVC)
 endif()
 
 ####################
-# Install
-####################
-
-include(GNUInstallDirs)
-
-install(TARGETS clownaudio
-	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/clownaudio
-)
-
-####################
 # Decoding backends
 ####################
 
@@ -275,3 +264,19 @@ if(CLOWNAUDIO_LIBXMPLITE)
 		target_link_libraries(clownaudio PRIVATE libxmp-lite)
 	endif()
 endif()
+
+####################
+# Install
+####################
+
+include(GNUInstallDirs)
+
+# Install directories
+install(TARGETS clownaudio
+	LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+	PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/clownaudio
+)
+
+# pkg-config
+configure_file(clownaudio.pc.in clownaudio.pc @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/clownaudio.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
