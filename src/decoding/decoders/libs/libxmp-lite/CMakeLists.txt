@@ -30,7 +30,7 @@ set(SOURCES src/virtual.c
             src/loaders/it_load.c
 )
 
-add_library(libxmp-lite STATIC ${SOURCES})
+add_library(libxmp-lite OBJECT ${SOURCES})
 target_compile_definitions(libxmp-lite PRIVATE LIBXMP_CORE_PLAYER=1 BUILDING_STATIC=1)
 
 target_include_directories(libxmp-lite PUBLIC include/libxmp-lite)
