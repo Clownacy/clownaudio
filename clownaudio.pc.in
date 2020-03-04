@@ -4,8 +4,8 @@ libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
 includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
 
 Name: @PROJECT_NAME@
-Description: Stereo audio engine supporting various formats
-Version: 0.2
+Description: @PROJECT_DESCRIPTION@
+Version: @PROJECT_VERSION@
 
 Requires:
 Libs: -L${libdir} -lclownaudio

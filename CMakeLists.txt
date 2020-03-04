@@ -14,7 +14,7 @@ option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
 option(CLOWNAUDIO_NO_PLAYBACK "Disables playback capabilities" OFF)
 set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
 
-project(clownaudio LANGUAGES C CXX)
+project(clownaudio VERSION 0.2 DESCRIPTION "Stereo audio engine supporting various formats" LANGUAGES C CXX)
 
 set(SOURCES
 	"include/clownaudio/mixer.h"
