@@ -48,7 +48,7 @@ typedef struct Channel
 	float volume_left;
 	float volume_right;
 	SplitDecoder *split_decoder;
-	Mixer_Sound instance;
+	ClownMixer_Sound instance;
 
 	unsigned long fade_out_counter_max;
 	unsigned long fade_in_counter_max;
@@ -64,12 +64,12 @@ typedef struct Mutex
 #endif
 } Mutex;
 
-struct Mixer
+struct ClownMixer
 {
 	Channel *channel_list_head;
 	Mutex mutex;
 	unsigned long sample_rate;
-	Mixer_Sound instance_allocator;
+	ClownMixer_Sound instance_allocator;
 };
 
 static void MutexInit(Mutex *mutex)
@@ -108,7 +108,7 @@ static void MutexUnlock(Mutex *mutex)
 #endif
 }
 
-static Channel* FindChannel(Mixer *mixer, Mixer_Sound instance)
+static Channel* FindChannel(ClownMixer *mixer, ClownMixer_Sound instance)
 {
 	for (Channel *channel = mixer->channel_list_head; channel != NULL; channel = channel->next)
 		if (channel->instance == instance)
@@ -117,9 +117,9 @@ static Channel* FindChannel(Mixer *mixer, Mixer_Sound instance)
 	return NULL;
 }
 
-DLL_API Mixer* Mixer_Create(unsigned long sample_rate)
+DLL_API ClownMixer* ClownMixer_Create(unsigned long sample_rate)
 {
-	Mixer *mixer = malloc(sizeof(Mixer));
+	ClownMixer *mixer = malloc(sizeof(ClownMixer));
 
 	if (mixer != NULL)
 	{
@@ -133,26 +133,26 @@ DLL_API Mixer* Mixer_Create(unsigned long sample_rate)
 	return mixer;
 }
 
-DLL_API void Mixer_Destroy(Mixer *mixer)
+DLL_API void ClownMixer_Destroy(ClownMixer *mixer)
 {
 	MutexDeinit(&mixer->mutex);
 
 	free(mixer);
 }
 
-DLL_API Mixer_SoundData* Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
+DLL_API ClownMixer_SoundData* ClownMixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
 {
-	return (Mixer_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, predecode);
+	return (ClownMixer_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, predecode);
 }
 
-DLL_API void Mixer_UnloadSoundData(Mixer_SoundData *sound)
+DLL_API void ClownMixer_UnloadSoundData(ClownMixer_SoundData *sound)
 {
 	SplitDecoder_UnloadData((SplitDecoderData*)sound);
 }
 
-DLL_API Mixer_Sound Mixer_CreateSound(Mixer *mixer, Mixer_SoundData *sound, bool loop, bool free_when_done)
+DLL_API ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, ClownMixer_SoundData *sound, bool loop, bool free_when_done)
 {
-	Mixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
+	ClownMixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
 	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, mixer->sample_rate);
 
@@ -180,7 +180,7 @@ DLL_API Mixer_Sound Mixer_CreateSound(Mixer *mixer, Mixer_SoundData *sound, bool
 	return instance;
 }
 
-DLL_API void Mixer_DestroySound(Mixer *mixer, Mixer_Sound instance)
+DLL_API void ClownMixer_DestroySound(ClownMixer *mixer, ClownMixer_Sound instance)
 {
 	Channel *channel = NULL;
 
@@ -205,7 +205,7 @@ DLL_API void Mixer_DestroySound(Mixer *mixer, Mixer_Sound instance)
 	}
 }
 
-DLL_API void Mixer_RewindSound(Mixer *mixer, Mixer_Sound instance)
+DLL_API void ClownMixer_RewindSound(ClownMixer *mixer, ClownMixer_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -217,7 +217,7 @@ DLL_API void Mixer_RewindSound(Mixer *mixer, Mixer_Sound instance)
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_PauseSound(Mixer *mixer, Mixer_Sound instance)
+DLL_API void ClownMixer_PauseSound(ClownMixer *mixer, ClownMixer_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -229,7 +229,7 @@ DLL_API void Mixer_PauseSound(Mixer *mixer, Mixer_Sound instance)
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_UnpauseSound(Mixer *mixer, Mixer_Sound instance)
+DLL_API void ClownMixer_UnpauseSound(ClownMixer *mixer, ClownMixer_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -241,7 +241,7 @@ DLL_API void Mixer_UnpauseSound(Mixer *mixer, Mixer_Sound instance)
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_FadeOutSound(Mixer *mixer, Mixer_Sound instance, unsigned int duration)
+DLL_API void ClownMixer_FadeOutSound(ClownMixer *mixer, ClownMixer_Sound instance, unsigned int duration)
 {
 	MutexLock(&mixer->mutex);
 
@@ -265,7 +265,7 @@ DLL_API void Mixer_FadeOutSound(Mixer *mixer, Mixer_Sound instance, unsigned int
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_FadeInSound(Mixer *mixer, Mixer_Sound instance, unsigned int duration)
+DLL_API void ClownMixer_FadeInSound(ClownMixer *mixer, ClownMixer_Sound instance, unsigned int duration)
 {
 	MutexLock(&mixer->mutex);
 
@@ -289,7 +289,7 @@ DLL_API void Mixer_FadeInSound(Mixer *mixer, Mixer_Sound instance, unsigned int 
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_CancelFade(Mixer *mixer, Mixer_Sound instance)
+DLL_API void ClownMixer_CancelFade(ClownMixer *mixer, ClownMixer_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -304,7 +304,7 @@ DLL_API void Mixer_CancelFade(Mixer *mixer, Mixer_Sound instance)
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API int Mixer_GetSoundStatus(Mixer *mixer, Mixer_Sound instance)
+DLL_API int ClownMixer_GetSoundStatus(ClownMixer *mixer, ClownMixer_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -317,7 +317,7 @@ DLL_API int Mixer_GetSoundStatus(Mixer *mixer, Mixer_Sound instance)
 	return status;
 }
 
-DLL_API void Mixer_SetSoundVolume(Mixer *mixer, Mixer_Sound instance, float volume_left, float volume_right)
+DLL_API void ClownMixer_SetSoundVolume(ClownMixer *mixer, ClownMixer_Sound instance, float volume_left, float volume_right)
 {
 	MutexLock(&mixer->mutex);
 
@@ -332,7 +332,7 @@ DLL_API void Mixer_SetSoundVolume(Mixer *mixer, Mixer_Sound instance, float volu
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_SetSoundLoop(Mixer *mixer, Mixer_Sound instance, bool loop)
+DLL_API void ClownMixer_SetSoundLoop(ClownMixer *mixer, ClownMixer_Sound instance, bool loop)
 {
 	MutexLock(&mixer->mutex);
 
@@ -344,7 +344,7 @@ DLL_API void Mixer_SetSoundLoop(Mixer *mixer, Mixer_Sound instance, bool loop)
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_SetSoundSampleRate(Mixer *mixer, Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
+DLL_API void ClownMixer_SetSoundSampleRate(ClownMixer *mixer, ClownMixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
 {
 	MutexLock(&mixer->mutex);
 
@@ -356,7 +356,7 @@ DLL_API void Mixer_SetSoundSampleRate(Mixer *mixer, Mixer_Sound instance, unsign
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_MixSamples(Mixer *mixer, float *output_buffer, size_t frames_to_do)
+DLL_API void ClownMixer_MixSamples(ClownMixer *mixer, float *output_buffer, size_t frames_to_do)
 {
 	MutexLock(&mixer->mutex);
 
