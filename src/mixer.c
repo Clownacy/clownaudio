@@ -65,13 +65,13 @@ typedef struct Mutex
 #endif
 } Mutex;
 
-typedef struct Mixer
+struct Mixer
 {
 	Channel *channel_list_head;
 	Mutex mutex;
 	unsigned long sample_rate;
 	Mixer_Sound instance_allocator;
-} Mixer;
+};
 
 static void MutexInit(Mutex *mutex)
 {

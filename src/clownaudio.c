@@ -41,8 +41,6 @@ static void CallbackStream(void *user_data, float *output_buffer, size_t frames_
 
 DLL_API bool ClownAudio_Init(void)
 {
-	bool success = false;
-
 	mixer = Mixer_Create(STREAM_SAMPLE_RATE);
 
 	if (mixer != NULL)
