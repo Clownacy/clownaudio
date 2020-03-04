@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
 				);
 				fflush(stdout);
 
-				float pan = 0.0f;
 				bool pause = false;
 
 				bool exit = false;
@@ -217,22 +216,6 @@ int main(int argc, char *argv[])
 							ClownAudio_SetSoundVolume(instance, param);
 							break;
 						}
-
-						case '[':
-							printf("Panning sound to the left\n");
-							fflush(stdout);
-
-							pan -= 0.25f;
-							ClownAudio_SetSoundPan(instance, pan);
-							break;
-
-						case ']':
-							printf("Panning sound to the right\n");
-							fflush(stdout);
-
-							pan += 0.25f;
-							ClownAudio_SetSoundPan(instance, pan);
-							break;
 					}
 				}
 

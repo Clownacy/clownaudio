@@ -64,7 +64,6 @@ DLL_API int ClownAudio_GetSoundStatus(ClownAudio_Sound instance);
 DLL_API void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume);	// Volume is linear, between 0.0f and 1.0f
 DLL_API void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop);
 DLL_API void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
-DLL_API void ClownAudio_SetSoundPan(ClownAudio_Sound instance, float pan);	// -1.0f is full-left; 1.0f is full-right
 
 #ifdef __cplusplus
 }

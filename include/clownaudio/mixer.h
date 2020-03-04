@@ -61,7 +61,6 @@ DLL_API int Mixer_GetSoundStatus(Mixer *mixer, Mixer_Sound instance);
 DLL_API void Mixer_SetSoundVolume(Mixer *mixer, Mixer_Sound instance, float volume);	// Volume is linear, between 0.0f and 1.0f
 DLL_API void Mixer_SetSoundLoop(Mixer *mixer, Mixer_Sound instance, bool loop);
 DLL_API void Mixer_SetSoundSampleRate(Mixer *mixer, Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
-DLL_API void Mixer_SetPan(Mixer *mixer, Mixer_Sound instance, float pan);	// -1.0f is full-left; 1.0f is full-right
 
 DLL_API void Mixer_MixSamples(Mixer *mixer, float *output_buffer, size_t frames_to_do);
 

@@ -46,8 +46,6 @@ typedef struct Channel
 	bool paused;
 	bool free_when_done;
 	float volume;
-	float left_pan[CHANNEL_COUNT];
-	float right_pan[CHANNEL_COUNT];
 	SplitDecoder *split_decoder;
 	Mixer_Sound instance;
 
@@ -165,10 +163,6 @@ DLL_API Mixer_Sound Mixer_CreateSound(Mixer *mixer, Mixer_SoundData *sound, bool
 
 		channel->split_decoder = split_decoder;
 		channel->volume = 1.0f;
-		channel->left_pan[0] = 1.0f;
-		channel->right_pan[0] = 0.0f;
-		channel->left_pan[1] = 0.0f;
-		channel->right_pan[1] = 1.0f;
 		channel->instance = instance;
 		channel->paused = true;
 		channel->free_when_done = free_when_done;
@@ -357,28 +351,6 @@ DLL_API void Mixer_SetSoundSampleRate(Mixer *mixer, Mixer_Sound instance, unsign
 	MutexUnlock(&mixer->mutex);
 }
 
-DLL_API void Mixer_SetPan(Mixer *mixer, Mixer_Sound instance, float pan)
-{
-	MutexLock(&mixer->mutex);
-
-	Channel *channel = FindChannel(mixer, instance);
-
-	if (channel != NULL)
-	{
-		channel->left_pan[0] = 1.0f - CLAMP(pan, 0.0f, 1.0f);
-		channel->right_pan[1] = 1.0f - CLAMP(-pan, 0.0f, 1.0f);
-
-		// Logarithmic (realistic) panning
-		channel->left_pan[0] *= channel->left_pan[0];
-		channel->right_pan[1] *= channel->right_pan[1];
-
-		channel->right_pan[0] = 1.0f - channel->right_pan[1];
-		channel->left_pan[1] = 1.0f - channel->left_pan[0];
-	}
-
-	MutexUnlock(&mixer->mutex);
-}
-
 DLL_API void Mixer_MixSamples(Mixer *mixer, float *output_buffer, size_t frames_to_do)
 {
 	MutexLock(&mixer->mutex);
@@ -411,7 +383,7 @@ DLL_API void Mixer_MixSamples(Mixer *mixer, float *output_buffer, size_t frames_
 					{
 						const float fade_out_volume = channel->fade_counter / (float)channel->fade_out_counter_max;
 
-						volume *= (fade_out_volume * fade_out_volume);
+						volume *= (fade_out_volume * fade_out_volume);	// Fade logarithmically
 
 						if (channel->fade_counter != 0)
 							--channel->fade_counter;
@@ -422,26 +394,15 @@ DLL_API void Mixer_MixSamples(Mixer *mixer, float *output_buffer, size_t frames_
 					{
 						const float fade_in_volume = (channel->fade_in_counter_max - channel->fade_counter) / (float)channel->fade_in_counter_max;
 
-						volume *= (fade_in_volume * fade_in_volume);
+						volume *= (fade_in_volume * fade_in_volume);	// Fade logarithmically
 
 						if (--channel->fade_counter == 0)
 							channel->fade_in_counter_max = 0;
 					}
 
 					// Mix data with output, and apply volume
-					const float left_sample = *read_buffer_pointer++;
-					const float right_sample = *read_buffer_pointer++;
-
-					for (unsigned int j = 0; j < CHANNEL_COUNT; ++j)
-					{
-						float panned_sample = (left_sample * channel->left_pan[j]) + (right_sample * channel->right_pan[j]);
-
-						const float total_pan = channel->left_pan[j] + channel->right_pan[j];
-						if (total_pan > 1.0f)
-							panned_sample /= total_pan;	// Clamp back down to the original max volume
-
-						*output_buffer_pointer++ += panned_sample * volume;
-					}
+					*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
+					*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
 				}
 
 				if (sub_frames_done < sub_frames_to_do)
