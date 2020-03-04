@@ -41,7 +41,7 @@ static void FileToMemory(const char *filename, unsigned char **buffer, size_t *s
 		size_t _size = ftell(file);
 		rewind(file);
 
-		unsigned char *_buffer = malloc(_size);
+		unsigned char *_buffer = (unsigned char*)malloc(_size);
 
 		if (_buffer != NULL)
 		{
