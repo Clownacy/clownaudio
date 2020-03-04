@@ -12,7 +12,7 @@ USE_PXTONE = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
 
-CLOWNAUDIO_DIR = ..
+CLOWNAUDIO_DIR = ../src
 
 ifneq ($(RELEASE),)
   CFLAGS = -O2 -flto
@@ -229,17 +229,17 @@ all: test
 obj/test.o: test.c
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -I$(CLOWNAUDIO_DIR) $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -I../include $< -o $@ -c
 
 obj/clownaudio/%.c.o: $(CLOWNAUDIO_DIR)/%.c
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -I../include/clownaudio $< -o $@ -c
 
 obj/clownaudio/%.cpp.o: $(CLOWNAUDIO_DIR)/%.cpp
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic -I../include/clownaudio $< -o $@ -c
 
 obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
 	$(info Compiling $<)
