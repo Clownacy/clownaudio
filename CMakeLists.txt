@@ -274,8 +274,7 @@ if(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
 	find_package(cubeb REQUIRED)
 
 	target_link_libraries(clownaudio PRIVATE cubeb::cubeb)
-	get_target_property(CUBEB_LIBRARIES cubeb::cubeb LINK_LIBRARIES)
-	list(APPEND STATIC_LIBS ${CUBEB_LIBRARIES})
+	list(APPEND STATIC_LIBS cubeb)
 endif()
 
 endif()
