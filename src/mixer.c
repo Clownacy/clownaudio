@@ -328,7 +328,7 @@ DLL_API void Mixer_SetSoundVolume(Mixer *mixer, Mixer_Sound instance, float volu
 	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
-		channel->volume = volume * volume;	// Don't do this - leave making it logarithmic up to the user
+		channel->volume = volume;
 
 	MutexUnlock(&mixer->mutex);
 }
