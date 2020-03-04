@@ -92,6 +92,15 @@ endif()
 if(CLOWNAUDIO_STB_VORBIS)
 	target_compile_definitions(clownaudio PRIVATE USE_STB_VORBIS)
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/stb_vorbis.c" "src/decoding/decoders/stb_vorbis.h")
+
+	include(CheckLibraryExists)
+
+	check_library_exists(m exp "" LIBM)
+	if(LIBM)
+		target_link_libraries(clownaudio PRIVATE m)
+	endif()
+
+	list(APPEND STATIC_LIBS m)
 endif()
 
 if(CLOWNAUDIO_LIBFLAC)
@@ -226,6 +235,8 @@ if(CLOWNAUDIO_BACKEND STREQUAL "miniaudio")
 	endif()
 
 	target_link_libraries(clownaudio PRIVATE ${CMAKE_DL_LIBS})
+
+	list(APPEND STATIC_LIBS m pthread dl)
 elseif(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
 	target_sources(clownaudio PRIVATE "src/playback/sdl1.c")
 elseif(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
@@ -255,21 +266,6 @@ if(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
 	list(APPEND STATIC_LIBS cubeb)
 endif()
 
-endif()
-
-if(CLOWNAUDIO_LIBXMPLITE)
-	find_package(LibXMPLite)	# TODO - replace this with pkg-config
-
-	if(libxmp-lite_FOUND)
-		message(STATUS "Using system libxmp-lite")
-		target_link_libraries(clownaudio PRIVATE libxmp-lite)
-		list(APPEND STATIC_LIBS ${LIBXMPLITE_LIBRARIES})
-	else()
-		# Compile it ourselves
-		message(STATUS "Using local libxmp-lite")
-		add_subdirectory("src/decoding/decoders/libs/libxmp-lite" EXCLUDE_FROM_ALL)
-		target_link_libraries(clownaudio PRIVATE libxmp-lite)
-	endif()
 endif()
 
 # pkg-config
@@ -358,6 +354,25 @@ if(CLOWNAUDIO_LIBOPENMPT)
 	pkg_check_modules(libopenmpt REQUIRED IMPORTED_TARGET libopenmpt)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::libopenmpt)
 	list(APPEND STATIC_LIBS ${libopenmpt_STATIC_LIBRARIES})
+endif()
+
+if(CLOWNAUDIO_LIBXMPLITE)
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(libxmp-lite IMPORTED_TARGET libxmp-lite)
+
+	if(libxmp-lite_FOUND)
+		message(STATUS "Using system libxmp-lite")
+		target_link_libraries(clownaudio PRIVATE PkgConfig::libxmp-lite)
+		list(APPEND STATIC_LIBS ${libxmp-lite_STATIC_LIBRARIES})
+	else()
+		# Compile it ourselves
+		message(STATUS "Using local libxmp-lite")
+		add_subdirectory("src/decoding/decoders/libs/libxmp-lite" EXCLUDE_FROM_ALL)
+		target_link_libraries(clownaudio PRIVATE libxmp-lite)
+	endif()
 endif()
 
 ####################
