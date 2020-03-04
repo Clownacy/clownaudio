@@ -7,7 +7,7 @@ Name: @PROJECT_NAME@
 Description: @PROJECT_DESCRIPTION@
 Version: @PROJECT_VERSION@
 
-Requires:
+Requires.private: @PKG_CONFIG_REQUIRES@
 Libs: -L${libdir} -lclownaudio
 Libs.private: @PKG_CONFIG_STATIC_LIBS@
 Cflags: -I${includedir}

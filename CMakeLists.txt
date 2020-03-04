@@ -277,7 +277,7 @@ if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
 
 	pkg_check_modules(sdl REQUIRED IMPORTED_TARGET sdl)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::sdl)
-	list(APPEND STATIC_LIBS ${sdl_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} sdl")
 endif()
 
 if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
@@ -287,7 +287,7 @@ if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
 
 	pkg_check_modules(sdl2 REQUIRED IMPORTED_TARGET sdl2)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::sdl2)
-	list(APPEND STATIC_LIBS ${sdl2_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} sdl2")
 endif()
 
 if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
@@ -297,7 +297,7 @@ if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
 
 	pkg_check_modules(portaudio REQUIRED IMPORTED_TARGET portaudio-2.0)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::portaudio)
-	list(APPEND STATIC_LIBS ${portaudio_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} portaudio-2.0")
 endif()
 
 endif()
@@ -309,7 +309,7 @@ if(CLOWNAUDIO_LIBVORBIS)
 
 	pkg_check_modules(vorbisfile REQUIRED IMPORTED_TARGET vorbisfile)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::vorbisfile)
-	list(APPEND STATIC_LIBS ${vorbisfile_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} vorbisfile")
 endif()
 
 if(CLOWNAUDIO_LIBFLAC)
@@ -319,7 +319,7 @@ if(CLOWNAUDIO_LIBFLAC)
 
 	pkg_check_modules(flac REQUIRED IMPORTED_TARGET flac)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::flac)
-	list(APPEND STATIC_LIBS ${flac_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} flac")
 endif()
 
 if(CLOWNAUDIO_LIBOPUS)
@@ -329,7 +329,7 @@ if(CLOWNAUDIO_LIBOPUS)
 
 	pkg_check_modules(opusfile REQUIRED IMPORTED_TARGET opusfile)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::opusfile)
-	list(APPEND STATIC_LIBS ${opusfile_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} opusfile")
 endif()
 
 if(CLOWNAUDIO_LIBSNDFILE)
@@ -339,7 +339,7 @@ if(CLOWNAUDIO_LIBSNDFILE)
 
 	pkg_check_modules(sndfile REQUIRED IMPORTED_TARGET sndfile)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::sndfile)
-	list(APPEND STATIC_LIBS ${sndfile_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} sndfile")
 endif()
 
 if(CLOWNAUDIO_LIBOPENMPT)
@@ -349,7 +349,7 @@ if(CLOWNAUDIO_LIBOPENMPT)
 
 	pkg_check_modules(libopenmpt REQUIRED IMPORTED_TARGET libopenmpt)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::libopenmpt)
-	list(APPEND STATIC_LIBS ${libopenmpt_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} libopenmpt")
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
@@ -362,7 +362,7 @@ if(CLOWNAUDIO_LIBXMPLITE)
 	if(libxmp-lite_FOUND)
 		message(STATUS "Using system libxmp-lite")
 		target_link_libraries(clownaudio PRIVATE PkgConfig::libxmp-lite)
-		list(APPEND STATIC_LIBS ${libxmp-lite_STATIC_LIBRARIES})
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} libxmp-lite")
 	else()
 		# Compile it ourselves
 		message(STATUS "Using local libxmp-lite")
