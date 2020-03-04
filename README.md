@@ -63,7 +63,7 @@ SDL2      | zlib     | No
 ## Building
 
 clownaudio is built with CMake - both shared and static libraries can be
-produced. A `pkg-config` file is also provided.
+produced. A `pkg-config` file is also generated.
 
 As an alternative, projects can embed clownaudio directly, using CMake's
 `add_subdirectory`.
