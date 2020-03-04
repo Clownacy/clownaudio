@@ -83,7 +83,7 @@ ifeq ($(USE_DR_WAV), true)
 endif
 
 ifeq ($(USE_LIBOPUS), true)
-  SOURCES += decoding/decoders/libopus.c
+  CLOWNAUDIO_SOURCES += decoding/decoders/libopus.c
   ALL_CFLAGS += -DUSE_LIBOPUS $(shell pkg-config opusfile --cflags)
   ALL_LIBS += $(shell pkg-config opusfile --libs --static)
 endif
