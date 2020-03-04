@@ -248,28 +248,6 @@ endif()
 
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
 
-if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
-	find_package(SDL REQUIRED)
-
-	if(SDL_FOUND)
-		target_include_directories(clownaudio PRIVATE ${SDL_INCLUDE_DIR})
-		target_link_libraries(clownaudio PRIVATE ${SDL_LIBRARY})
-	endif()
-endif()
-
-if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
-	find_package(SDL2 REQUIRED)
-
-	if(TARGET SDL2::SDL2)
-		# CMake-generated config (Arch, vcpkg, Raspbian)
-		target_link_libraries(clownaudio PRIVATE SDL2::SDL2 SDL2::SDL2main)
-	elseif(SDL2_FOUND)
-		# Autotools-generated config (MSYS2)
-		target_include_directories(clownaudio PRIVATE ${SDL2_INCLUDE_DIRS})
-		target_link_libraries(clownaudio PRIVATE ${SDL2_LIBRARIES})
-	endif()
-endif()
-
 if(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
 	find_package(cubeb REQUIRED)
 
@@ -300,6 +278,26 @@ find_package(PkgConfig QUIET)
 
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
 
+if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(sdl REQUIRED IMPORTED_TARGET sdl)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::sdl)
+	list(APPEND STATIC_LIBS ${sdl_STATIC_LIBRARIES})
+endif()
+
+if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	endif()
+
+	pkg_check_modules(sdl2 REQUIRED IMPORTED_TARGET sdl2)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::sdl2)
+	list(APPEND STATIC_LIBS ${sdl2_STATIC_LIBRARIES})
+endif()
+
 if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
 	if (NOT PkgConfig_FOUND)
 		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
@@ -307,7 +305,7 @@ if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
 
 	pkg_check_modules(portaudio REQUIRED IMPORTED_TARGET portaudio-2.0)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::portaudio)
-	list(APPEND STATIC_LIBS ${portaudio_LIBRARIES})
+	list(APPEND STATIC_LIBS ${portaudio_STATIC_LIBRARIES})
 endif()
 
 endif()
