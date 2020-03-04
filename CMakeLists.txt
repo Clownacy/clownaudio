@@ -14,10 +14,6 @@ option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
 option(CLOWNAUDIO_NO_PLAYBACK "Disables playback capabilities" OFF)
 set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
 
-list(APPEND CMAKE_MODULE_PATH
-	"${CMAKE_CURRENT_LIST_DIR}/cmake"
-)
-
 project(clownaudio LANGUAGES C CXX)
 
 set(SOURCES
