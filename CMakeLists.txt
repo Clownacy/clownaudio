@@ -386,7 +386,7 @@ install(TARGETS clownaudio
 # pkg-config
 list(REMOVE_DUPLICATES STATIC_LIBS)
 foreach(ITEM ${STATIC_LIBS})
-	set(PKG_CONFIG_STATIC_LIBS "-l${ITEM} ${PKG_CONFIG_STATIC_LIBS}")
+	set(PKG_CONFIG_STATIC_LIBS "${PKG_CONFIG_STATIC_LIBS} -l${ITEM}")
 endforeach()
 
 configure_file("clownaudio.pc.in" clownaudio.pc @ONLY)
