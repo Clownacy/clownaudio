@@ -138,9 +138,9 @@ DLL_API int ClownAudio_GetSoundStatus(ClownAudio_Sound instance)
 	return Mixer_GetSoundStatus(mixer, instance);
 }
 
-DLL_API void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume)
+DLL_API void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume_left, float volume_right)
 {
-	Mixer_SetSoundVolume(mixer, instance, volume);
+	Mixer_SetSoundVolume(mixer, instance, volume_left, volume_right);
 }
 
 DLL_API void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop)

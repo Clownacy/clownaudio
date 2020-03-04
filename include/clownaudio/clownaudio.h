@@ -61,7 +61,7 @@ DLL_API void ClownAudio_CancelFade(ClownAudio_Sound instance);
 // Returns -1 if the sound doesn't exist, 0 if it's unpaused, or 1 if it is paused
 DLL_API int ClownAudio_GetSoundStatus(ClownAudio_Sound instance);
 
-DLL_API void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume);	// Volume is linear, between 0.0f and 1.0f
+DLL_API void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume_left, float volume_right);	// Volume is linear, between 0.0f and 1.0f
 DLL_API void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop);
 DLL_API void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
 

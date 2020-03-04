@@ -98,16 +98,16 @@ int main(int argc, char *argv[])
 
 				printf("\n"
 				       "Controls:\n"
-				       " q            - Quit\n"
-				       " r            - Rewind sound\n"
-				       " o [duration] - Fade-out sound (milliseconds)\n"
-				       " i [duration] - Fade-in sound (milliseconds)\n"
-				       " c            - Cancel fade\n"
-				       " u [rate]     - Set sample-rate (Hz)\n"
-				       " p            - Pause/unpause sound\n"
-				       " v [volume]   - Set sound volume (0.0-1.0)\n"
-				       " [            - Pan to the left\n"
-				       " ]            - Pan to the right\n\n"
+				       " q                - Quit\n"
+				       " r                - Rewind sound\n"
+				       " o [duration]     - Fade-out sound (milliseconds)\n"
+				       " i [duration]     - Fade-in sound (milliseconds)\n"
+				       " c                - Cancel fade\n"
+				       " u [rate]         - Set sample-rate (Hz)\n"
+				       " p                - Pause/unpause sound\n"
+				       " v [left] [right] - Set sound volume (0.0-1.0)\n"
+				       " [                - Pan to the left\n"
+				       " ]                - Pan to the right\n\n"
 				);
 				fflush(stdout);
 
@@ -206,14 +206,18 @@ int main(int argc, char *argv[])
 
 						case 'v':
 						{
-							float param;
-							if (sscanf(buffer, "%c %f", &mode, &param) != 2)
-								param = 1.0f;
+							float volume_left, volume_right;
+							int values_read = sscanf(buffer, "%c %f %f", &mode, &volume_left, &volume_right);
 
-							printf("Setting volume to %f\n", param);
+							if (values_read == 1)
+								volume_left = volume_right = 1.0f;
+							else if (values_read == 2)
+								volume_right = volume_left;
+
+							printf("Setting volume to %f left, %f right\n", volume_left, volume_right);
 							fflush(stdout);
 
-							ClownAudio_SetSoundVolume(instance, param);
+							ClownAudio_SetSoundVolume(instance, volume_left, volume_right);
 							break;
 						}
 					}

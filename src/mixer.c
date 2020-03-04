@@ -45,7 +45,8 @@ typedef struct Channel
 
 	bool paused;
 	bool free_when_done;
-	float volume;
+	float volume_left;
+	float volume_right;
 	SplitDecoder *split_decoder;
 	Mixer_Sound instance;
 
@@ -162,7 +163,8 @@ DLL_API Mixer_Sound Mixer_CreateSound(Mixer *mixer, Mixer_SoundData *sound, bool
 		Channel *channel = malloc(sizeof(Channel));
 
 		channel->split_decoder = split_decoder;
-		channel->volume = 1.0f;
+		channel->volume_left = 1.0f;
+		channel->volume_right = 1.0f;
 		channel->instance = instance;
 		channel->paused = true;
 		channel->free_when_done = free_when_done;
@@ -315,14 +317,17 @@ DLL_API int Mixer_GetSoundStatus(Mixer *mixer, Mixer_Sound instance)
 	return status;
 }
 
-DLL_API void Mixer_SetSoundVolume(Mixer *mixer, Mixer_Sound instance, float volume)
+DLL_API void Mixer_SetSoundVolume(Mixer *mixer, Mixer_Sound instance, float volume_left, float volume_right)
 {
 	MutexLock(&mixer->mutex);
 
 	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
-		channel->volume = volume;
+	{
+		channel->volume_left = volume_left;
+		channel->volume_right = volume_right;
+	}
 
 	MutexUnlock(&mixer->mutex);
 }
@@ -376,14 +381,14 @@ DLL_API void Mixer_MixSamples(Mixer *mixer, float *output_buffer, size_t frames_
 
 				for (size_t i = 0; i < sub_frames_done; ++i)
 				{
-					float volume = channel->volume;
+					float fade_volume = 1.0f;
 
 					// Apply fade-out volume
 					if (channel->fade_out_counter_max != 0)
 					{
 						const float fade_out_volume = channel->fade_counter / (float)channel->fade_out_counter_max;
 
-						volume *= (fade_out_volume * fade_out_volume);	// Fade logarithmically
+						fade_volume *= (fade_out_volume * fade_out_volume);	// Fade logarithmically
 
 						if (channel->fade_counter != 0)
 							--channel->fade_counter;
@@ -394,15 +399,15 @@ DLL_API void Mixer_MixSamples(Mixer *mixer, float *output_buffer, size_t frames_
 					{
 						const float fade_in_volume = (channel->fade_in_counter_max - channel->fade_counter) / (float)channel->fade_in_counter_max;
 
-						volume *= (fade_in_volume * fade_in_volume);	// Fade logarithmically
+						fade_volume *= (fade_in_volume * fade_in_volume);	// Fade logarithmically
 
 						if (--channel->fade_counter == 0)
 							channel->fade_in_counter_max = 0;
 					}
 
 					// Mix data with output, and apply volume
-					*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
-					*output_buffer_pointer++ += *read_buffer_pointer++ * volume;
+					*output_buffer_pointer++ += *read_buffer_pointer++ * channel->volume_left * fade_volume;
+					*output_buffer_pointer++ += *read_buffer_pointer++ * channel->volume_right * fade_volume;
 				}
 
 				if (sub_frames_done < sub_frames_to_do)
