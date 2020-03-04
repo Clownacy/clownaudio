@@ -73,6 +73,9 @@ Example `Makefile` and `CMakeLists.txt` files for a demo tool are provided: the
 `CMakeLists.txt` file demonstrates embedding clownaudio using
 `add_subdirectory`.
 
+`PKGBUILD` files for MSYS2 and Arch Linux are provided in the `packages`
+directory.
+
 
 ## Licensing
 
