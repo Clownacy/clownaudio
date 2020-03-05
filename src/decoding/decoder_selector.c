@@ -263,35 +263,37 @@ void DecoderSelector_Rewind(DecoderSelector *selector)
 
 size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_t frames_to_do)
 {
-	if (selector->data->decoder_type == DECODER_TYPE_PREDECODER)
-	{
-		return Predecoder_GetSamples(selector->decoder, buffer, frames_to_do);
-	}
-	else if (selector->data->decoder_type == DECODER_TYPE_COMPLEX)
-	{
-		return selector->data->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
-	}
-	else //if (selector->data->decoder_type == DECODER_TYPE_SIMPLE)
-	{
-		// Handle looping here, since the simple decoders don't do it by themselves
-		size_t frames_done = 0;
+	size_t frames_done = 0;
 
-		while (frames_done != frames_to_do)
-		{
-			const size_t frames = selector->data->decoder_functions->GetSamples(selector->decoder, &((char*)buffer)[frames_done * selector->data->size_of_frame], frames_to_do - frames_done);
+	switch (selector->data->decoder_type)
+	{
+		default:
+			return 0;
 
-			if (frames == 0)
+		case DECODER_TYPE_PREDECODER:
+			return Predecoder_GetSamples(selector->decoder, buffer, frames_to_do);
+
+		case DECODER_TYPE_COMPLEX:
+			return selector->data->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
+
+		case DECODER_TYPE_SIMPLE:
+			// Handle looping here, since the simple decoders don't do it by themselves
+			while (frames_done != frames_to_do)
 			{
-				if (selector->loop)
-					selector->data->decoder_functions->Rewind(selector->decoder);
-				else
-					break;
+				const size_t frames = selector->data->decoder_functions->GetSamples(selector->decoder, (char*)buffer + frames_done * selector->data->size_of_frame, frames_to_do - frames_done);
+
+				if (frames == 0)
+				{
+					if (selector->loop)
+						selector->data->decoder_functions->Rewind(selector->decoder);
+					else
+						break;
+				}
+
+				frames_done += frames;
 			}
 
-			frames_done += frames;
-		}
-
-		return frames_done;
+			return frames_done;
 	}
 }
 
