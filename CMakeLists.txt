@@ -61,10 +61,6 @@ target_include_directories(clownaudio PUBLIC "${CMAKE_BINARY_DIR}/export")
 
 set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 
-if(BUILD_SHARED_LIBS AND WIN32)
-	target_compile_definitions(clownaudio PRIVATE BUILDING_DLL)
-endif()
-
 if(CLOWNAUDIO_NO_PLAYBACK)
 	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h")
 else()
