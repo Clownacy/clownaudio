@@ -17,14 +17,14 @@ CLOWNAUDIO_DIR = ../src
 ifneq ($(RELEASE),)
   CFLAGS = -O2 -flto
 else
-  CFLAGS = -Og -ggdb
+  CFLAGS = -Og -ggdb3
 endif
 ALL_CFLAGS = -std=c99 -MMD -MP -MF $@.d $(CFLAGS)
 
 ifneq ($(RELEASE),)
   CXXFLAGS = -O2 -flto
 else
-  CXXFLAGS = -Og -ggdb
+  CXXFLAGS = -Og -ggdb3
 endif
 ALL_CXXFLAGS = -MMD -MP -MF $@.d $(CXXFLAGS)
 
