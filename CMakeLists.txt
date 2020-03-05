@@ -429,6 +429,8 @@ configure_package_config_file(
 	INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/clownaudio"
 )
 
+install(FILES "${CMAKE_BINARY_DIR}/clownaudioConfig.cmake" DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/clownaudio")
+
 # pkg-config
 list(REMOVE_DUPLICATES STATIC_LIBS)
 foreach(ITEM ${STATIC_LIBS})
