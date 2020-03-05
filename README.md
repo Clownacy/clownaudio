@@ -63,15 +63,16 @@ SDL2      | zlib     | No
 ## Building
 
 clownaudio is built with CMake - both shared and static libraries can be
-produced. A `pkg-config` file is also generated.
+produced. Built libraries can be accessed via `pkg-config` and CMake's
+`find_package`.
 
-As an alternative, projects can embed clownaudio directly, using CMake's
+As an alternative, CMake projects can embed clownaudio directly, using
 `add_subdirectory`.
 
 Example `Makefile` and `CMakeLists.txt` files for a demo tool are provided: the
-`Makefile` demonstrates linking clownaudio with pkg-config, and the
-`CMakeLists.txt` file demonstrates embedding clownaudio using
-`add_subdirectory`.
+`Makefile` demonstrates linking clownaudio with `pkg-config`, and the
+`CMakeLists.txt` file demonstrates linking with `find_package` and embedding
+with `add_subdirectory`.
 
 `PKGBUILD` files for MSYS2 and Arch Linux are provided in the `packages`
 directory.
