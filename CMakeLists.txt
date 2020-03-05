@@ -62,9 +62,9 @@ target_include_directories(clownaudio PUBLIC "${CMAKE_BINARY_DIR}/export")
 set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 
 if(CLOWNAUDIO_NO_PLAYBACK)
-	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h")
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 else()
-	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h")
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 endif()
 
 set_target_properties(clownaudio PROPERTIES
@@ -386,9 +386,6 @@ install(TARGETS clownaudio
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/clownaudio"
 )
-
-# Install export file
-install(FILES "${CMAKE_BINARY_DIR}/export/clownaudio_export.h" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/clownaudio")
 
 # pkg-config
 list(REMOVE_DUPLICATES STATIC_LIBS)
