@@ -31,7 +31,10 @@ set(SOURCES "src/virtual.c"
 )
 
 add_library(libxmp-lite OBJECT ${SOURCES})
-target_compile_definitions(libxmp-lite PRIVATE LIBXMP_CORE_PLAYER=1 BUILDING_STATIC=1)
+
+set_target_properties(libxmp-lite PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+
+target_compile_definitions(libxmp-lite PRIVATE LIBXMP_CORE_PLAYER=1)
 
 target_include_directories(libxmp-lite PUBLIC "include/libxmp-lite")
 target_include_directories(libxmp-lite PRIVATE "src")

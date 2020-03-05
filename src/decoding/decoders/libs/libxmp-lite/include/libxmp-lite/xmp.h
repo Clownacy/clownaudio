@@ -11,6 +11,8 @@ extern "C" {
 #define XMP_VER_MINOR 4
 #define XMP_VER_RELEASE 1
 
+#define EXPORT
+/*
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # if defined(BUILDING_STATIC)
 #  define EXPORT
@@ -28,6 +30,7 @@ extern "C" {
 #else
 # define EXPORT 
 #endif
+*/
 
 #define XMP_NAME_SIZE		64	/* Size of module name and type */
 
