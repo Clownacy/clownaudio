@@ -261,7 +261,7 @@ obj/pxtone/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/pxtone/%
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
 
 test: $(OBJECTS)
-	$(info Linking $<)
+	$(info Linking $@)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic $^ -o $@ $(ALL_LDFLAGS) $(ALL_LIBS)
 
 include $(wildcard $(DEPENDENCIES))
