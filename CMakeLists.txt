@@ -47,12 +47,15 @@ endif()
 # Misc. settings
 ####################
 
-target_include_directories(clownaudio INTERFACE "include")
+target_include_directories(clownaudio INTERFACE
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
 target_include_directories(clownaudio PRIVATE "include/clownaudio")
 
 include(GenerateExportHeader)
 GENERATE_EXPORT_HEADER(clownaudio EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
-target_include_directories(clownaudio PUBLIC "${CMAKE_BINARY_DIR}/export")
+target_include_directories(clownaudio PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/export>")
 
 set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 
@@ -407,10 +410,23 @@ include(GNUInstallDirs)
 
 # Install directories
 install(TARGETS clownaudio
+	EXPORT clownaudioTargets
 	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/clownaudio"
+)
+
+# Install `clownaudioConfig.cmake` and `clownaudioTargets.cmake`
+install(EXPORT clownaudioTargets DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/clownaudio")
+
+export(TARGETS clownaudio FILE "clownaudioTargets.cmake")
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+	"clownaudioConfig.cmake.in"
+	"clownaudioConfig.cmake"
+	INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/clownaudio"
 )
 
 # pkg-config
