@@ -131,7 +131,11 @@ endif
 ifeq ($(BACKEND), miniaudio)
   CLOWNAUDIO_SOURCES += playback/miniaudio.c
   ALL_CFLAGS += -DMINIAUDIO_ENABLE_DEVICE_IO
-  ALL_LIBS += -ldl -lpthread -lm
+  ALL_LIBS += -lpthread -lm
+
+  ifneq ($(WINDOWS), 1)
+    ALL_LIBS += -ldl
+  endif
 else ifeq ($(BACKEND), SDL1)
   CLOWNAUDIO_SOURCES += playback/sdl1.c
   ALL_CFLAGS += $(SDL1_CFLAGS)
