@@ -370,6 +370,10 @@ if(CLOWNAUDIO_LIBXMPLITE)
 		message(STATUS "Using local libxmp-lite")
 		add_subdirectory("src/decoding/decoders/libs/libxmp-lite" EXCLUDE_FROM_ALL)
 		target_link_libraries(clownaudio PRIVATE libxmp-lite)
+		# Manually sync libxmp-lite's POSITION_INDEPENDENT_CODE with clownaudio's,
+		# to prevent build errors when compiling a Linux Shared Library
+		get_target_property(IS_PIC clownaudio POSITION_INDEPENDENT_CODE)
+		set_target_properties(libxmp-lite PROPERTIES POSITION_INDEPENDENT_CODE "${IS_PIC}")
 	endif()
 endif()
 
