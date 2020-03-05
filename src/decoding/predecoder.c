@@ -45,8 +45,8 @@ struct Predecoder
 
 typedef struct DecoderMetadata
 {
-	Decoder *decoder;
-	size_t (*GetSamples)(Decoder *decoder, void *buffer, size_t frames_to_do);
+	void *decoder;
+	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
 } DecoderMetadata;
 
 static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
@@ -58,7 +58,7 @@ static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_
 	return decoder_metadata->GetSamples(decoder_metadata->decoder, output_buffer, frames_to_do);
 }
 
-PredecoderData* Predecoder_DecodeData(DecoderInfo *info, Decoder *decoder, size_t (*decoder_get_samples_function)(Decoder *decoder, void *buffer, size_t frames_to_do))
+PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (*decoder_get_samples_function)(void *decoder, void *buffer, size_t frames_to_do))
 {
 	PredecoderData *predecoder_data = NULL;
 

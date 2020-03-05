@@ -36,5 +36,3 @@ typedef struct DecoderInfo
 	DecoderFormat format;
 	bool is_complex;
 } DecoderInfo;
-
-typedef struct Decoder Decoder;

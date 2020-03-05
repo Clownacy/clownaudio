@@ -30,7 +30,7 @@
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
-Decoder* Decoder_libOpenMPT_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_libOpenMPT* Decoder_libOpenMPT_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
 	openmpt_module *module = openmpt_module_create_from_memory2(data, data_size, openmpt_log_func_silent, NULL, openmpt_error_func_ignore, NULL, NULL, NULL, NULL);
 
@@ -45,20 +45,20 @@ Decoder* Decoder_libOpenMPT_Create(const unsigned char *data, size_t data_size, 
 			openmpt_module_set_repeat_count(module, -1);
 	}
 
-	return (Decoder*)module;
+	return (Decoder_libOpenMPT*)module;
 }
 
-void Decoder_libOpenMPT_Destroy(Decoder *decoder)
+void Decoder_libOpenMPT_Destroy(Decoder_libOpenMPT *decoder)
 {
 	openmpt_module_destroy((openmpt_module*)decoder);
 }
 
-void Decoder_libOpenMPT_Rewind(Decoder *decoder)
+void Decoder_libOpenMPT_Rewind(Decoder_libOpenMPT *decoder)
 {
 	openmpt_module_set_position_seconds((openmpt_module*)decoder, 0);
 }
 
-size_t Decoder_libOpenMPT_GetSamples(Decoder *decoder, void *buffer_void, size_t frames_to_do)
+size_t Decoder_libOpenMPT_GetSamples(Decoder_libOpenMPT *decoder, void *buffer_void, size_t frames_to_do)
 {
 	float *buffer = buffer_void;
 

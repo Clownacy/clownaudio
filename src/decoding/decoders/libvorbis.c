@@ -29,7 +29,7 @@
 #include "common.h"
 #include "memory_stream.h"
 
-struct Decoder
+struct Decoder_libVorbis
 {
 	OggVorbis_File vorbis_file;
 	unsigned int channel_count;
@@ -83,11 +83,11 @@ static const ov_callbacks ov_callback_memory = {
 	ftell_wrapper
 };
 
-Decoder* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	Decoder *decoder = NULL;
+	Decoder_libVorbis *decoder = NULL;
 
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
 
@@ -97,7 +97,7 @@ Decoder* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, b
 
 		if (ov_open_callbacks(memory_stream, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
 		{
-			decoder = malloc(sizeof(Decoder));
+			decoder = malloc(sizeof(Decoder_libVorbis));
 
 			if (decoder != NULL)
 			{
@@ -125,18 +125,18 @@ Decoder* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, b
 	return decoder;
 }
 
-void Decoder_libVorbis_Destroy(Decoder *decoder)
+void Decoder_libVorbis_Destroy(Decoder_libVorbis *decoder)
 {
 	ov_clear(&decoder->vorbis_file);
 	free(decoder);
 }
 
-void Decoder_libVorbis_Rewind(Decoder *decoder)
+void Decoder_libVorbis_Rewind(Decoder_libVorbis *decoder)
 {
 	ov_time_seek(&decoder->vorbis_file, 0);
 }
 
-size_t Decoder_libVorbis_GetSamples(Decoder *decoder, void *buffer, size_t frames_to_do)
+size_t Decoder_libVorbis_GetSamples(Decoder_libVorbis *decoder, void *buffer, size_t frames_to_do)
 {
 	float **source_buffer;
 	size_t frames_done = ov_read_float(&decoder->vorbis_file, &source_buffer, frames_to_do, NULL);

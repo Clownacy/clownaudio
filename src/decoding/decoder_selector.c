@@ -62,6 +62,14 @@
 #include "decoders/pxtone_noise.h"
 #endif
 
+#define DECODER_FUNCTIONS(name) \
+{ \
+	(void*(*)(const unsigned char*,size_t,bool,DecoderInfo*))Decoder_##name##_Create, \
+	(void(*)(void*))Decoder_##name##_Destroy, \
+	(void(*)(void*))Decoder_##name##_Rewind, \
+	(size_t(*)(void*,void*,size_t))Decoder_##name##_GetSamples \
+}
+
 typedef enum DecoderType
 {
 	DECODER_TYPE_PREDECODER,
@@ -71,10 +79,10 @@ typedef enum DecoderType
 
 typedef struct DecoderFunctions
 {
-	Decoder* (*Create)(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
-	void (*Destroy)(Decoder *decoder);
-	void (*Rewind)(Decoder *decoder);
-	size_t (*GetSamples)(Decoder *decoder, void *buffer, size_t frames_to_do);
+	void* (*Create)(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
+	void (*Destroy)(void *decoder);
+	void (*Rewind)(void *decoder);
+	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
 } DecoderFunctions;
 
 struct DecoderSelectorData
@@ -89,115 +97,55 @@ struct DecoderSelectorData
 
 struct DecoderSelector
 {
-	Decoder *decoder;
+	void *decoder;
 	DecoderSelectorData *data;
 	bool loop;
 };
 
 static const DecoderFunctions decoder_function_list[] = {
 #ifdef USE_LIBVORBIS
-	{
-		Decoder_libVorbis_Create,
-		Decoder_libVorbis_Destroy,
-		Decoder_libVorbis_Rewind,
-		Decoder_libVorbis_GetSamples,
-	},
+	DECODER_FUNCTIONS(libVorbis),
 #endif
 #ifdef USE_STB_VORBIS
-	{
-		Decoder_STB_Vorbis_Create,
-		Decoder_STB_Vorbis_Destroy,
-		Decoder_STB_Vorbis_Rewind,
-		Decoder_STB_Vorbis_GetSamples,
-	},
+	DECODER_FUNCTIONS(STB_Vorbis),
 #endif
 #ifdef USE_LIBFLAC
-	{
-		Decoder_libFLAC_Create,
-		Decoder_libFLAC_Destroy,
-		Decoder_libFLAC_Rewind,
-		Decoder_libFLAC_GetSamples,
-	},
+	DECODER_FUNCTIONS(libFLAC),
 #endif
 #ifdef USE_DR_FLAC
-	{
-		Decoder_DR_FLAC_Create,
-		Decoder_DR_FLAC_Destroy,
-		Decoder_DR_FLAC_Rewind,
-		Decoder_DR_FLAC_GetSamples,
-	},
+	DECODER_FUNCTIONS(DR_FLAC),
 #endif
 #ifdef USE_DR_WAV
-	{
-		Decoder_DR_WAV_Create,
-		Decoder_DR_WAV_Destroy,
-		Decoder_DR_WAV_Rewind,
-		Decoder_DR_WAV_GetSamples,
-	},
+	DECODER_FUNCTIONS(DR_WAV),
 #endif
 #ifdef USE_LIBOPUS
-	{
-		Decoder_libOpus_Create,
-		Decoder_libOpus_Destroy,
-		Decoder_libOpus_Rewind,
-		Decoder_libOpus_GetSamples,
-	},
+	DECODER_FUNCTIONS(libOpus),
 #endif
 #ifdef USE_LIBSNDFILE
-	{
-		Decoder_libSndfile_Create,
-		Decoder_libSndfile_Destroy,
-		Decoder_libSndfile_Rewind,
-		Decoder_libSndfile_GetSamples,
-	},
+	DECODER_FUNCTIONS(libSndfile),
 #endif
 #ifdef USE_LIBOPENMPT
-	{
-		Decoder_libOpenMPT_Create,
-		Decoder_libOpenMPT_Destroy,
-		Decoder_libOpenMPT_Rewind,
-		Decoder_libOpenMPT_GetSamples,
-	},
+	DECODER_FUNCTIONS(libOpenMPT),
 #endif
 #ifdef USE_LIBXMPLITE
-	{
-		Decoder_libXMPLite_Create,
-		Decoder_libXMPLite_Destroy,
-		Decoder_libXMPLite_Rewind,
-		Decoder_libXMPLite_GetSamples,
-	},
+	DECODER_FUNCTIONS(libXMPLite),
 #endif
 #ifdef USE_SNES_SPC
-	{
-		Decoder_SNES_SPC_Create,
-		Decoder_SNES_SPC_Destroy,
-		Decoder_SNES_SPC_Rewind,
-		Decoder_SNES_SPC_GetSamples,
-	},
+	DECODER_FUNCTIONS(SNES_SPC),
 #endif
 #ifdef USE_PXTONE
-	{
-		Decoder_PxTone_Create,
-		Decoder_PxTone_Destroy,
-		Decoder_PxTone_Rewind,
-		Decoder_PxTone_GetSamples,
-	},
+	DECODER_FUNCTIONS(PxTone),
 #endif
 #ifdef USE_PXTONE
-	{
-		Decoder_PxToneNoise_Create,
-		Decoder_PxToneNoise_Destroy,
-		Decoder_PxToneNoise_Rewind,
-		Decoder_PxToneNoise_GetSamples,
-	},
+	DECODER_FUNCTIONS(PxToneNoise),
 #endif
 };
 
 static const DecoderFunctions predecoder_functions = {
 	NULL,
-	(void(*)(Decoder*))Predecoder_Destroy,
-	(void(*)(Decoder*))Predecoder_Rewind,
-	(size_t(*)(Decoder*,void*,size_t))Predecoder_GetSamples
+	(void(*)(void*))Predecoder_Destroy,
+	(void(*)(void*))Predecoder_Rewind,
+	(size_t(*)(void*,void*,size_t))Predecoder_GetSamples
 };
 
 DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
@@ -211,7 +159,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 	// Figure out what format this sound is
 	for (size_t i = 0; i < sizeof(decoder_function_list) / sizeof(decoder_function_list[0]); ++i)
 	{
-		Decoder *decoder = decoder_function_list[i].Create(file_buffer, file_size, false, &info);
+		void *decoder = decoder_function_list[i].Create(file_buffer, file_size, false, &info);
 
 		if (decoder != NULL)
 		{
@@ -285,7 +233,7 @@ DecoderSelector* DecoderSelector_Create(DecoderSelectorData *data, bool loop, De
 	if (selector != NULL)
 	{
 		if (data->decoder_type == DECODER_TYPE_PREDECODER)
-			selector->decoder = (Decoder*)Predecoder_Create(data->predecoder_data, loop, info);
+			selector->decoder = Predecoder_Create(data->predecoder_data, loop, info);
 		else
 			selector->decoder = data->decoder_functions->Create(data->file_buffer, data->file_size, loop, info);
 
@@ -315,36 +263,36 @@ void DecoderSelector_Rewind(DecoderSelector *selector)
 
 size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_t frames_to_do)
 {
-	switch (selector->data->decoder_type)
+	if (selector->data->decoder_type == DECODER_TYPE_PREDECODER)
 	{
-		case DECODER_TYPE_PREDECODER:
-		case DECODER_TYPE_COMPLEX:
-			return selector->data->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
+		return Predecoder_GetSamples(selector->decoder, buffer, frames_to_do);
+	}
+	else if (selector->data->decoder_type == DECODER_TYPE_COMPLEX)
+	{
+		return selector->data->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
+	}
+	else //if (selector->data->decoder_type == DECODER_TYPE_SIMPLE)
+	{
+		// Handle looping here, since the simple decoders don't do it by themselves
+		size_t frames_done = 0;
 
-		case DECODER_TYPE_SIMPLE:;
-			// Handle looping here, since the simple decoders don't do it by themselves
-			size_t frames_done = 0;
+		while (frames_done != frames_to_do)
+		{
+			const size_t frames = selector->data->decoder_functions->GetSamples(selector->decoder, &((char*)buffer)[frames_done * selector->data->size_of_frame], frames_to_do - frames_done);
 
-			while (frames_done != frames_to_do)
+			if (frames == 0)
 			{
-				const size_t frames = selector->data->decoder_functions->GetSamples(selector->decoder, &((char*)buffer)[frames_done * selector->data->size_of_frame], frames_to_do - frames_done);
-
-				if (frames == 0)
-				{
-					if (selector->loop)
-						selector->data->decoder_functions->Rewind(selector->decoder);
-					else
-						break;
-				}
-
-				frames_done += frames;
+				if (selector->loop)
+					selector->data->decoder_functions->Rewind(selector->decoder);
+				else
+					break;
 			}
 
-			return frames_done;
-	}
+			frames_done += frames;
+		}
 
-	// In case decoder_type is somehow invalid
-	return frames_to_do;
+		return frames_done;
+	}
 }
 
 void DecoderSelector_SetLoop(DecoderSelector *selector, bool loop)
@@ -352,7 +300,7 @@ void DecoderSelector_SetLoop(DecoderSelector *selector, bool loop)
 	switch (selector->data->decoder_type)
 	{
 		case DECODER_TYPE_PREDECODER:
-			Predecoder_SetLoop((Predecoder*)selector->decoder, loop);
+			Predecoder_SetLoop(selector->decoder, loop);
 			break;
 
 		case DECODER_TYPE_SIMPLE:

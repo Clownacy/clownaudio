@@ -25,7 +25,9 @@
 
 #include "common.h"
 
-Decoder* Decoder_libOpus_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
-void Decoder_libOpus_Destroy(Decoder *decoder);
-void Decoder_libOpus_Rewind(Decoder *decoder);
-size_t Decoder_libOpus_GetSamples(Decoder *decoder, void *buffer, size_t frames_to_do);
+typedef struct Decoder_libOpus Decoder_libOpus;
+
+Decoder_libOpus* Decoder_libOpus_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
+void Decoder_libOpus_Destroy(Decoder_libOpus *decoder);
+void Decoder_libOpus_Rewind(Decoder_libOpus *decoder);
+size_t Decoder_libOpus_GetSamples(Decoder_libOpus *decoder, void *buffer, size_t frames_to_do);

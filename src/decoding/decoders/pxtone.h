@@ -29,10 +29,12 @@
 extern "C" {
 #endif
 
-Decoder* Decoder_PxTone_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
-void Decoder_PxTone_Destroy(Decoder *decoder);
-void Decoder_PxTone_Rewind(Decoder *decoder);
-size_t Decoder_PxTone_GetSamples(Decoder *decoder, void *buffer, size_t frames_to_do);
+typedef struct Decoder_PxTone Decoder_PxTone;
+
+Decoder_PxTone* Decoder_PxTone_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
+void Decoder_PxTone_Destroy(Decoder_PxTone *decoder);
+void Decoder_PxTone_Rewind(Decoder_PxTone *decoder);
+size_t Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, size_t frames_to_do);
 
 #ifdef __cplusplus
 }
