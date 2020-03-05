@@ -274,7 +274,7 @@ if(NOT CLOWNAUDIO_NO_PLAYBACK)
 
 if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
 	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+		message(FATAL_ERROR "pkg-config is needed by SDL1, but it couldn't be found")
 	endif()
 
 	pkg_check_modules(sdl REQUIRED IMPORTED_TARGET sdl)
@@ -284,7 +284,7 @@ endif()
 
 if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
 	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+		message(FATAL_ERROR "pkg-config is needed by SDL2, but it couldn't be found")
 	endif()
 
 	pkg_check_modules(sdl2 REQUIRED IMPORTED_TARGET sdl2)
@@ -294,7 +294,7 @@ endif()
 
 if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
 	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+		message(FATAL_ERROR "pkg-config is needed by PortAudio, but it couldn't be found")
 	endif()
 
 	pkg_check_modules(portaudio REQUIRED IMPORTED_TARGET portaudio-2.0)
@@ -306,7 +306,7 @@ endif()
 
 if(CLOWNAUDIO_LIBVORBIS)
 	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+		message(FATAL_ERROR "pkg-config is needed by libvorbis, but it couldn't be found")
 	endif()
 
 	pkg_check_modules(vorbisfile REQUIRED IMPORTED_TARGET vorbisfile)
@@ -316,7 +316,7 @@ endif()
 
 if(CLOWNAUDIO_LIBFLAC)
 	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+		message(FATAL_ERROR "pkg-config is needed by libflac, but it couldn't be found")
 	endif()
 
 	pkg_check_modules(flac REQUIRED IMPORTED_TARGET flac)
@@ -326,7 +326,7 @@ endif()
 
 if(CLOWNAUDIO_LIBOPUS)
 	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+		message(FATAL_ERROR "pkg-config is needed by libopus, but it couldn't be found")
 	endif()
 
 	pkg_check_modules(opusfile REQUIRED IMPORTED_TARGET opusfile)
@@ -336,7 +336,7 @@ endif()
 
 if(CLOWNAUDIO_LIBSNDFILE)
 	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+		message(FATAL_ERROR "pkg-config is needed by libsndfile, but it couldn't be found")
 	endif()
 
 	pkg_check_modules(sndfile REQUIRED IMPORTED_TARGET sndfile)
@@ -346,7 +346,7 @@ endif()
 
 if(CLOWNAUDIO_LIBOPENMPT)
 	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+		message(FATAL_ERROR "pkg-config is needed by libopenmpt, but it couldn't be found")
 	endif()
 
 	pkg_check_modules(libopenmpt REQUIRED IMPORTED_TARGET libopenmpt)
