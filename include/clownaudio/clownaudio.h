@@ -23,11 +23,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#ifdef BUILDING_DLL
-#define DLL_API __declspec(dllexport)
-#else
-#define DLL_API
-#endif
+#include "clownaudio_export.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,34 +32,34 @@ extern "C" {
 typedef struct ClownAudio_SoundData ClownAudio_SoundData;
 typedef unsigned int ClownAudio_Sound;
 
-DLL_API bool ClownAudio_Init(void);
-DLL_API void ClownAudio_Deinit(void);
+CLOWNAUDIO_EXPORT bool ClownAudio_Init(void);
+CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void);
 
-DLL_API void ClownAudio_Pause(void);
-DLL_API void ClownAudio_Unpause(void);
+CLOWNAUDIO_EXPORT void ClownAudio_Pause(void);
+CLOWNAUDIO_EXPORT void ClownAudio_Unpause(void);
 
-DLL_API ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode);
-DLL_API void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound);
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode);
+CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound);
 
 // If `free_when_done` is true, the sound will be destroyed once it finishes playing
-DLL_API ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done);
-DLL_API void ClownAudio_DestroySound(ClownAudio_Sound instance);
+CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done);
+CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Sound instance);
 
-DLL_API void ClownAudio_RewindSound(ClownAudio_Sound instance);
+CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Sound instance);
 
-DLL_API void ClownAudio_PauseSound(ClownAudio_Sound instance);
-DLL_API void ClownAudio_UnpauseSound(ClownAudio_Sound instance);
+CLOWNAUDIO_EXPORT void ClownAudio_PauseSound(ClownAudio_Sound instance);
+CLOWNAUDIO_EXPORT void ClownAudio_UnpauseSound(ClownAudio_Sound instance);
 
-DLL_API void ClownAudio_FadeOutSound(ClownAudio_Sound instance, unsigned int duration);	// Duration is in milliseconds
-DLL_API void ClownAudio_FadeInSound(ClownAudio_Sound instance, unsigned int duration);
-DLL_API void ClownAudio_CancelFade(ClownAudio_Sound instance);
+CLOWNAUDIO_EXPORT void ClownAudio_FadeOutSound(ClownAudio_Sound instance, unsigned int duration);	// Duration is in milliseconds
+CLOWNAUDIO_EXPORT void ClownAudio_FadeInSound(ClownAudio_Sound instance, unsigned int duration);
+CLOWNAUDIO_EXPORT void ClownAudio_CancelFade(ClownAudio_Sound instance);
 
 // Returns -1 if the sound doesn't exist, 0 if it's unpaused, or 1 if it is paused
-DLL_API int ClownAudio_GetSoundStatus(ClownAudio_Sound instance);
+CLOWNAUDIO_EXPORT int ClownAudio_GetSoundStatus(ClownAudio_Sound instance);
 
-DLL_API void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume_left, float volume_right);	// Volume is linear, between 0.0f and 1.0f
-DLL_API void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop);
-DLL_API void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume_left, float volume_right);	// Volume is linear, between 0.0f and 1.0f
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop);
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
 
 #ifdef __cplusplus
 }

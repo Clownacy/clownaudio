@@ -55,6 +55,12 @@ endif()
 target_include_directories(clownaudio INTERFACE "include")
 target_include_directories(clownaudio PRIVATE "include/clownaudio")
 
+include(GenerateExportHeader)
+GENERATE_EXPORT_HEADER(clownaudio EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
+target_include_directories(clownaudio PUBLIC "${CMAKE_BINARY_DIR}/export")
+
+set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+
 if(BUILD_SHARED_LIBS AND WIN32)
 	target_compile_definitions(clownaudio PRIVATE BUILDING_DLL)
 endif()
@@ -384,6 +390,9 @@ install(TARGETS clownaudio
 	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
 	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/clownaudio"
 )
+
+# Install export file
+install(FILES "${CMAKE_BINARY_DIR}/export/clownaudio_export.h" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/clownaudio")
 
 # pkg-config
 list(REMOVE_DUPLICATES STATIC_LIBS)
