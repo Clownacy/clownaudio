@@ -368,7 +368,7 @@ if(CLOWNAUDIO_LIBXMPLITE)
 	if(libxmp-lite_FOUND)
 		message(STATUS "Using system libxmp-lite")
 		target_link_libraries(clownaudio PRIVATE PkgConfig::libxmp-lite)
-	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} libxmp-lite")
+		set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} libxmp-lite")
 	else()
 		# Compile it ourselves
 		message(STATUS "Using local libxmp-lite")
