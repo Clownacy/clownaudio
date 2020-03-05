@@ -73,18 +73,25 @@ if(MSVC)
 	target_compile_definitions(clownaudio PRIVATE _CRT_SECURE_NO_WARNINGS)	# Shut up those stupid MSVC warnings
 endif()
 
+
 ####################
 # Decoding backends
 ####################
 
 if(CLOWNAUDIO_LIBVORBIS)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBVORBIS)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/libvorbis.c" "src/decoding/decoders/libvorbis.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/libvorbis.c"
+		"src/decoding/decoders/libvorbis.h"
+	)
 endif()
 
 if(CLOWNAUDIO_STB_VORBIS)
 	target_compile_definitions(clownaudio PRIVATE USE_STB_VORBIS)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/stb_vorbis.c" "src/decoding/decoders/stb_vorbis.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/stb_vorbis.c"
+		"src/decoding/decoders/stb_vorbis.h"
+	)
 
 	include(CheckLibraryExists)
 
@@ -97,43 +104,67 @@ endif()
 
 if(CLOWNAUDIO_LIBFLAC)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBFLAC)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/libflac.c" "src/decoding/decoders/libflac.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/libflac.c"
+		"src/decoding/decoders/libflac.h"
+	)
 endif()
 
 if(CLOWNAUDIO_DR_FLAC)
 	target_compile_definitions(clownaudio PRIVATE USE_DR_FLAC)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/dr_flac.c" "src/decoding/decoders/dr_flac.h" "src/decoding/decoders/libs/dr_flac.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/dr_flac.c"
+		"src/decoding/decoders/dr_flac.h"
+		"src/decoding/decoders/libs/dr_flac.h"
+	)
 endif()
 
 if(CLOWNAUDIO_DR_WAV)
 	target_compile_definitions(clownaudio PRIVATE USE_DR_WAV)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/dr_wav.c" "src/decoding/decoders/dr_wav.h" "src/decoding/decoders/libs/dr_wav.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/dr_wav.c"
+		"src/decoding/decoders/dr_wav.h"
+		"src/decoding/decoders/libs/dr_wav.h"
+	)
 endif()
 
 if(CLOWNAUDIO_LIBOPUS)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBOPUS)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/libopus.c" "src/decoding/decoders/libopus.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/libopus.c"
+		"src/decoding/decoders/libopus.h"
+	)
 endif()
 
 if(CLOWNAUDIO_LIBSNDFILE)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBSNDFILE)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/libsndfile.c" "src/decoding/decoders/libsndfile.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/libsndfile.c"
+		"src/decoding/decoders/libsndfile.h"
+	)
 endif()
 
 if(CLOWNAUDIO_LIBOPENMPT)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBOPENMPT)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/libopenmpt.c" "src/decoding/decoders/libopenmpt.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/libopenmpt.c"
+		"src/decoding/decoders/libopenmpt.h"
+	)
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBXMPLITE)
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/libxmp-lite.c" "src/decoding/decoders/libxmp-lite.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/libxmp-lite.c"
+		"src/decoding/decoders/libxmp-lite.h"
+	)
 endif()
 
 if(CLOWNAUDIO_SNES_SPC)
 	target_compile_definitions(clownaudio PRIVATE USE_SNES_SPC)
 	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/snes_spc.c" "src/decoding/decoders/snes_spc.h"
+		"src/decoding/decoders/snes_spc.c"
+		"src/decoding/decoders/snes_spc.h"
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_common.h"
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_config.h"
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_endian.h"
@@ -157,8 +188,10 @@ endif()
 if(CLOWNAUDIO_PXTONE)
 	target_compile_definitions(clownaudio PRIVATE USE_PXTONE)
 	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/pxtone.cpp" "src/decoding/decoders/pxtone.h"
-		"src/decoding/decoders/pxtone_noise.cpp" "src/decoding/decoders/pxtone_noise.h"
+		"src/decoding/decoders/pxtone.cpp"
+		"src/decoding/decoders/pxtone.h"
+		"src/decoding/decoders/pxtone_noise.cpp"
+		"src/decoding/decoders/pxtone_noise.h"
 		"src/decoding/decoders/libs/pxtone/pxtn.h"
 		"src/decoding/decoders/libs/pxtone/pxtnDelay.cpp"
 		"src/decoding/decoders/libs/pxtone/pxtnDelay.h"
@@ -204,44 +237,43 @@ if(CLOWNAUDIO_PXTONE)
 	list(APPEND STATIC_LIBS stdc++)
 endif()
 
+
 ####################
 # Playback backends
 ####################
 
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
+	if(CLOWNAUDIO_BACKEND STREQUAL "miniaudio")
+		target_sources(clownaudio PRIVATE "src/playback/miniaudio.c")
+		target_compile_definitions(clownaudio PRIVATE MINIAUDIO_ENABLE_DEVICE_IO)
 
-if(CLOWNAUDIO_BACKEND STREQUAL "miniaudio")
-	target_sources(clownaudio PRIVATE "src/playback/miniaudio.c")
-	target_compile_definitions(clownaudio PRIVATE MINIAUDIO_ENABLE_DEVICE_IO)
+		include(CheckLibraryExists)
 
-	include(CheckLibraryExists)
+		check_library_exists(m pow "" LIBM)
+		if(LIBM)
+			target_link_libraries(clownaudio PRIVATE m)
+			list(APPEND STATIC_LIBS m)
+		endif()
 
-	check_library_exists(m pow "" LIBM)
-	if(LIBM)
-		target_link_libraries(clownaudio PRIVATE m)
-		list(APPEND STATIC_LIBS m)
+		check_library_exists(pthread pthread_create "" LIBPTHREAD)
+		if(LIBPTHREAD)
+			target_link_libraries(clownaudio PRIVATE pthread)
+			list(APPEND STATIC_LIBS pthread)
+		endif()
+
+		target_link_libraries(clownaudio PRIVATE ${CMAKE_DL_LIBS})
+		list(APPEND STATIC_LIBS ${CMAKE_DL_LIBS})
+	elseif(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
+		target_sources(clownaudio PRIVATE "src/playback/sdl1.c")
+	elseif(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
+		target_sources(clownaudio PRIVATE "src/playback/sdl2.c")
+	elseif(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
+		target_sources(clownaudio PRIVATE "src/playback/cubeb.c")
+	elseif(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
+		target_sources(clownaudio PRIVATE "src/playback/portaudio.c")
+	else()
+		message(FATAL_ERROR "Invalid BACKEND selected")
 	endif()
-
-	check_library_exists(pthread pthread_create "" LIBPTHREAD)
-	if(LIBPTHREAD)
-		target_link_libraries(clownaudio PRIVATE pthread)
-		list(APPEND STATIC_LIBS pthread)
-	endif()
-
-	target_link_libraries(clownaudio PRIVATE ${CMAKE_DL_LIBS})
-	list(APPEND STATIC_LIBS ${CMAKE_DL_LIBS})
-elseif(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
-	target_sources(clownaudio PRIVATE "src/playback/sdl1.c")
-elseif(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
-	target_sources(clownaudio PRIVATE "src/playback/sdl2.c")
-elseif(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
-	target_sources(clownaudio PRIVATE "src/playback/cubeb.c")
-elseif(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
-	target_sources(clownaudio PRIVATE "src/playback/portaudio.c")
-else()
-	message(FATAL_ERROR "Invalid BACKEND selected")
-endif()
-
 endif()
 
 ####################
@@ -251,14 +283,12 @@ endif()
 # CMake
 
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
+	if(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
+		find_package(cubeb REQUIRED)
 
-if(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
-	find_package(cubeb REQUIRED)
-
-	target_link_libraries(clownaudio PRIVATE cubeb::cubeb)
-	list(APPEND STATIC_LIBS cubeb)
-endif()
-
+		target_link_libraries(clownaudio PRIVATE cubeb::cubeb)
+		list(APPEND STATIC_LIBS cubeb)
+	endif()
 endif()
 
 # pkg-config
@@ -266,37 +296,35 @@ endif()
 find_package(PkgConfig QUIET)
 
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
+	if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
+		if (NOT PkgConfig_FOUND)
+			message(FATAL_ERROR "pkg-config is needed by SDL1, but it couldn't be found")
+		endif()
 
-if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
-	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config is needed by SDL1, but it couldn't be found")
+		pkg_check_modules(sdl REQUIRED IMPORTED_TARGET sdl)
+		target_link_libraries(clownaudio PRIVATE PkgConfig::sdl)
+		set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} sdl")
 	endif()
 
-	pkg_check_modules(sdl REQUIRED IMPORTED_TARGET sdl)
-	target_link_libraries(clownaudio PRIVATE PkgConfig::sdl)
-	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} sdl")
-endif()
+	if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
+		if (NOT PkgConfig_FOUND)
+			message(FATAL_ERROR "pkg-config is needed by SDL2, but it couldn't be found")
+		endif()
 
-if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
-	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config is needed by SDL2, but it couldn't be found")
+		pkg_check_modules(sdl2 REQUIRED IMPORTED_TARGET sdl2)
+		target_link_libraries(clownaudio PRIVATE PkgConfig::sdl2)
+		set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} sdl2")
 	endif()
 
-	pkg_check_modules(sdl2 REQUIRED IMPORTED_TARGET sdl2)
-	target_link_libraries(clownaudio PRIVATE PkgConfig::sdl2)
-	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} sdl2")
-endif()
+	if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
+		if (NOT PkgConfig_FOUND)
+			message(FATAL_ERROR "pkg-config is needed by PortAudio, but it couldn't be found")
+		endif()
 
-if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
-	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config is needed by PortAudio, but it couldn't be found")
+		pkg_check_modules(portaudio REQUIRED IMPORTED_TARGET portaudio-2.0)
+		target_link_libraries(clownaudio PRIVATE PkgConfig::portaudio)
+		set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} portaudio-2.0")
 	endif()
-
-	pkg_check_modules(portaudio REQUIRED IMPORTED_TARGET portaudio-2.0)
-	target_link_libraries(clownaudio PRIVATE PkgConfig::portaudio)
-	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} portaudio-2.0")
-endif()
-
 endif()
 
 if(CLOWNAUDIO_LIBVORBIS)
@@ -370,6 +398,7 @@ if(CLOWNAUDIO_LIBXMPLITE)
 	endif()
 endif()
 
+
 ####################
 # Install
 ####################
@@ -390,5 +419,5 @@ foreach(ITEM ${STATIC_LIBS})
 	set(PKG_CONFIG_STATIC_LIBS "${PKG_CONFIG_STATIC_LIBS} -l${ITEM}")
 endforeach()
 
-configure_file("clownaudio.pc.in" clownaudio.pc @ONLY)
+configure_file("clownaudio.pc.in" "clownaudio.pc" @ONLY)
 install(FILES "${CMAKE_BINARY_DIR}/clownaudio.pc" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig")
