@@ -355,11 +355,9 @@ if(CLOWNAUDIO_LIBOPENMPT)
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
-	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config needed, but couldn't be found")
+	if (PkgConfig_FOUND)
+		pkg_check_modules(libxmp-lite IMPORTED_TARGET libxmp-lite)
 	endif()
-
-	pkg_check_modules(libxmp-lite IMPORTED_TARGET libxmp-lite)
 
 	if(libxmp-lite_FOUND)
 		message(STATUS "Using system libxmp-lite")
