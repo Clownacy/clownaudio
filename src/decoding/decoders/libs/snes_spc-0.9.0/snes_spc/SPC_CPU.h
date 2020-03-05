@@ -11,6 +11,11 @@ details. You should have received a copy of the GNU Lesser General Public
 License along with this module; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+#endif
+
 //// Memory access
 
 #if SPC_MORE_ACCURACY
@@ -1218,3 +1223,7 @@ stop:
 	}
 }
 SPC_CPU_RUN_FUNC_END
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
