@@ -16,7 +16,7 @@ set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: 
 
 project(clownaudio VERSION 0.2 DESCRIPTION "Stereo audio engine supporting various formats" LANGUAGES C CXX)
 
-set(SOURCES
+add_library(clownaudio
 	"include/clownaudio/mixer.h"
 	"src/miniaudio.c"
 	"src/miniaudio.h"
@@ -35,18 +35,13 @@ set(SOURCES
 )
 
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
-	list(APPEND SOURCES
+	target_sources(clownaudio PRIVATE
 		"include/clownaudio/clownaudio.h"
 		"src/clownaudio.c"
 		"src/playback/playback.h"
 	)
 endif()
 
-if(BUILD_SHARED_LIBS)
-	add_library(clownaudio SHARED ${SOURCES})
-else()
-	add_library(clownaudio STATIC ${SOURCES})
-endif()
 
 ####################
 # Misc. settings
