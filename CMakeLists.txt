@@ -66,7 +66,7 @@ else()
 endif()
 
 set_target_properties(clownaudio PROPERTIES
-	C_STANDARD 99
+	C_STANDARD 90
 	C_EXTENSIONS OFF
 	CXX_STANDARD 11
 	CXX_EXTENSIONS OFF

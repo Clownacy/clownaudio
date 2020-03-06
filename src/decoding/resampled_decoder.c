@@ -72,7 +72,7 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 				format = ma_format_s16;
 			else if (info.format == DECODER_FORMAT_S32)
 				format = ma_format_s32;
-			else //if (info.format == DECODER_FORMAT_F32)
+			else /*if (info.format == DECODER_FORMAT_F32)*/
 				format = ma_format_f32;
 
 			ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, 2, sample_rate, PCMConverterCallback, resampled_decoder);

@@ -156,8 +156,9 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 	DecoderInfo info;
 
-	// Figure out what format this sound is
-	for (size_t i = 0; i < sizeof(decoder_function_list) / sizeof(decoder_function_list[0]); ++i)
+	/* Figure out what format this sound is */
+	size_t i;
+	for (i = 0; i < sizeof(decoder_function_list) / sizeof(decoder_function_list[0]); ++i)
 	{
 		void *decoder = decoder_function_list[i].Create(file_buffer, file_size, false, &info);
 
@@ -277,7 +278,7 @@ size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_
 			return selector->data->decoder_functions->GetSamples(selector->decoder, buffer, frames_to_do);
 
 		case DECODER_TYPE_SIMPLE:
-			// Handle looping here, since the simple decoders don't do it by themselves
+			/* Handle looping here, since the simple decoders don't do it by themselves */
 			while (frames_done != frames_to_do)
 			{
 				const size_t frames = selector->data->decoder_functions->GetSamples(selector->decoder, (char*)buffer + frames_done * selector->data->size_of_frame, frames_to_do - frames_done);
@@ -310,7 +311,7 @@ void DecoderSelector_SetLoop(DecoderSelector *selector, bool loop)
 			break;
 
 		case DECODER_TYPE_COMPLEX:
-			// TODO - This is impossible to implement
+			/* TODO - This is impossible to implement */
 			break;
 	}
 }

@@ -33,7 +33,8 @@ static void CallbackStream(void *user_data, float *output_buffer, size_t frames_
 {
 	ClownMixer *mixer = user_data;
 
-	for (size_t i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
+	size_t i;
+	for (i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
 		output_buffer[i] = 0.0f;
 
 	ClownMixer_MixSamples(mixer, output_buffer, frames_to_do);

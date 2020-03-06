@@ -110,7 +110,8 @@ static void MutexUnlock(Mutex *mutex)
 
 static Channel* FindChannel(ClownMixer *mixer, ClownMixer_Sound instance)
 {
-	for (Channel *channel = mixer->channel_list_head; channel != NULL; channel = channel->next)
+	Channel *channel;
+	for (channel = mixer->channel_list_head; channel != NULL; channel = channel->next)
 		if (channel->instance == instance)
 			return channel;
 
@@ -152,7 +153,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_UnloadSoundData(ClownMixer_SoundData *sound)
 
 CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, ClownMixer_SoundData *sound, bool loop, bool free_when_done)
 {
-	ClownMixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
+	ClownMixer_Sound instance = 0;	/* TODO: This is an error value - never let instance_allocator generate it */
 
 	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, mixer->sample_rate);
 
@@ -183,10 +184,11 @@ CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, Clo
 CLOWNAUDIO_EXPORT void ClownMixer_DestroySound(ClownMixer *mixer, ClownMixer_Sound instance)
 {
 	Channel *channel = NULL;
+	Channel **channel_pointer;
 
 	MutexLock(&mixer->mutex);
 
-	for (Channel **channel_pointer = &mixer->channel_list_head; *channel_pointer != NULL; channel_pointer = &(*channel_pointer)->next)
+	for (channel_pointer = &mixer->channel_list_head; *channel_pointer != NULL; channel_pointer = &(*channel_pointer)->next)
 	{
 		if ((*channel_pointer)->instance == instance)
 		{
@@ -358,9 +360,11 @@ CLOWNAUDIO_EXPORT void ClownMixer_SetSoundSampleRate(ClownMixer *mixer, ClownMix
 
 CLOWNAUDIO_EXPORT void ClownMixer_MixSamples(ClownMixer *mixer, float *output_buffer, size_t frames_to_do)
 {
+	Channel **channel_pointer;
+
 	MutexLock(&mixer->mutex);
 
-	Channel **channel_pointer = &mixer->channel_list_head;
+	channel_pointer = &mixer->channel_list_head;
 	while (*channel_pointer != NULL)
 	{
 		Channel *channel = *channel_pointer;
@@ -370,42 +374,45 @@ CLOWNAUDIO_EXPORT void ClownMixer_MixSamples(ClownMixer *mixer, float *output_bu
 			float *output_buffer_pointer = output_buffer;
 
 			size_t frames_done = 0;
-			for (size_t sub_frames_done; frames_done < frames_to_do; frames_done += sub_frames_done)
+			size_t sub_frames_done;
+			for (sub_frames_done; frames_done < frames_to_do; frames_done += sub_frames_done)
 			{
 				float read_buffer[0x1000];
+				float *read_buffer_pointer;
+				size_t i;
 
 				const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
 				sub_frames_done = SplitDecoder_GetSamples(channel->split_decoder, read_buffer, sub_frames_to_do);
 
-				float *read_buffer_pointer = read_buffer;
+				read_buffer_pointer = read_buffer;
 
-				for (size_t i = 0; i < sub_frames_done; ++i)
+				for (i = 0; i < sub_frames_done; ++i)
 				{
 					float fade_volume = 1.0f;
 
-					// Apply fade-out volume
+					/* Apply fade-out volume */
 					if (channel->fade_out_counter_max != 0)
 					{
 						const float fade_out_volume = channel->fade_counter / (float)channel->fade_out_counter_max;
 
-						fade_volume *= (fade_out_volume * fade_out_volume);	// Fade logarithmically
+						fade_volume *= (fade_out_volume * fade_out_volume);	/* Fade logarithmically */
 
 						if (channel->fade_counter != 0)
 							--channel->fade_counter;
 					}
 
-					// Apply fade-in volume
+					/* Apply fade-in volume */
 					if (channel->fade_in_counter_max != 0)
 					{
 						const float fade_in_volume = (channel->fade_in_counter_max - channel->fade_counter) / (float)channel->fade_in_counter_max;
 
-						fade_volume *= (fade_in_volume * fade_in_volume);	// Fade logarithmically
+						fade_volume *= (fade_in_volume * fade_in_volume);	/* Fade logarithmically */
 
 						if (--channel->fade_counter == 0)
 							channel->fade_in_counter_max = 0;
 					}
 
-					// Mix data with output, and apply volume
+					/* Mix data with output, and apply volume */
 					*output_buffer_pointer++ += *read_buffer_pointer++ * channel->volume_left * fade_volume;
 					*output_buffer_pointer++ += *read_buffer_pointer++ * channel->volume_right * fade_volume;
 				}
@@ -417,7 +424,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_MixSamples(ClownMixer *mixer, float *output_bu
 				}
 			}
 
-			if (frames_done < frames_to_do)	// Sound finished
+			if (frames_done < frames_to_do)	/* Sound finished */
 			{
 				if (channel->free_when_done)
 				{

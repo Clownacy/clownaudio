@@ -32,7 +32,7 @@
 
 Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
-	(void)loop;	// This is ignored in simple decoders
+	(void)loop;	/* This is ignored in simple decoders */
 
 	drflac *backend = drflac_open_memory(data, data_size, NULL);
 

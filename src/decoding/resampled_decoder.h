@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct DecoderSelectorData ResampledDecoderData;	// This is deliberate
+typedef struct DecoderSelectorData ResampledDecoderData;	/* This is deliberate */
 typedef struct ResampledDecoder ResampledDecoder;
 
 ResampledDecoderData* ResampledDecoder_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode);

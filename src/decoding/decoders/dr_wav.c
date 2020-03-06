@@ -33,7 +33,7 @@
 
 Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
-	(void)loop;	// This is ignored in simple decoders
+	(void)loop;	/* This is ignored in simple decoders */
 
 	drwav *instance = malloc(sizeof(drwav));
 

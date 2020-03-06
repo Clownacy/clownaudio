@@ -44,10 +44,13 @@ static void Callback(ma_device *device, void *output_buffer_void, const void *in
 
 	stream->user_callback(stream->user_data, output_buffer, frames_to_do);
 
-	// Handle volume in software, since mini_al's API doesn't have volume control
+	/* Handle volume in software, since mini_al's API doesn't have volume control */
 	if (stream->volume != 1.0f)
-		for (unsigned long i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
+	{
+		unsigned long i;
+		for (i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
 			output_buffer[i] *= stream->volume;
+	}
 }
 
 bool Backend_Init(void)

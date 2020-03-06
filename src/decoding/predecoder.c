@@ -71,7 +71,7 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 			format = ma_format_s16;
 		else if (info->format == DECODER_FORMAT_S32)
 			format = ma_format_s32;
-		else //if (info->format == DECODER_FORMAT_F32)
+		else /*if (info->format == DECODER_FORMAT_F32)*/
 			format = ma_format_f32;
 
 		DecoderMetadata decoder_metadata;
