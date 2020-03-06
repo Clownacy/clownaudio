@@ -71,7 +71,7 @@ void SplitDecoder_UnloadData(SplitDecoderData *data)
 
 SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned long sample_rate)
 {
-	SplitDecoder *split_decoder = split_decoder = malloc(sizeof(SplitDecoder));
+	SplitDecoder *split_decoder = malloc(sizeof(SplitDecoder));
 
 	if (split_decoder != NULL)
 	{
