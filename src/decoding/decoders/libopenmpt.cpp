@@ -20,7 +20,6 @@
 
 #include "libopenmpt.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 
 #include <libopenmpt/libopenmpt.h>
@@ -60,7 +59,7 @@ void Decoder_libOpenMPT_Rewind(Decoder_libOpenMPT *decoder)
 
 size_t Decoder_libOpenMPT_GetSamples(Decoder_libOpenMPT *decoder, void *buffer_void, size_t frames_to_do)
 {
-	float *buffer = buffer_void;
+	float *buffer = (float*)buffer_void;
 
 	size_t frames_done = 0;
 
