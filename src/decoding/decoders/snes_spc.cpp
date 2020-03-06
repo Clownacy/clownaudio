@@ -20,7 +20,6 @@
 
 #include "snes_spc.h"
 
-//#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 

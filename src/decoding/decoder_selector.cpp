@@ -20,7 +20,6 @@
 
 #include "decoder_selector.h"
 
-//#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 

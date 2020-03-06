@@ -20,7 +20,6 @@
 
 #include "dr_wav.h"
 
-//#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 

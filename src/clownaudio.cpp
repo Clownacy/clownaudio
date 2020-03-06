@@ -20,7 +20,6 @@
 
 #include "clownaudio.h"
 
-//#include <stdbool.h>
 #include <stddef.h>
 
 #include "mixer.h"
