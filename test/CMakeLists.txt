@@ -15,7 +15,7 @@ endif()
 target_link_libraries(test PRIVATE clownaudio)
 
 set_target_properties(test PROPERTIES
-	C_STANDARD 99
+	C_STANDARD 90
 	C_EXTENSIONS OFF
 )
 

@@ -18,7 +18,6 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,14 +80,14 @@ int main(int argc, char *argv[])
 			file_sizes[1] = 0;
 		}
 
-		ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
+		ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], CA_FALSE);
 
 		if (sound_data != NULL)
 		{
 			printf("Loaded sound data\n");
 			fflush(stdout);
 
-			ClownAudio_Sound instance = ClownAudio_CreateSound(sound_data, true, true);
+			ClownAudio_Sound instance = ClownAudio_CreateSound(sound_data, CA_TRUE, CA_TRUE);
 			ClownAudio_UnpauseSound(instance);
 
 			if (instance != 0)
@@ -111,9 +110,9 @@ int main(int argc, char *argv[])
 				);
 				fflush(stdout);
 
-				bool pause = false;
+				CA_BOOL pause = CA_FALSE;
 
-				bool exit = false;
+				CA_BOOL exit = CA_FALSE;
 				while (!exit)
 				{
 					char buffer[128];
@@ -128,7 +127,7 @@ int main(int argc, char *argv[])
 							printf("Quitting\n");
 							fflush(stdout);
 
-							exit = true;
+							exit = CA_TRUE;
 							break;
 
 						case 'r':
