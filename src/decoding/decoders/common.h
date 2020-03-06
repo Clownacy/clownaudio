@@ -20,7 +20,8 @@
 
 #pragma once
 
-#include <stdbool.h>
+//#include <stdbool.h>
+#include "bool.h"
 
 typedef enum DecoderFormat
 {

@@ -20,7 +20,8 @@
 
 #include "predecoder.h"
 
-#include <stdbool.h>
+//#include <stdbool.h>
+#include "bool.h"
 #include <stddef.h>
 #include <stdlib.h>
 

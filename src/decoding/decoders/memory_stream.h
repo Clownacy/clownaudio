@@ -20,9 +20,8 @@
 
 #pragma once 
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
+//#include <stdbool.h>
+#include "bool.h"
 #include <stddef.h>
 
 #ifdef __cplusplus

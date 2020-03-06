@@ -20,7 +20,8 @@
 
 #include "dr_flac.h"
 
-#include <stdbool.h>
+//#include <stdbool.h>
+#include "bool.h"
 #include <stddef.h>
 
 #define DR_FLAC_IMPLEMENTATION
