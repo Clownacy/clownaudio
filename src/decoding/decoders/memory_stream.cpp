@@ -20,7 +20,7 @@
 
 #include "memory_stream.h"
 
-#include <stdbool.h>
+//#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,7 +42,7 @@ static bool ResizeIfNeeded(MemoryStream *memory_stream, size_t minimum_needed_si
 		while (new_size < minimum_needed_size)
 			new_size <<= 1;
 
-		unsigned char *buffer = realloc(memory_stream->buffer, new_size);
+		unsigned char *buffer = (unsigned char*)realloc(memory_stream->buffer, new_size);
 
 		if (buffer == NULL)
 			return false;
@@ -60,7 +60,7 @@ static bool ResizeIfNeeded(MemoryStream *memory_stream, size_t minimum_needed_si
 
 MemoryStream* MemoryStream_Create(bool free_buffer_when_destroyed)
 {
-	MemoryStream *memory_stream = malloc(sizeof(MemoryStream));
+	MemoryStream *memory_stream = (MemoryStream*)malloc(sizeof(MemoryStream));
 
 	if (memory_stream != NULL)
 	{
@@ -156,11 +156,11 @@ void MemoryStream_Rewind(MemoryStream *memory_stream)
 
 ROMemoryStream* ROMemoryStream_Create(const void *data, size_t size)
 {
-	MemoryStream *memory_stream = malloc(sizeof(MemoryStream));
+	MemoryStream *memory_stream = (MemoryStream*)malloc(sizeof(MemoryStream));
 
 	if (memory_stream != NULL)
 	{
-		memory_stream->buffer = (void*)data;
+		memory_stream->buffer = (unsigned char*)data;
 		memory_stream->position = 0;
 		memory_stream->end = size;
 		memory_stream->size = size;

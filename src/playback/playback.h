@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <stdbool.h>
+//#include <stdbool.h>
 #include <stddef.h>
 
 #define STREAM_SAMPLE_RATE 48000

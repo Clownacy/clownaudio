@@ -20,7 +20,7 @@
 
 #include "predecoder.h"
 
-#include <stdbool.h>
+//#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -53,7 +53,7 @@ static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_
 {
 	(void)converter;
 
-	DecoderMetadata *decoder_metadata = user_data;
+	DecoderMetadata *decoder_metadata = (DecoderMetadata*)user_data;
 
 	return decoder_metadata->GetSamples(decoder_metadata->decoder, output_buffer, frames_to_do);
 }
@@ -83,7 +83,7 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 		ma_pcm_converter converter;
 		if (ma_pcm_converter_init(&config, &converter) == MA_SUCCESS)
 		{
-			predecoder_data = malloc(sizeof(PredecoderData));
+			predecoder_data = (PredecoderData*)malloc(sizeof(PredecoderData));
 
 			if (predecoder_data != NULL)
 			{
@@ -119,7 +119,7 @@ void Predecoder_UnloadData(PredecoderData *data)
 
 Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info)
 {
-	Predecoder *predecoder = malloc(sizeof(Predecoder));
+	Predecoder *predecoder = (Predecoder*)malloc(sizeof(Predecoder));
 
 	if (predecoder != NULL)
 	{
@@ -154,7 +154,7 @@ void Predecoder_Rewind(Predecoder *predecoder)
 
 size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, size_t frames_to_do)
 {
-	float *buffer = buffer_void;
+	float *buffer = (float*)buffer_void;
 
 	size_t frames_done = 0;
 
