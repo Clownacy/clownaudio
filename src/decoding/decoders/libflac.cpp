@@ -217,14 +217,11 @@ Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_s
 
 void Decoder_libFLAC_Destroy(Decoder_libFLAC *decoder)
 {
-	if (decoder != NULL)
-	{
-		FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
-		FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
-		ROMemoryStream_Destroy(decoder->memory_stream);
-		free(decoder->block_buffer);
-		free(decoder);
-	}
+	FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
+	FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
+	ROMemoryStream_Destroy(decoder->memory_stream);
+	free(decoder->block_buffer);
+	free(decoder);
 }
 
 void Decoder_libFLAC_Rewind(Decoder_libFLAC *decoder)

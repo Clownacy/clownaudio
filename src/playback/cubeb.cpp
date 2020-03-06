@@ -77,8 +77,6 @@ void Backend_Deinit(void)
 
 BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
 {
-	BackendStream *stream = NULL;
-
 	cubeb_stream_params output_params;
 	output_params.format = CUBEB_SAMPLE_FLOAT32LE;
 	output_params.rate = STREAM_SAMPLE_RATE;
@@ -90,7 +88,7 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t)
 
 	if (cubeb_get_min_latency(cubeb_context, &output_params, &latency_frames) == CUBEB_OK)
 	{
-		stream = (BackendStream*)malloc(sizeof(BackendStream));
+		BackendStream *stream = (BackendStream*)malloc(sizeof(BackendStream));
 
 		if (stream != NULL)
 		{
@@ -102,16 +100,15 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t)
 				stream->user_data = user_data;
 
 				stream->cubeb_stream_pointer = cubeb_stream_pointer;
+
+				return stream;
 			}
-			else
-			{
-				free(stream);
-				stream = NULL;
-			}
+
+			free(stream);
 		}
 	}
 
-	return stream;
+	return NULL;
 }
 
 bool Backend_DestroyStream(BackendStream *stream)

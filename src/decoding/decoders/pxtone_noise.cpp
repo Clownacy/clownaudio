@@ -42,8 +42,6 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	Decoder_PxToneNoise *decoder = NULL;
-
 	pxtoneNoise *pxtn = new pxtoneNoise();
 
 	if (pxtn->init())
@@ -63,7 +61,7 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_
 
 					if (memory_stream != NULL)
 					{
-						decoder = (Decoder_PxToneNoise*)malloc(sizeof(Decoder_PxToneNoise));
+						Decoder_PxToneNoise *decoder = (Decoder_PxToneNoise*)malloc(sizeof(Decoder_PxToneNoise));
 
 						if (decoder != NULL)
 						{
@@ -76,6 +74,7 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_
 							info->is_complex = false;
 
 							delete pxtn;
+
 							return decoder;
 						}
 
@@ -90,7 +89,7 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_
 
 	delete pxtn;
 
-	return decoder;
+	return NULL;
 }
 
 void Decoder_PxToneNoise_Destroy(Decoder_PxToneNoise *decoder)

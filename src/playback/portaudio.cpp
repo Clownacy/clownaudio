@@ -75,15 +75,14 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t)
 			stream->user_data = user_data;
 
 			stream->volume = 1.0f;
+
+			return stream;
 		}
-		else
-		{
-			free(stream);
-			stream = NULL;
-		}
+
+		free(stream);
 	}
 
-	return stream;
+	return NULL;
 }
 
 bool Backend_DestroyStream(BackendStream *stream)

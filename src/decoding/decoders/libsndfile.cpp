@@ -93,8 +93,6 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	Decoder_libSndfile *decoder = NULL;
-
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
 
 	if (memory_stream != NULL)
@@ -106,7 +104,7 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 
 		if (sndfile != NULL)
 		{
-			decoder = (Decoder_libSndfile*)malloc(sizeof(Decoder_libSndfile));
+			Decoder_libSndfile *decoder = (Decoder_libSndfile*)malloc(sizeof(Decoder_libSndfile));
 
 			if (decoder != NULL)
 			{

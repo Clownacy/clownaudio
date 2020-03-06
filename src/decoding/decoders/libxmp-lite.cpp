@@ -39,15 +39,13 @@ struct Decoder_libXMPLite
 
 Decoder_libXMPLite* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
-	Decoder_libXMPLite *decoder = NULL;
-
 	xmp_context context = xmp_create_context();
 
 	if (!xmp_load_module_from_memory(context, (void*)data, data_size))
 	{
 		xmp_start_player(context, SAMPLE_RATE, 0);
 
-		decoder = (Decoder_libXMPLite*)malloc(sizeof(Decoder_libXMPLite));
+		Decoder_libXMPLite *decoder = (Decoder_libXMPLite*)malloc(sizeof(Decoder_libXMPLite));
 
 		if (decoder != NULL)
 		{
