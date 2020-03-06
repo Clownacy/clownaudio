@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14.6)
+cmake_minimum_required(VERSION 3.12)
 
 option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
 option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" ON)
