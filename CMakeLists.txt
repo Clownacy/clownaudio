@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14.6)
+cmake_minimum_required(VERSION 3.12)
 
 option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
 option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" ON)
@@ -476,10 +476,12 @@ configure_package_config_file(
 install(FILES "${CMAKE_BINARY_DIR}/clownaudioConfig.cmake" DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/clownaudio")
 
 # pkg-config
-list(REMOVE_DUPLICATES STATIC_LIBS)
-foreach(ITEM ${STATIC_LIBS})
-	set(PKG_CONFIG_STATIC_LIBS "${PKG_CONFIG_STATIC_LIBS} -l${ITEM}")
-endforeach()
+if(DEFINED STATIC_LIBS)
+	list(REMOVE_DUPLICATES STATIC_LIBS)
+	foreach(ITEM ${STATIC_LIBS})
+		set(PKG_CONFIG_STATIC_LIBS "${PKG_CONFIG_STATIC_LIBS} -l${ITEM}")
+	endforeach()
+endif()
 
 configure_file("clownaudio.pc.in" "clownaudio.pc" @ONLY)
 install(FILES "${CMAKE_BINARY_DIR}/clownaudio.pc" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig")
