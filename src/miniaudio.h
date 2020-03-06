@@ -5841,7 +5841,7 @@ float ma_factor_to_gain_db(float factor)
 
 float ma_gain_db_to_factor(float gain)
 {
-    return (float)pow(10, gain/20.0);
+    return (float)pow(10.0, gain/20.0);
 }
 
 

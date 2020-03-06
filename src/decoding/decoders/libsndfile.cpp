@@ -20,7 +20,6 @@
 
 #include "libsndfile.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +37,7 @@ struct Decoder_libSndfile
 
 static sf_count_t fread_wrapper(void *output, sf_count_t count, void *user)
 {
-	return ROMemoryStream_Read(user, output, 1, count);
+	return ROMemoryStream_Read((ROMemoryStream*)user, output, 1, count);
 }
 
 static sf_count_t fseek_wrapper(sf_count_t offset, int origin, void *user)
@@ -62,12 +61,12 @@ static sf_count_t fseek_wrapper(sf_count_t offset, int origin, void *user)
 			return -1;
 	}
 
-	return (ROMemoryStream_SetPosition(user, offset, memory_stream_origin) ? 0 : -1);
+	return (ROMemoryStream_SetPosition((ROMemoryStream*)user, offset, memory_stream_origin) ? 0 : -1);
 }
 
 static sf_count_t ftell_wrapper(void *user)
 {
-	return ROMemoryStream_GetPosition(user);
+	return ROMemoryStream_GetPosition((ROMemoryStream*)user);
 }
 
 static sf_count_t GetStreamSize(void *user)
@@ -94,8 +93,6 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	Decoder_libSndfile *decoder = NULL;
-
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
 
 	if (memory_stream != NULL)
@@ -107,7 +104,7 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 
 		if (sndfile != NULL)
 		{
-			decoder = malloc(sizeof(Decoder_libSndfile));
+			Decoder_libSndfile *decoder = (Decoder_libSndfile*)malloc(sizeof(Decoder_libSndfile));
 
 			if (decoder != NULL)
 			{
@@ -145,5 +142,5 @@ void Decoder_libSndfile_Rewind(Decoder_libSndfile *decoder)
 
 size_t Decoder_libSndfile_GetSamples(Decoder_libSndfile *decoder, void *buffer, size_t frames_to_do)
 {
-	return sf_readf_float(decoder->sndfile, buffer, frames_to_do);
+	return sf_readf_float(decoder->sndfile, (float*)buffer, frames_to_do);
 }

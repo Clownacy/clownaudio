@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.12)
 
 option(SUBDIRECTORY "Use clownaudio as a subdirectory, instead of an external package" OFF)
 
-project(clownaudio_test LANGUAGES C)
+project(clownaudio_test LANGUAGES CXX)
 
-add_executable(test "test.c")
+add_executable(test "test.cpp")
 
 if(SUBDIRECTORY)
 	add_subdirectory(".." "clownaudio" EXCLUDE_FROM_ALL)
@@ -15,8 +15,8 @@ endif()
 target_link_libraries(test PRIVATE clownaudio)
 
 set_target_properties(test PROPERTIES
-	C_STANDARD 99
-	C_EXTENSIONS OFF
+	CXX_STANDARD 98
+	CXX_EXTENSIONS OFF
 )
 
 if(MSVC)

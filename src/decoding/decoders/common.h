@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <stdbool.h>
-
 typedef enum DecoderFormat
 {
 	DECODER_FORMAT_S16,

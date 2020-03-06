@@ -20,7 +20,6 @@
 
 #include "libvorbis.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -37,7 +36,7 @@ struct Decoder_libVorbis
 
 static size_t fread_wrapper(void *output, size_t size, size_t count, void *file)
 {
-	return ROMemoryStream_Read(file, output, size, count);
+	return ROMemoryStream_Read((ROMemoryStream*)file, output, size, count);
 }
 
 static int fseek_wrapper(void *file, ogg_int64_t offset, int origin)
@@ -61,19 +60,19 @@ static int fseek_wrapper(void *file, ogg_int64_t offset, int origin)
 			return -1;
 	}
 
-	return (ROMemoryStream_SetPosition(file, offset, memory_stream_origin) ? 0 : -1);
+	return (ROMemoryStream_SetPosition((ROMemoryStream*)file, offset, memory_stream_origin) ? 0 : -1);
 }
 
 static int fclose_wrapper(void *file)
 {
-	ROMemoryStream_Destroy(file);
+	ROMemoryStream_Destroy((ROMemoryStream*)file);
 
 	return 0;
 }
 
 static long ftell_wrapper(void *file)
 {
-	return ROMemoryStream_GetPosition(file);
+	return ROMemoryStream_GetPosition((ROMemoryStream*)file);
 }
 
 static const ov_callbacks ov_callback_memory = {
@@ -87,8 +86,6 @@ Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t da
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	Decoder_libVorbis *decoder = NULL;
-
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
 
 	if (memory_stream != NULL)
@@ -97,7 +94,7 @@ Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t da
 
 		if (ov_open_callbacks(memory_stream, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
 		{
-			decoder = malloc(sizeof(Decoder_libVorbis));
+			Decoder_libVorbis *decoder = (Decoder_libVorbis*)malloc(sizeof(Decoder_libVorbis));
 
 			if (decoder != NULL)
 			{
@@ -110,19 +107,17 @@ Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t da
 				info->channel_count = v_info->channels;
 				info->format = DECODER_FORMAT_F32;
 				info->is_complex = false;
+
+				return decoder;
 			}
-			else
-			{
-				ov_clear(&vorbis_file);
-			}
+
+			ov_clear(&vorbis_file);
 		}
-		else
-		{
-			ROMemoryStream_Destroy(memory_stream);
-		}
+
+		ROMemoryStream_Destroy(memory_stream);
 	}
 
-	return decoder;
+	return NULL;
 }
 
 void Decoder_libVorbis_Destroy(Decoder_libVorbis *decoder)

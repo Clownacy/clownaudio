@@ -20,31 +20,45 @@
 
 #include "playback.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
-#include "../miniaudio.h"
+#include "SDL.h"
 
 struct BackendStream
 {
 	void (*user_callback)(void*, float*, size_t);
 	void *user_data;
 
-	ma_device device;
+	SDL_AudioDeviceID device;
 	float volume;
 };
 
-static void Callback(ma_device *device, void *output_buffer_void, const void *input_buffer, ma_uint32 frames_to_do)
-{
-	(void)input_buffer;
+static bool sdl_already_init;
 
-	BackendStream *stream = device->pUserData;
-	float *output_buffer = output_buffer_void;
+static unsigned int NextPowerOfTwo(unsigned int value)
+{
+	value--;
+	value |= value >> 1;
+	value |= value >> 2;
+	value |= value >> 4;
+	value |= value >> 8;
+	value |= value >> 16;
+	value++;
+
+	return value;
+}
+
+static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_do)
+{
+	BackendStream *stream = (BackendStream*)user_data;
+	const unsigned long frames_to_do = bytes_to_do / (sizeof(float) * STREAM_CHANNEL_COUNT);
+	float *output_buffer = (float*)output_buffer_uint8;
 
 	stream->user_callback(stream->user_data, output_buffer, frames_to_do);
 
-	// Handle volume in software, since mini_al's API doesn't have volume control
+	// Handle volume in software, since SDL2's API doesn't have volume control
 	if (stream->volume != 1.0f)
 		for (unsigned long i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
 			output_buffer[i] *= stream->volume;
@@ -52,51 +66,62 @@ static void Callback(ma_device *device, void *output_buffer_void, const void *in
 
 bool Backend_Init(void)
 {
-	return true;
+	bool success = true;
+
+	sdl_already_init = SDL_WasInit(SDL_INIT_AUDIO);
+
+	if (!sdl_already_init)
+		if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
+			success = false;
+
+	return success;
 }
 
 void Backend_Deinit(void)
 {
-	
+	if (!sdl_already_init)
+		SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
 {
-	BackendStream *stream = malloc(sizeof(BackendStream));
+	BackendStream *stream = (BackendStream*)malloc(sizeof(BackendStream));
 
 	if (stream != NULL)
 	{
-		ma_device_config config = ma_device_config_init(ma_device_type_playback);
-		config.playback.pDeviceID = NULL;
-		config.playback.format = ma_format_f32;
-		config.playback.channels = STREAM_CHANNEL_COUNT;
-		config.sampleRate = STREAM_SAMPLE_RATE;
-		config.noPreZeroedOutputBuffer = MA_TRUE;
-		config.dataCallback = Callback;
-		config.pUserData = stream;
+		SDL_AudioSpec want;
+		memset(&want, 0, sizeof(want));
+		want.freq = STREAM_SAMPLE_RATE;
+		want.format = AUDIO_F32;
+		want.channels = STREAM_CHANNEL_COUNT;
+		want.samples = NextPowerOfTwo(((STREAM_SAMPLE_RATE * 10) / 1000) * STREAM_CHANNEL_COUNT);	// A low-latency buffer of 10 milliseconds
+		want.callback = Callback;
+		want.userdata = stream;
 
-		if (ma_device_init(NULL, &config, &stream->device) == MA_SUCCESS)
+		SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &want, NULL, 0);
+
+		if (device > 0)
 		{
 			stream->user_callback = user_callback;
 			stream->user_data = user_data;
 
+			stream->device = device;
 			stream->volume = 1.0f;
+
+			return stream;
 		}
-		else
-		{
-			free(stream);
-			stream = NULL;
-		}
+
+		free(stream);
 	}
 
-	return stream;
+	return NULL;
 }
 
 bool Backend_DestroyStream(BackendStream *stream)
 {
 	if (stream != NULL)
 	{
-		ma_device_uninit(&stream->device);
+		SDL_CloseAudioDevice(stream->device);
 		free(stream);
 	}
 
@@ -113,20 +138,16 @@ bool Backend_SetVolume(BackendStream *stream, float volume)
 
 bool Backend_PauseStream(BackendStream *stream)
 {
-	bool success = true;
+	if (stream != NULL)
+		SDL_PauseAudioDevice(stream->device, -1);
 
-	if (stream != NULL && ma_device_is_started(&stream->device))
-		success = ma_device_stop(&stream->device) == MA_SUCCESS;
-
-	return success;
+	return true;
 }
 
 bool Backend_ResumeStream(BackendStream *stream)
 {
-	bool success = true;
+	if (stream != NULL)
+		SDL_PauseAudioDevice(stream->device, 0);
 
-	if (stream != NULL && !ma_device_is_started(&stream->device))
-		success = ma_device_start(&stream->device) == MA_SUCCESS;
-
-	return success;
+	return true;
 }

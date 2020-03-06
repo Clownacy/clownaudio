@@ -20,7 +20,6 @@
 
 #include "playback.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +53,7 @@ static unsigned int NextPowerOfTwo(unsigned int value)
 
 static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_do)
 {
-	BackendStream *stream = user_data;
+	BackendStream *stream = (BackendStream*)user_data;
 	const unsigned long frames_to_do = bytes_to_do / (sizeof(short) * STREAM_CHANNEL_COUNT);
 
 	// This playback backend doesn't support float32, so we have to convert the samples to S16
@@ -101,7 +100,7 @@ void Backend_Deinit(void)
 
 BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
 {
-	BackendStream *stream = malloc(sizeof(BackendStream));
+	BackendStream *stream = (BackendStream*)malloc(sizeof(BackendStream));
 
 	if (stream != NULL)
 	{
@@ -120,15 +119,14 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t)
 			stream->user_data = user_data;
 
 			stream->volume = 1.0f;
+
+			return stream;
 		}
-		else
-		{
-			free(stream);
-			stream = NULL;
-		}
+
+		free(stream);
 	}
 
-	return stream;
+	return NULL;
 }
 
 bool Backend_DestroyStream(BackendStream *stream)

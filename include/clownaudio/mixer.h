@@ -20,7 +20,9 @@
 
 #pragma once
 
+#ifndef __cplusplus
 #include <stdbool.h>
+#endif
 #include <stddef.h>
 
 #include "clownaudio_export.h"

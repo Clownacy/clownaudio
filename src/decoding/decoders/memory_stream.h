@@ -20,14 +20,7 @@
 
 #pragma once 
 
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
 #include <stddef.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 typedef struct MemoryStream MemoryStream;
 typedef struct ROMemoryStream ROMemoryStream;
@@ -55,7 +48,3 @@ size_t ROMemoryStream_Read(ROMemoryStream *memory_stream, void *output, size_t s
 size_t ROMemoryStream_GetPosition(ROMemoryStream *memory_stream);
 bool ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
 void ROMemoryStream_Rewind(ROMemoryStream *memory_stream);
-
-#ifdef __cplusplus
-}
-#endif

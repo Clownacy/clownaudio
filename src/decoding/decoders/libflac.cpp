@@ -20,7 +20,6 @@
 
 #include "libflac.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -54,7 +53,7 @@ static FLAC__StreamDecoderReadStatus fread_wrapper(const FLAC__StreamDecoder *fl
 {
 	(void)flac_stream_decoder;
 
-	Decoder_libFLAC *decoder = user;
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
 	FLAC__StreamDecoderReadStatus status = FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 
@@ -70,7 +69,7 @@ static FLAC__StreamDecoderSeekStatus fseek_wrapper(const FLAC__StreamDecoder *fl
 {
 	(void)flac_stream_decoder;
 
-	Decoder_libFLAC *decoder = user;
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
 	return ROMemoryStream_SetPosition(decoder->memory_stream, offset, MEMORYSTREAM_START) ? FLAC__STREAM_DECODER_SEEK_STATUS_OK : FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
 }
@@ -79,7 +78,7 @@ static FLAC__StreamDecoderTellStatus ftell_wrapper(const FLAC__StreamDecoder *fl
 {
 	(void)flac_stream_decoder;
 
-	Decoder_libFLAC *decoder = user;
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
 	*offset = ROMemoryStream_GetPosition(decoder->memory_stream);
 
@@ -90,7 +89,7 @@ static FLAC__StreamDecoderLengthStatus GetSize(const FLAC__StreamDecoder *flac_s
 {
 	(void)flac_stream_decoder;
 
-	Decoder_libFLAC *decoder = user;
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
 	const size_t old_offset = ROMemoryStream_GetPosition(decoder->memory_stream);
 
@@ -106,7 +105,7 @@ static FLAC__bool CheckEOF(const FLAC__StreamDecoder *flac_stream_decoder, void 
 {
 	(void)flac_stream_decoder;
 
-	Decoder_libFLAC *decoder = user;
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
 	const size_t offset = ROMemoryStream_GetPosition(decoder->memory_stream);
 
@@ -122,7 +121,7 @@ static FLAC__StreamDecoderWriteStatus WriteCallback(const FLAC__StreamDecoder *f
 {
 	(void)flac_stream_decoder;
 
-	Decoder_libFLAC *decoder = user;
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
 	FLAC__int32 *block_buffer_pointer = (FLAC__int32*)decoder->block_buffer;
 	for (unsigned int i = 0; i < frame->header.blocksize; ++i)
@@ -151,7 +150,7 @@ static void MetadataCallback(const FLAC__StreamDecoder *flac_stream_decoder, con
 {
 	(void)flac_stream_decoder;
 
-	Decoder_libFLAC *decoder = user;
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
 	decoder->info->sample_rate = metadata->data.stream_info.sample_rate;
 	decoder->info->channel_count = decoder->channel_count = metadata->data.stream_info.channels;
@@ -161,7 +160,7 @@ static void MetadataCallback(const FLAC__StreamDecoder *flac_stream_decoder, con
 	decoder->bits_per_sample = metadata->data.stream_info.bits_per_sample;
 
 	// Init block buffer
-	decoder->block_buffer = malloc(metadata->data.stream_info.max_blocksize * sizeof(FLAC__int32) * metadata->data.stream_info.channels);
+	decoder->block_buffer = (unsigned char*)malloc(metadata->data.stream_info.max_blocksize * sizeof(FLAC__int32) * metadata->data.stream_info.channels);
 	decoder->block_buffer_index = 0;
 	decoder->block_buffer_size = 0;
 }
@@ -171,7 +170,7 @@ static void ErrorCallback(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__
 	(void)flac_stream_decoder;
 	(void)status;
 
-	Decoder_libFLAC *decoder = user;
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
 	decoder->error = true;
 }
@@ -180,7 +179,7 @@ Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_s
 {
 	(void)loop;	// This is ignored in simple decoders
 
-	Decoder_libFLAC *decoder = malloc(sizeof(Decoder_libFLAC));
+	Decoder_libFLAC *decoder = (Decoder_libFLAC*)malloc(sizeof(Decoder_libFLAC));
 
 	if (decoder != NULL)
 	{
@@ -218,14 +217,11 @@ Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_s
 
 void Decoder_libFLAC_Destroy(Decoder_libFLAC *decoder)
 {
-	if (decoder != NULL)
-	{
-		FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
-		FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
-		ROMemoryStream_Destroy(decoder->memory_stream);
-		free(decoder->block_buffer);
-		free(decoder);
-	}
+	FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
+	FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
+	ROMemoryStream_Destroy(decoder->memory_stream);
+	free(decoder->block_buffer);
+	free(decoder);
 }
 
 void Decoder_libFLAC_Rewind(Decoder_libFLAC *decoder)
