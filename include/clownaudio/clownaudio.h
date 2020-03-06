@@ -20,9 +20,9 @@
 
 #pragma once
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
+
+#include "bool.h"
 
 #include "clownaudio_export.h"
 
@@ -33,17 +33,17 @@ extern "C" {
 typedef struct ClownAudio_SoundData ClownAudio_SoundData;
 typedef unsigned int ClownAudio_Sound;
 
-CLOWNAUDIO_EXPORT bool ClownAudio_Init(void);
+CLOWNAUDIO_EXPORT CA_BOOL ClownAudio_Init(void);
 CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void);
 
 CLOWNAUDIO_EXPORT void ClownAudio_Pause(void);
 CLOWNAUDIO_EXPORT void ClownAudio_Unpause(void);
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode);
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, CA_BOOL predecode);
 CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound);
 
 /* If `free_when_done` is true, the sound will be destroyed once it finishes playing */
-CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done);
+CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, CA_BOOL loop, CA_BOOL free_when_done);
 CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Sound instance);
 
 CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Sound instance);
@@ -59,7 +59,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_CancelFade(ClownAudio_Sound instance);
 CLOWNAUDIO_EXPORT int ClownAudio_GetSoundStatus(ClownAudio_Sound instance);
 
 CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume_left, float volume_right);	/* Volume is linear, between 0.0f and 1.0f */
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop);
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, CA_BOOL loop);
 CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
 
 #ifdef __cplusplus

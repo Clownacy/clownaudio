@@ -20,9 +20,9 @@
 
 #include "dr_flac.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
+
+#include "bool.h"
 
 #define DR_FLAC_IMPLEMENTATION
 #define DR_FLAC_NO_STDIO
@@ -31,7 +31,7 @@
 
 #include "common.h"
 
-Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, CA_BOOL loop, DecoderInfo *info)
 {
 	(void)loop;	/* This is ignored in simple decoders */
 
@@ -42,7 +42,7 @@ Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_s
 		info->sample_rate = backend->sampleRate;
 		info->channel_count = backend->channels;
 		info->format = DECODER_FORMAT_S32;
-		info->is_complex = false;
+		info->is_complex = CA_FALSE;
 	}
 
 	return (Decoder_DR_FLAC*)backend;

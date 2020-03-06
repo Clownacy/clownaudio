@@ -20,10 +20,10 @@
 
 #include "playback.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
 #include <stdlib.h>
+
+#include "bool.h"
 
 #include "../miniaudio.h"
 
@@ -54,9 +54,9 @@ static void Callback(ma_device *device, void *output_buffer_void, const void *in
 	}
 }
 
-bool Backend_Init(void)
+CA_BOOL Backend_Init(void)
 {
-	return true;
+	return CA_TRUE;
 }
 
 void Backend_Deinit(void)
@@ -96,7 +96,7 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t)
 	return stream;
 }
 
-bool Backend_DestroyStream(BackendStream *stream)
+CA_BOOL Backend_DestroyStream(BackendStream *stream)
 {
 	if (stream != NULL)
 	{
@@ -104,20 +104,20 @@ bool Backend_DestroyStream(BackendStream *stream)
 		free(stream);
 	}
 
-	return true;
+	return CA_TRUE;
 }
 
-bool Backend_SetVolume(BackendStream *stream, float volume)
+CA_BOOL Backend_SetVolume(BackendStream *stream, float volume)
 {
 	if (stream != NULL)
 		stream->volume = volume * volume;
 
-	return true;
+	return CA_TRUE;
 }
 
-bool Backend_PauseStream(BackendStream *stream)
+CA_BOOL Backend_PauseStream(BackendStream *stream)
 {
-	bool success = true;
+	CA_BOOL success = CA_TRUE;
 
 	if (stream != NULL && ma_device_is_started(&stream->device))
 		success = ma_device_stop(&stream->device) == MA_SUCCESS;
@@ -125,9 +125,9 @@ bool Backend_PauseStream(BackendStream *stream)
 	return success;
 }
 
-bool Backend_ResumeStream(BackendStream *stream)
+CA_BOOL Backend_ResumeStream(BackendStream *stream)
 {
-	bool success = true;
+	CA_BOOL success = CA_TRUE;
 
 	if (stream != NULL && !ma_device_is_started(&stream->device))
 		success = ma_device_start(&stream->device) == MA_SUCCESS;

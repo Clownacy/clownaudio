@@ -20,9 +20,9 @@
 
 #include "clownaudio.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
+
+#include "bool.h"
 
 #include "mixer.h"
 #include "playback/playback.h"
@@ -41,7 +41,7 @@ static void CallbackStream(void *user_data, float *output_buffer, size_t frames_
 	ClownMixer_MixSamples(mixer, output_buffer, frames_to_do);
 }
 
-CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
+CLOWNAUDIO_EXPORT CA_BOOL ClownAudio_Init(void)
 {
 	mixer = ClownMixer_Create(STREAM_SAMPLE_RATE);
 
@@ -54,7 +54,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 			if (stream != NULL)
 			{
 				if (Backend_ResumeStream(stream))
-					return true;
+					return CA_TRUE;
 
 				Backend_DestroyStream(stream);
 			}
@@ -65,7 +65,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 		ClownMixer_Destroy(mixer);
 	}
 
-	return false;
+	return CA_FALSE;
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void)
@@ -85,7 +85,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Unpause(void)
 	Backend_ResumeStream(stream);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, CA_BOOL predecode)
 {
 	return (ClownAudio_SoundData*)ClownMixer_LoadSoundData(file_buffer1, file_size1, file_buffer2, file_size2, predecode);
 }
@@ -95,7 +95,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
 	ClownMixer_UnloadSoundData((ClownMixer_SoundData*)sound);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done)
+CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, CA_BOOL loop, CA_BOOL free_when_done)
 {
 	return ClownMixer_CreateSound(mixer, (ClownMixer_SoundData*)sound, loop, free_when_done);
 }
@@ -145,7 +145,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, floa
 	ClownMixer_SetSoundVolume(mixer, instance, volume_left, volume_right);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop)
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, CA_BOOL loop)
 {
 	ClownMixer_SetSoundLoop(mixer, instance, loop);
 }

@@ -20,8 +20,6 @@
 
 #include "mixer.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +29,8 @@
 #else
 #include <pthread.h>
 #endif
+
+#include "bool.h"
 
 #include "decoding/split_decoder.h"
 
@@ -44,8 +44,8 @@ typedef struct Channel
 {
 	struct Channel *next;
 
-	bool paused;
-	bool free_when_done;
+	CA_BOOL paused;
+	CA_BOOL free_when_done;
 	float volume_left;
 	float volume_right;
 	SplitDecoder *split_decoder;
@@ -142,7 +142,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_Destroy(ClownMixer *mixer)
 	free(mixer);
 }
 
-CLOWNAUDIO_EXPORT ClownMixer_SoundData* ClownMixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
+CLOWNAUDIO_EXPORT ClownMixer_SoundData* ClownMixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, CA_BOOL predecode)
 {
 	return (ClownMixer_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, predecode);
 }
@@ -152,7 +152,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_UnloadSoundData(ClownMixer_SoundData *sound)
 	SplitDecoder_UnloadData((SplitDecoderData*)sound);
 }
 
-CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, ClownMixer_SoundData *sound, bool loop, bool free_when_done)
+CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, ClownMixer_SoundData *sound, CA_BOOL loop, CA_BOOL free_when_done)
 {
 	ClownMixer_Sound instance = 0;	/* TODO: This is an error value - never let instance_allocator generate it */
 
@@ -168,7 +168,7 @@ CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, Clo
 		channel->volume_left = 1.0f;
 		channel->volume_right = 1.0f;
 		channel->instance = instance;
-		channel->paused = true;
+		channel->paused = CA_TRUE;
 		channel->free_when_done = free_when_done;
 		channel->fade_out_counter_max = 0;
 		channel->fade_in_counter_max = 0;
@@ -227,7 +227,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_PauseSound(ClownMixer *mixer, ClownMixer_Sound
 	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
-		channel->paused = true;
+		channel->paused = CA_TRUE;
 
 	MutexUnlock(&mixer->mutex);
 }
@@ -239,7 +239,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_UnpauseSound(ClownMixer *mixer, ClownMixer_Sou
 	Channel *channel = FindChannel(mixer, instance);
 
 	if (channel != NULL)
-		channel->paused = false;
+		channel->paused = CA_FALSE;
 
 	MutexUnlock(&mixer->mutex);
 }
@@ -335,7 +335,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_SetSoundVolume(ClownMixer *mixer, ClownMixer_S
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownMixer_SetSoundLoop(ClownMixer *mixer, ClownMixer_Sound instance, bool loop)
+CLOWNAUDIO_EXPORT void ClownMixer_SetSoundLoop(ClownMixer *mixer, ClownMixer_Sound instance, CA_BOOL loop)
 {
 	MutexLock(&mixer->mutex);
 
@@ -370,7 +370,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_MixSamples(ClownMixer *mixer, float *output_bu
 	{
 		Channel *channel = *channel_pointer;
 
-		if (channel->paused == false)
+		if (channel->paused == CA_FALSE)
 		{
 			float *output_buffer_pointer = output_buffer;
 
@@ -436,7 +436,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_MixSamples(ClownMixer *mixer, float *output_bu
 				}
 				else
 				{
-					channel->paused = true;
+					channel->paused = CA_TRUE;
 				}
 			}
 		}

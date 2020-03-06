@@ -20,10 +20,10 @@
 
 #include "predecoder.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
 #include <stdlib.h>
+
+#include "bool.h"
 
 #include "../miniaudio.h"
 
@@ -41,7 +41,7 @@ struct PredecoderData
 struct Predecoder
 {
 	ROMemoryStream *memory_stream;
-	bool loop;
+	CA_BOOL loop;
 };
 
 typedef struct DecoderMetadata
@@ -63,7 +63,7 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 {
 	PredecoderData *predecoder_data = NULL;
 
-	MemoryStream *memory_stream = MemoryStream_Create(false);
+	MemoryStream *memory_stream = MemoryStream_Create(CA_FALSE);
 
 	if (memory_stream != NULL)
 	{
@@ -118,7 +118,7 @@ void Predecoder_UnloadData(PredecoderData *data)
 	free(data);
 }
 
-Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info)
+Predecoder* Predecoder_Create(PredecoderData *data, CA_BOOL loop, DecoderInfo *info)
 {
 	Predecoder *predecoder = malloc(sizeof(Predecoder));
 
@@ -172,7 +172,7 @@ size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, size_t f
 	return frames_done;
 }
 
-void Predecoder_SetLoop(Predecoder *predecoder, bool loop)
+void Predecoder_SetLoop(Predecoder *predecoder, CA_BOOL loop)
 {
 	predecoder->loop = loop;
 }

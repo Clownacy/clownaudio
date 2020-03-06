@@ -20,9 +20,9 @@
 
 #pragma once
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
+
+#include "bool.h"
 
 #include "clownaudio_export.h"
 
@@ -37,11 +37,11 @@ typedef unsigned int ClownMixer_Sound;
 CLOWNAUDIO_EXPORT ClownMixer* ClownMixer_Create(unsigned long sample_rate);
 CLOWNAUDIO_EXPORT void ClownMixer_Destroy(ClownMixer *mixer);
 
-CLOWNAUDIO_EXPORT ClownMixer_SoundData* ClownMixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode);
+CLOWNAUDIO_EXPORT ClownMixer_SoundData* ClownMixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, CA_BOOL predecode);
 CLOWNAUDIO_EXPORT void ClownMixer_UnloadSoundData(ClownMixer_SoundData *sound);
 
 /* If `free_when_done` is true, the sound will be destroyed once it finishes playing */
-CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, ClownMixer_SoundData *sound, bool loop, bool free_when_done);
+CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, ClownMixer_SoundData *sound, CA_BOOL loop, CA_BOOL free_when_done);
 CLOWNAUDIO_EXPORT void ClownMixer_DestroySound(ClownMixer *mixer, ClownMixer_Sound instance);
 
 CLOWNAUDIO_EXPORT void ClownMixer_RewindSound(ClownMixer *mixer, ClownMixer_Sound instance);
@@ -56,7 +56,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_CancelFade(ClownMixer *mixer, ClownMixer_Sound
 CLOWNAUDIO_EXPORT int ClownMixer_GetSoundStatus(ClownMixer *mixer, ClownMixer_Sound instance);
 
 CLOWNAUDIO_EXPORT void ClownMixer_SetSoundVolume(ClownMixer *mixer, ClownMixer_Sound instance, float volume_left, float volume_right);	/* Volume is linear, between 0.0f and 1.0f */
-CLOWNAUDIO_EXPORT void ClownMixer_SetSoundLoop(ClownMixer *mixer, ClownMixer_Sound instance, bool loop);
+CLOWNAUDIO_EXPORT void ClownMixer_SetSoundLoop(ClownMixer *mixer, ClownMixer_Sound instance, CA_BOOL loop);
 CLOWNAUDIO_EXPORT void ClownMixer_SetSoundSampleRate(ClownMixer *mixer, ClownMixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2);
 
 CLOWNAUDIO_EXPORT void ClownMixer_MixSamples(ClownMixer *mixer, float *output_buffer, size_t frames_to_do);

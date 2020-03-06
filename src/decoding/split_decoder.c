@@ -20,10 +20,10 @@
 
 #include "split_decoder.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
 #include <stdlib.h>
+
+#include "bool.h"
 
 #include "resampled_decoder.h"
 
@@ -38,10 +38,10 @@ struct SplitDecoder
 {
 	ResampledDecoder *resampled_decoder[2];
 	unsigned int current_decoder;
-	bool last_decoder;
+	CA_BOOL last_decoder;
 };
 
-SplitDecoderData* SplitDecoder_LoadData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
+SplitDecoderData* SplitDecoder_LoadData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, CA_BOOL predecode)
 {
 	SplitDecoderData *data = malloc(sizeof(SplitDecoderData));
 
@@ -70,7 +70,7 @@ void SplitDecoder_UnloadData(SplitDecoderData *data)
 	free(data);
 }
 
-SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned long sample_rate)
+SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, CA_BOOL loop, unsigned long sample_rate)
 {
 	SplitDecoder *split_decoder = malloc(sizeof(SplitDecoder));
 
@@ -78,13 +78,13 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 	{
 		if (data->resampled_decoder_data[0] != NULL && data->resampled_decoder_data[1] != NULL)
 		{
-			split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], false, sample_rate);
+			split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], CA_FALSE, sample_rate);
 			split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate);
 
 			if (split_decoder->resampled_decoder[0] != NULL && split_decoder->resampled_decoder[1] != NULL)
 			{
 				split_decoder->current_decoder = 0;
-				split_decoder->last_decoder = false;
+				split_decoder->last_decoder = CA_FALSE;
 				return split_decoder;
 			}
 		}
@@ -96,7 +96,7 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 			if (split_decoder->resampled_decoder[0] != NULL)
 			{
 				split_decoder->current_decoder = 0;
-				split_decoder->last_decoder = true;
+				split_decoder->last_decoder = CA_TRUE;
 				return split_decoder;
 			}
 		}
@@ -108,7 +108,7 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 			if (split_decoder->resampled_decoder[1] != NULL)
 			{
 				split_decoder->current_decoder = 1;
-				split_decoder->last_decoder = true;
+				split_decoder->last_decoder = CA_TRUE;
 				return split_decoder;
 			}
 		}
@@ -152,7 +152,7 @@ size_t SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_void, s
 		if (frames_done != frames_to_do && !split_decoder->last_decoder)
 		{
 			split_decoder->current_decoder = 1;
-			split_decoder->last_decoder = true;
+			split_decoder->last_decoder = CA_TRUE;
 		}
 		else
 		{
@@ -163,7 +163,7 @@ size_t SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_void, s
 	return frames_done;
 }
 
-void SplitDecoder_SetLoop(SplitDecoder *split_decoder, bool loop)
+void SplitDecoder_SetLoop(SplitDecoder *split_decoder, CA_BOOL loop)
 {
 	ResampledDecoder_SetLoop(split_decoder->resampled_decoder[split_decoder->last_decoder ? split_decoder->current_decoder : 1], loop);
 }

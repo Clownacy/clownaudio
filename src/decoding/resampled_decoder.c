@@ -20,10 +20,10 @@
 
 #include "resampled_decoder.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
 #include <stdlib.h>
+
+#include "bool.h"
 
 #include "../miniaudio.h"
 
@@ -45,7 +45,7 @@ static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_
 	return DecoderSelector_GetSamples(resampled_decoder->decoder, output_buffer, frames_to_do);
 }
 
-ResampledDecoderData* ResampledDecoder_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
+ResampledDecoderData* ResampledDecoder_LoadData(const unsigned char *file_buffer, size_t file_size, CA_BOOL predecode)
 {
 	return DecoderSelector_LoadData(file_buffer, file_size, predecode);
 }
@@ -55,7 +55,7 @@ void ResampledDecoder_UnloadData(ResampledDecoderData *data)
 	DecoderSelector_UnloadData(data);
 }
 
-ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop, unsigned long sample_rate)
+ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, CA_BOOL loop, unsigned long sample_rate)
 {
 	DecoderInfo info;
 	void *decoder = DecoderSelector_Create(data, loop, &info);
@@ -107,7 +107,7 @@ size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *bu
 	return ma_pcm_converter_read(&resampled_decoder->converter, buffer, frames_to_do);
 }
 
-void ResampledDecoder_SetLoop(ResampledDecoder *resampled_decoder, bool loop)
+void ResampledDecoder_SetLoop(ResampledDecoder *resampled_decoder, CA_BOOL loop)
 {
 	DecoderSelector_SetLoop(resampled_decoder->decoder, loop);
 }

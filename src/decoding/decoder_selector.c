@@ -20,10 +20,10 @@
 
 #include "decoder_selector.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
 #include <stdlib.h>
+
+#include "bool.h"
 
 #include "decoders/common.h"
 #include "predecoder.h"
@@ -65,7 +65,7 @@
 
 #define DECODER_FUNCTIONS(name) \
 { \
-	(void*(*)(const unsigned char*,size_t,bool,DecoderInfo*))Decoder_##name##_Create, \
+	(void*(*)(const unsigned char*,size_t,CA_BOOL,DecoderInfo*))Decoder_##name##_Create, \
 	(void(*)(void*))Decoder_##name##_Destroy, \
 	(void(*)(void*))Decoder_##name##_Rewind, \
 	(size_t(*)(void*,void*,size_t))Decoder_##name##_GetSamples \
@@ -80,7 +80,7 @@ typedef enum DecoderType
 
 typedef struct DecoderFunctions
 {
-	void* (*Create)(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
+	void* (*Create)(const unsigned char *data, size_t data_size, CA_BOOL loop, DecoderInfo *info);
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
 	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
@@ -100,7 +100,7 @@ struct DecoderSelector
 {
 	void *decoder;
 	DecoderSelectorData *data;
-	bool loop;
+	CA_BOOL loop;
 };
 
 static const DecoderFunctions decoder_function_list[] = {
@@ -149,7 +149,7 @@ static const DecoderFunctions predecoder_functions = {
 	(size_t(*)(void*,void*,size_t))Predecoder_GetSamples
 };
 
-DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
+DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, CA_BOOL predecode)
 {
 	DecoderType decoder_type;
 	const DecoderFunctions *decoder_functions = NULL;
@@ -161,7 +161,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 	size_t i;
 	for (i = 0; i < sizeof(decoder_function_list) / sizeof(decoder_function_list[0]); ++i)
 	{
-		void *decoder = decoder_function_list[i].Create(file_buffer, file_size, false, &info);
+		void *decoder = decoder_function_list[i].Create(file_buffer, file_size, CA_FALSE, &info);
 
 		if (decoder != NULL)
 		{
@@ -228,7 +228,7 @@ void DecoderSelector_UnloadData(DecoderSelectorData *data)
 	free(data);
 }
 
-DecoderSelector* DecoderSelector_Create(DecoderSelectorData *data, bool loop, DecoderInfo *info)
+DecoderSelector* DecoderSelector_Create(DecoderSelectorData *data, CA_BOOL loop, DecoderInfo *info)
 {
 	DecoderSelector *selector = malloc(sizeof(DecoderSelector));
 
@@ -299,7 +299,7 @@ size_t DecoderSelector_GetSamples(DecoderSelector *selector, void *buffer, size_
 	}
 }
 
-void DecoderSelector_SetLoop(DecoderSelector *selector, bool loop)
+void DecoderSelector_SetLoop(DecoderSelector *selector, CA_BOOL loop)
 {
 	switch (selector->data->decoder_type)
 	{

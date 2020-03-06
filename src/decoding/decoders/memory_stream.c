@@ -20,11 +20,11 @@
 
 #include "memory_stream.h"
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "bool.h"
 
 struct MemoryStream
 {
@@ -32,10 +32,10 @@ struct MemoryStream
 	size_t position;
 	size_t end;
 	size_t size;
-	bool free_buffer_when_destroyed;
+	CA_BOOL free_buffer_when_destroyed;
 };
 
-static bool ResizeIfNeeded(MemoryStream *memory_stream, size_t minimum_needed_size)
+static CA_BOOL ResizeIfNeeded(MemoryStream *memory_stream, size_t minimum_needed_size)
 {
 	if (minimum_needed_size > memory_stream->size)
 	{
@@ -46,7 +46,7 @@ static bool ResizeIfNeeded(MemoryStream *memory_stream, size_t minimum_needed_si
 		unsigned char *buffer = realloc(memory_stream->buffer, new_size);
 
 		if (buffer == NULL)
-			return false;
+			return CA_FALSE;
 
 		memory_stream->buffer = buffer;
 		memset(memory_stream->buffer + memory_stream->size, 0, new_size - memory_stream->size);
@@ -56,10 +56,10 @@ static bool ResizeIfNeeded(MemoryStream *memory_stream, size_t minimum_needed_si
 	if (minimum_needed_size > memory_stream->end)
 		memory_stream->end = minimum_needed_size;
 
-	return true;
+	return CA_TRUE;
 }
 
-MemoryStream* MemoryStream_Create(bool free_buffer_when_destroyed)
+MemoryStream* MemoryStream_Create(CA_BOOL free_buffer_when_destroyed)
 {
 	MemoryStream *memory_stream = malloc(sizeof(MemoryStream));
 
@@ -83,25 +83,25 @@ void MemoryStream_Destroy(MemoryStream *memory_stream)
 	free(memory_stream);
 }
 
-bool MemoryStream_WriteByte(MemoryStream *memory_stream, unsigned char byte)
+CA_BOOL MemoryStream_WriteByte(MemoryStream *memory_stream, unsigned char byte)
 {
 	if (!ResizeIfNeeded(memory_stream, memory_stream->position + 1))
-		return false;
+		return CA_FALSE;
 
 	memory_stream->buffer[memory_stream->position++] = byte;
 
-	return true;
+	return CA_TRUE;
 }
 
-bool MemoryStream_Write(MemoryStream *memory_stream, const void *data, size_t size, size_t count)
+CA_BOOL MemoryStream_Write(MemoryStream *memory_stream, const void *data, size_t size, size_t count)
 {
 	if (!ResizeIfNeeded(memory_stream, memory_stream->position + size * count))
-		return false;
+		return CA_FALSE;
 
 	memcpy(&memory_stream->buffer[memory_stream->position], data, size * count);
 	memory_stream->position += size * count;
 
-	return true;
+	return CA_TRUE;
 }
 
 size_t MemoryStream_Read(MemoryStream *memory_stream, void *output, size_t size, size_t count)
@@ -127,7 +127,7 @@ size_t MemoryStream_GetPosition(MemoryStream *memory_stream)
 	return memory_stream->position;
 }
 
-bool MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
+CA_BOOL MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
 {
 	switch (origin)
 	{
@@ -144,10 +144,10 @@ bool MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enu
 			break;
 
 		default:
-			return false;
+			return CA_FALSE;
 	}
 
-	return true;
+	return CA_TRUE;
 }
 
 void MemoryStream_Rewind(MemoryStream *memory_stream)
@@ -165,7 +165,7 @@ ROMemoryStream* ROMemoryStream_Create(const void *data, size_t size)
 		memory_stream->position = 0;
 		memory_stream->end = size;
 		memory_stream->size = size;
-		memory_stream->free_buffer_when_destroyed = false;
+		memory_stream->free_buffer_when_destroyed = CA_FALSE;
 	}
 
 	return (ROMemoryStream*)memory_stream;
@@ -186,7 +186,7 @@ size_t ROMemoryStream_GetPosition(ROMemoryStream *memory_stream)
 	return MemoryStream_GetPosition((MemoryStream*)memory_stream);
 }
 
-bool ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
+CA_BOOL ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
 {
 	return MemoryStream_SetPosition((MemoryStream*)memory_stream, offset, origin);
 }

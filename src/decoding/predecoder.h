@@ -20,9 +20,9 @@
 
 #pragma once
 
-//#include <stdbool.h>
-#include "bool.h"
 #include <stddef.h>
+
+#include "bool.h"
 
 #include "decoders/common.h"
 
@@ -31,8 +31,8 @@ typedef struct Predecoder Predecoder;
 
 PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (*decoder_get_samples_function)(void *decoder, void *buffer, size_t frames_to_do));
 void Predecoder_UnloadData(PredecoderData *data);
-Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info);
+Predecoder* Predecoder_Create(PredecoderData *data, CA_BOOL loop, DecoderInfo *info);
 void Predecoder_Destroy(Predecoder *predecoder);
 void Predecoder_Rewind(Predecoder *predecoder);
 size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer, size_t frames_to_do);
-void Predecoder_SetLoop(Predecoder *predecoder, bool loop);
+void Predecoder_SetLoop(Predecoder *predecoder, CA_BOOL loop);

@@ -20,7 +20,6 @@
 
 #pragma once
 
-//#include <stdbool.h>
 #include "bool.h"
 
 typedef enum DecoderFormat
@@ -35,5 +34,5 @@ typedef struct DecoderInfo
 	unsigned long sample_rate;
 	unsigned int channel_count;
 	DecoderFormat format;
-	bool is_complex;
+	CA_BOOL is_complex;
 } DecoderInfo;
