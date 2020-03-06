@@ -105,8 +105,6 @@ int main(int argc, char *argv[])
 				       " u [rate]         - Set sample-rate (Hz)\n"
 				       " p                - Pause/unpause sound\n"
 				       " v [left] [right] - Set sound volume (0.0-1.0)\n"
-				       " [                - Pan to the left\n"
-				       " ]                - Pan to the right\n\n"
 				);
 				fflush(stdout);
 
