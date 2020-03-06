@@ -27,6 +27,10 @@
 
 #include <math.h>
 
+#ifndef M_LN2
+#define M_LN2 0.693147180559945309417
+#endif
+
 #ifdef LIBXMP_PAULA_SIMULATOR
 /*
  * Period table from the Protracker V2.1A play routine

@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "common.h"
-#include "effects.h"
-#include "format.h"
-#include "hio.h"
+#include "../common.h"
+#include "../effects.h"
+#include "../format.h"
+#include "../hio.h"
 
 /* Sample flags */
 #define SAMPLE_FLAG_DIFF	0x0001	/* Differential */
