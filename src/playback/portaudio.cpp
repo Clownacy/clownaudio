@@ -20,93 +20,60 @@
 
 #include "playback.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
 
-#include "SDL.h"
+#include "portaudio.h"
 
 struct BackendStream
 {
 	void (*user_callback)(void*, float*, size_t);
 	void *user_data;
 
-	SDL_AudioDeviceID device;
+	PaStream *pa_stream;
 	float volume;
 };
 
-static bool sdl_already_init;
-
-static unsigned int NextPowerOfTwo(unsigned int value)
+static int Callback(const void *input_buffer, void *output_buffer_void, unsigned long frames_to_do, const PaStreamCallbackTimeInfo *time_info, PaStreamCallbackFlags status_flags, void *user_data)
 {
-	value--;
-	value |= value >> 1;
-	value |= value >> 2;
-	value |= value >> 4;
-	value |= value >> 8;
-	value |= value >> 16;
-	value++;
+	(void)input_buffer;
+	(void)time_info;
+	(void)status_flags;
 
-	return value;
-}
-
-static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_do)
-{
-	BackendStream *stream = user_data;
-	const unsigned long frames_to_do = bytes_to_do / (sizeof(float) * STREAM_CHANNEL_COUNT);
-	float *output_buffer = (float*)output_buffer_uint8;
+	BackendStream *stream = (BackendStream*)user_data;
+	float *output_buffer = (float*)output_buffer_void;
 
 	stream->user_callback(stream->user_data, output_buffer, frames_to_do);
 
-	// Handle volume in software, since SDL2's API doesn't have volume control
+	// Handle volume in software, since PortAudio's API doesn't have volume control
 	if (stream->volume != 1.0f)
 		for (unsigned long i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
 			output_buffer[i] *= stream->volume;
+
+	return 0;
 }
 
 bool Backend_Init(void)
 {
-	bool success = true;
-
-	sdl_already_init = SDL_WasInit(SDL_INIT_AUDIO);
-
-	if (!sdl_already_init)
-		if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
-			success = false;
-
-	return success;
+	return Pa_Initialize() == paNoError;
 }
 
 void Backend_Deinit(void)
 {
-	if (!sdl_already_init)
-		SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	Pa_Terminate();
 }
 
 BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
 {
-	BackendStream *stream = malloc(sizeof(BackendStream));
+	BackendStream *stream = (BackendStream*)malloc(sizeof(BackendStream));
 
 	if (stream != NULL)
 	{
-		SDL_AudioSpec want;
-		memset(&want, 0, sizeof(want));
-		want.freq = STREAM_SAMPLE_RATE;
-		want.format = AUDIO_F32;
-		want.channels = STREAM_CHANNEL_COUNT;
-		want.samples = NextPowerOfTwo(((STREAM_SAMPLE_RATE * 10) / 1000) * STREAM_CHANNEL_COUNT);	// A low-latency buffer of 10 milliseconds
-		want.callback = Callback;
-		want.userdata = stream;
-
-		SDL_AudioDeviceID device = SDL_OpenAudioDevice(NULL, 0, &want, NULL, 0);
-
-		if (device > 0)
+		if (Pa_OpenDefaultStream(&stream->pa_stream, 0, STREAM_CHANNEL_COUNT, paFloat32, STREAM_SAMPLE_RATE, paFramesPerBufferUnspecified, Callback, stream ) == paNoError)
 		{
 			stream->user_callback = user_callback;
 			stream->user_data = user_data;
 
-			stream->device = device;
 			stream->volume = 1.0f;
 		}
 		else
@@ -121,13 +88,15 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t)
 
 bool Backend_DestroyStream(BackendStream *stream)
 {
+	bool success = true;
+
 	if (stream != NULL)
 	{
-		SDL_CloseAudioDevice(stream->device);
+		success = Pa_CloseStream(stream->pa_stream) == paNoError;
 		free(stream);
 	}
 
-	return true;
+	return success;
 }
 
 bool Backend_SetVolume(BackendStream *stream, float volume)
@@ -140,16 +109,20 @@ bool Backend_SetVolume(BackendStream *stream, float volume)
 
 bool Backend_PauseStream(BackendStream *stream)
 {
-	if (stream != NULL)
-		SDL_PauseAudioDevice(stream->device, -1);
+	bool success = true;
 
-	return true;
+	if (stream != NULL)
+		success = Pa_StopStream(stream->pa_stream) == paNoError;
+
+	return success;
 }
 
 bool Backend_ResumeStream(BackendStream *stream)
 {
-	if (stream != NULL)
-		SDL_PauseAudioDevice(stream->device, 0);
+	bool success = true;
 
-	return true;
+	if (stream != NULL)
+		success = Pa_StartStream(stream->pa_stream) == paNoError;
+
+	return success;
 }

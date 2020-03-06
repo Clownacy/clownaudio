@@ -20,7 +20,6 @@
 
 #include "playback.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #ifdef _WIN32
@@ -46,7 +45,7 @@ static long DataCallback(cubeb_stream *c_stream, void *user_data, void const *in
 
 	BackendStream *stream = (BackendStream*)user_data;
 
-	stream->user_callback(stream->user_data, output_buffer, frames_to_do);
+	stream->user_callback(stream->user_data, (float*)output_buffer, frames_to_do);
 
 	return frames_to_do;
 }
@@ -91,7 +90,7 @@ BackendStream* Backend_CreateStream(void (*user_callback)(void*, float*, size_t)
 
 	if (cubeb_get_min_latency(cubeb_context, &output_params, &latency_frames) == CUBEB_OK)
 	{
-		stream = malloc(sizeof(BackendStream));
+		stream = (BackendStream*)malloc(sizeof(BackendStream));
 
 		if (stream != NULL)
 		{
