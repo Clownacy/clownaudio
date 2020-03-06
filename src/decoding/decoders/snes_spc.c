@@ -42,8 +42,6 @@ Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data
 {
 	(void)loop;	// Unusable, sadly - looping is up to the music file
 
-	Decoder_SNES_SPC *decoder = NULL;
-
 	SNES_SPC *snes_spc = spc_new();
 
 	SPC_Filter *filter = spc_filter_new();
@@ -54,7 +52,7 @@ Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data
 
 		spc_filter_clear(filter);
 
-		decoder = malloc(sizeof(Decoder_SNES_SPC));
+		Decoder_SNES_SPC *decoder = malloc(sizeof(Decoder_SNES_SPC));
 
 		if (decoder != NULL)
 		{
