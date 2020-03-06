@@ -20,7 +20,6 @@
 
 #include "libopus.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 
 #include <opus/opusfile.h>
@@ -56,5 +55,5 @@ void Decoder_libOpus_Rewind(Decoder_libOpus *decoder)
 
 size_t Decoder_libOpus_GetSamples(Decoder_libOpus *decoder, void *buffer, size_t frames_to_do)
 {
-	return op_read_float_stereo((OggOpusFile*)decoder, buffer, frames_to_do * 2);	// You tell *me* why that last parameter is in samples and not frames
+	return op_read_float_stereo((OggOpusFile*)decoder, (float*)buffer, frames_to_do * 2);	// You tell *me* why that last parameter is in samples and not frames
 }
