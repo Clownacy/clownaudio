@@ -84,7 +84,7 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 				spec->channel_count = wanted_spec->channel_count;
 				spec->format = wanted_spec->format;
 
-				resampled_decoder->size_of_in_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(spec->format)) * spec->channel_count;
+				resampled_decoder->size_of_in_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(child_spec.format)) * child_spec.channel_count;
 				resampled_decoder->size_of_out_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(wanted_spec->format)) * wanted_spec->channel_count;
 				resampled_decoder->buffer_remaining = 0;
 				resampled_decoder->sample_rate = wanted_spec->sample_rate;
