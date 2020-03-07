@@ -73,8 +73,8 @@ PredecoderData* Predecoder_DecodeData(const DecoderSpec *in_spec, const DecoderS
 				unsigned char in_buffer[0x1000];
 				unsigned char out_buffer[0x1000];
 
-				const size_t size_of_in_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(in_spec->format)) * CHANNEL_COUNT;
-				const size_t size_of_out_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(out_spec->format)) * CHANNEL_COUNT;
+				const size_t size_of_in_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(in_spec->format)) * in_spec->channel_count;
+				const size_t size_of_out_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(out_spec->format)) * out_spec->channel_count;
 
 				size_t in_buffer_remaining = 0;
 

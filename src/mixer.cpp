@@ -157,7 +157,7 @@ CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, Clo
 
 	DecoderSpec wanted_spec, spec;
 	wanted_spec.sample_rate = mixer->sample_rate;
-	wanted_spec.channel_count = 2;
+	wanted_spec.channel_count = CHANNEL_COUNT;
 	wanted_spec.format = DECODER_FORMAT_F32;
 
 	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, &wanted_spec, &spec);
