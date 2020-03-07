@@ -26,22 +26,19 @@
 #include "../miniaudio.h"
 
 #include "decoder_selector.h"
-#include "predecoder.h"
+
+#define RESAMPLE_BUFFER_SIZE 0x1000
+#define CHANNEL_COUNT 2
 
 struct ResampledDecoder
 {
 	DecoderSelector *decoder;
-	ma_pcm_converter converter;
+	ma_data_converter converter;
+	unsigned long sample_rate;
+	size_t size_of_frame;
+	unsigned char buffer[RESAMPLE_BUFFER_SIZE];
+	size_t buffer_remaining;
 };
-
-static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
-{
-	(void)converter;
-
-	ResampledDecoder *resampled_decoder = (ResampledDecoder*)user_data;
-
-	return DecoderSelector_GetSamples(resampled_decoder->decoder, output_buffer, frames_to_do);
-}
 
 ResampledDecoderData* ResampledDecoder_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
 {
@@ -74,11 +71,17 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 			else //if (info.format == DECODER_FORMAT_F32)
 				format = ma_format_f32;
 
-			ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info.channel_count, info.sample_rate, ma_format_f32, 2, sample_rate, PCMConverterCallback, resampled_decoder);
-			config.allowDynamicSampleRate = MA_TRUE;
+			ma_data_converter_config config = ma_data_converter_config_init(format, ma_format_f32, info.channel_count, CHANNEL_COUNT, info.sample_rate, sample_rate);
+			config.resampling.allowDynamicSampleRate = MA_TRUE;
 
-			if (ma_pcm_converter_init(&config, &resampled_decoder->converter) == MA_SUCCESS)
+			if (ma_data_converter_init(&config, &resampled_decoder->converter) == MA_SUCCESS)
+			{
+				resampled_decoder->size_of_frame = ma_get_bytes_per_sample(format) * CHANNEL_COUNT;
+				resampled_decoder->buffer_remaining = 0;
+				resampled_decoder->sample_rate = sample_rate;
+
 				return resampled_decoder;
+			}
 
 			free(resampled_decoder);
 		}
@@ -91,6 +94,7 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 
 void ResampledDecoder_Destroy(ResampledDecoder *resampled_decoder)
 {
+	ma_data_converter_uninit(&resampled_decoder->converter);
 	DecoderSelector_Destroy(resampled_decoder->decoder);
 	free(resampled_decoder);
 }
@@ -100,9 +104,31 @@ void ResampledDecoder_Rewind(ResampledDecoder *resampled_decoder)
 	DecoderSelector_Rewind(resampled_decoder->decoder);
 }
 
-size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *buffer, size_t frames_to_do)
+size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *buffer_void, size_t frames_to_do)
 {
-	return ma_pcm_converter_read(&resampled_decoder->converter, buffer, frames_to_do);
+	float (*buffer)[CHANNEL_COUNT] = (float(*)[CHANNEL_COUNT])buffer_void;
+
+	size_t frames_done = 0;
+
+	while (frames_done != frames_to_do)
+	{
+		if (resampled_decoder->buffer_remaining == 0)
+		{
+			resampled_decoder->buffer_remaining = DecoderSelector_GetSamples(resampled_decoder->decoder, resampled_decoder->buffer, RESAMPLE_BUFFER_SIZE / resampled_decoder->size_of_frame);
+
+			if (resampled_decoder->buffer_remaining == 0)
+				return frames_done;	// Sample end
+		}
+
+		ma_uint64 frames_in = resampled_decoder->buffer_remaining;
+		ma_uint64 frames_out = frames_to_do - frames_done;
+		ma_data_converter_process_pcm_frames(&resampled_decoder->converter, &resampled_decoder->buffer[RESAMPLE_BUFFER_SIZE - (resampled_decoder->buffer_remaining * resampled_decoder->size_of_frame)], &frames_in, &buffer[frames_done], &frames_out);
+
+		resampled_decoder->buffer_remaining -= frames_in;
+		frames_done += frames_out;
+	}
+
+	return frames_to_do;
 }
 
 void ResampledDecoder_SetLoop(ResampledDecoder *resampled_decoder, bool loop)
@@ -112,5 +138,5 @@ void ResampledDecoder_SetLoop(ResampledDecoder *resampled_decoder, bool loop)
 
 void ResampledDecoder_SetSampleRate(ResampledDecoder *resampled_decoder, unsigned long sample_rate)
 {
-	ma_pcm_converter_set_input_sample_rate(&resampled_decoder->converter, sample_rate);
+	ma_data_converter_set_rate(&resampled_decoder->converter, sample_rate, resampled_decoder->sample_rate);
 }

@@ -42,21 +42,6 @@ struct Predecoder
 	bool loop;
 };
 
-typedef struct DecoderMetadata
-{
-	void *decoder;
-	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
-} DecoderMetadata;
-
-static ma_uint32 PCMConverterCallback(ma_pcm_converter *converter, void *output_buffer, ma_uint32 frames_to_do, void *user_data)
-{
-	(void)converter;
-
-	DecoderMetadata *decoder_metadata = (DecoderMetadata*)user_data;
-
-	return decoder_metadata->GetSamples(decoder_metadata->decoder, output_buffer, frames_to_do);
-}
-
 PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (*decoder_get_samples_function)(void *decoder, void *buffer, size_t frames_to_do))
 {
 	PredecoderData *predecoder_data = NULL;
@@ -73,35 +58,49 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 		else //if (info->format == DECODER_FORMAT_F32)
 			format = ma_format_f32;
 
-		DecoderMetadata decoder_metadata;
-		decoder_metadata.decoder = decoder;
-		decoder_metadata.GetSamples = decoder_get_samples_function;
+		const ma_data_converter_config config = ma_data_converter_config_init(format, ma_format_f32, info->channel_count, CHANNEL_COUNT, info->sample_rate, info->sample_rate);
 
-		const ma_pcm_converter_config config = ma_pcm_converter_config_init(format, info->channel_count, info->sample_rate, ma_format_f32, 2, info->sample_rate, PCMConverterCallback, &decoder_metadata);
-
-		ma_pcm_converter converter;
-		if (ma_pcm_converter_init(&config, &converter) == MA_SUCCESS)
+		ma_data_converter converter;
+		if (ma_data_converter_init(&config, &converter) == MA_SUCCESS)
 		{
 			predecoder_data = (PredecoderData*)malloc(sizeof(PredecoderData));
 
 			if (predecoder_data != NULL)
 			{
+				unsigned char in_buffer[0x1000];
+				size_t in_buffer_remaining = 0;
+
+				const size_t size_of_in_frame = ma_get_bytes_per_sample(format) * CHANNEL_COUNT;
+
+				const size_t size_of_out_frame = sizeof(float) * CHANNEL_COUNT;
+				const size_t size_of_out_buffer = 0x1000 / size_of_out_frame;
+				float out_buffer[size_of_out_buffer];
+
 				for (;;)
 				{
-					float buffer[0x1000];
+					if (in_buffer_remaining == 0)
+					{
+						in_buffer_remaining = decoder_get_samples_function(decoder, in_buffer, 0x1000 / size_of_in_frame);
 
-					size_t samples_read = ma_pcm_converter_read(&converter, buffer, 0x1000 / CHANNEL_COUNT) * CHANNEL_COUNT;
+						if (in_buffer_remaining == 0)
+							break;
+					}
 
-					MemoryStream_Write(memory_stream, buffer, sizeof(float), samples_read);
+					ma_uint64 frames_in = in_buffer_remaining;
+					ma_uint64 frames_out = size_of_out_buffer;
+					ma_data_converter_process_pcm_frames(&converter, &in_buffer[0x1000 - (in_buffer_remaining * size_of_in_frame)], &frames_in, out_buffer, &frames_out);
 
-					if (samples_read != 0x1000)
-						break;
+					MemoryStream_Write(memory_stream, out_buffer, size_of_out_frame, frames_out);
+
+					in_buffer_remaining -= frames_in;
 				}
 
 				predecoder_data->decoded_data = MemoryStream_GetBuffer(memory_stream);
 				predecoder_data->decoded_data_size = MemoryStream_GetPosition(memory_stream);
 				predecoder_data->sample_rate = info->sample_rate;
 			}
+
+			ma_data_converter_uninit(&converter);
 		}
 
 		MemoryStream_Destroy(memory_stream);
