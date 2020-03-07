@@ -37,7 +37,8 @@ struct ResampledDecoder
 	DecoderSelector *decoder;
 	ma_data_converter converter;
 	unsigned long sample_rate;
-	size_t size_of_frame;
+	size_t size_of_in_frame;
+	size_t size_of_out_frame;
 	unsigned char buffer[RESAMPLE_BUFFER_SIZE];
 	size_t buffer_remaining;
 };
@@ -61,7 +62,6 @@ void ResampledDecoder_UnloadData(ResampledDecoderData *data)
 {
 	DecoderSelector_UnloadData(data);
 }
-
 ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	DecoderSpec child_spec;
@@ -84,9 +84,10 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 				spec->channel_count = wanted_spec->channel_count;
 				spec->format = wanted_spec->format;
 
-				resampled_decoder->size_of_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(spec->format)) * CHANNEL_COUNT;
+				resampled_decoder->size_of_in_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(spec->format)) * CHANNEL_COUNT;
+				resampled_decoder->size_of_out_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(wanted_spec->format)) * CHANNEL_COUNT;
 				resampled_decoder->buffer_remaining = 0;
-				resampled_decoder->sample_rate = spec->sample_rate;
+				resampled_decoder->sample_rate = wanted_spec->sample_rate;
 
 				return resampled_decoder;
 			}
@@ -114,7 +115,7 @@ void ResampledDecoder_Rewind(ResampledDecoder *resampled_decoder)
 
 size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *buffer_void, size_t frames_to_do)
 {
-	float (*buffer)[CHANNEL_COUNT] = (float(*)[CHANNEL_COUNT])buffer_void;
+	unsigned char *buffer = (unsigned char*)buffer_void;
 
 	size_t frames_done = 0;
 
@@ -122,7 +123,7 @@ size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *bu
 	{
 		if (resampled_decoder->buffer_remaining == 0)
 		{
-			resampled_decoder->buffer_remaining = DecoderSelector_GetSamples(resampled_decoder->decoder, resampled_decoder->buffer, RESAMPLE_BUFFER_SIZE / resampled_decoder->size_of_frame);
+			resampled_decoder->buffer_remaining = DecoderSelector_GetSamples(resampled_decoder->decoder, resampled_decoder->buffer, RESAMPLE_BUFFER_SIZE / resampled_decoder->size_of_in_frame);
 
 			if (resampled_decoder->buffer_remaining == 0)
 				return frames_done;	// Sample end
@@ -130,7 +131,7 @@ size_t ResampledDecoder_GetSamples(ResampledDecoder *resampled_decoder, void *bu
 
 		ma_uint64 frames_in = resampled_decoder->buffer_remaining;
 		ma_uint64 frames_out = frames_to_do - frames_done;
-		ma_data_converter_process_pcm_frames(&resampled_decoder->converter, &resampled_decoder->buffer[RESAMPLE_BUFFER_SIZE - (resampled_decoder->buffer_remaining * resampled_decoder->size_of_frame)], &frames_in, &buffer[frames_done], &frames_out);
+		ma_data_converter_process_pcm_frames(&resampled_decoder->converter, &resampled_decoder->buffer[RESAMPLE_BUFFER_SIZE - (resampled_decoder->buffer_remaining * resampled_decoder->size_of_in_frame)], &frames_in, &buffer[frames_done * resampled_decoder->size_of_out_frame], &frames_out);
 
 		resampled_decoder->buffer_remaining -= frames_in;
 		frames_done += frames_out;

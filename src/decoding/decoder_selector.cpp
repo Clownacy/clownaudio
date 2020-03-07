@@ -171,7 +171,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 			if (decoder_type == DECODER_TYPE_SIMPLE && predecode)
 			{
-				predecoder_data = Predecoder_DecodeData(&wanted_spec, &spec, decoder, decoder_functions->GetSamples);
+				predecoder_data = Predecoder_DecodeData(&spec, &wanted_spec, decoder, decoder_functions->GetSamples);
 
 				if (predecoder_data != NULL)
 				{
