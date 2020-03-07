@@ -167,7 +167,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 			if (decoder_type == DECODER_TYPE_SIMPLE && predecode)
 			{
-				predecoder_data = Predecoder_DecodeData(&info, decoder, decoder_functions[i].GetSamples);
+				predecoder_data = Predecoder_DecodeData(&info, decoder, decoder_functions->GetSamples);
 
 				if (predecoder_data != NULL)
 				{
