@@ -27,9 +27,9 @@
 typedef struct PredecoderData PredecoderData;
 typedef struct Predecoder Predecoder;
 
-PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (*decoder_get_samples_function)(void *decoder, void *buffer, size_t frames_to_do));
+PredecoderData* Predecoder_DecodeData(const DecoderSpec *wanted_spec, DecoderSpec *spec, void *decoder, size_t (*decoder_get_samples_function)(void *decoder, void *buffer, size_t frames_to_do));
 void Predecoder_UnloadData(PredecoderData *data);
-Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info);
+Predecoder* Predecoder_Create(PredecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
 void Predecoder_Destroy(Predecoder *predecoder);
 void Predecoder_Rewind(Predecoder *predecoder);
 size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer, size_t frames_to_do);

@@ -23,6 +23,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include "decoders/common.h"
+
 #include "resampled_decoder.h"
 
 #define CHANNEL_COUNT 2
@@ -68,7 +70,7 @@ void SplitDecoder_UnloadData(SplitDecoderData *data)
 	free(data);
 }
 
-SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned long sample_rate)
+SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	SplitDecoder *split_decoder = split_decoder = (SplitDecoder*)malloc(sizeof(SplitDecoder));
 
@@ -76,8 +78,8 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 	{
 		if (data->resampled_decoder_data[0] != NULL && data->resampled_decoder_data[1] != NULL)
 		{
-			split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], false, sample_rate);
-			split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate);
+			split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], false, wanted_spec, spec);
+			split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, wanted_spec, spec);
 
 			if (split_decoder->resampled_decoder[0] != NULL && split_decoder->resampled_decoder[1] != NULL)
 			{
@@ -88,7 +90,7 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 		}
 		else if (data->resampled_decoder_data[0] != NULL)
 		{
-			split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], loop, sample_rate);
+			split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], loop, wanted_spec, spec);
 			split_decoder->resampled_decoder[1] = NULL;
 
 			if (split_decoder->resampled_decoder[0] != NULL)
@@ -101,7 +103,7 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, unsigned lo
 		else if (data->resampled_decoder_data[1] != NULL)
 		{
 			split_decoder->resampled_decoder[0] = NULL;
-			split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, sample_rate);
+			split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, wanted_spec, spec);
 
 			if (split_decoder->resampled_decoder[1] != NULL)
 			{

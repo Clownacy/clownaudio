@@ -25,6 +25,7 @@
 
 #include "../miniaudio.h"
 
+#include "decoders/common.h"
 #include "decoders/memory_stream.h"
 
 #define CHANNEL_COUNT 2
@@ -42,7 +43,17 @@ struct Predecoder
 	bool loop;
 };
 
-PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (*decoder_get_samples_function)(void *decoder, void *buffer, size_t frames_to_do))
+static ma_format FormatToMiniaudioFormat(DecoderFormat format)
+{
+	if (format == DECODER_FORMAT_S16)
+		return ma_format_s16;
+	else if (format == DECODER_FORMAT_S32)
+		return ma_format_s32;
+	else //if (format == DECODER_FORMAT_F32)
+		return ma_format_f32;
+}
+#include <stdio.h>
+PredecoderData* Predecoder_DecodeData(const DecoderSpec *wanted_spec, DecoderSpec *spec, void *decoder, size_t (*decoder_get_samples_function)(void *decoder, void *buffer, size_t frames_to_do))
 {
 	PredecoderData *predecoder_data = NULL;
 
@@ -50,15 +61,7 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 
 	if (memory_stream != NULL)
 	{
-		ma_format format;
-		if (info->format == DECODER_FORMAT_S16)
-			format = ma_format_s16;
-		else if (info->format == DECODER_FORMAT_S32)
-			format = ma_format_s32;
-		else //if (info->format == DECODER_FORMAT_F32)
-			format = ma_format_f32;
-
-		const ma_data_converter_config config = ma_data_converter_config_init(format, ma_format_f32, info->channel_count, CHANNEL_COUNT, info->sample_rate, info->sample_rate);
+		const ma_data_converter_config config = ma_data_converter_config_init(FormatToMiniaudioFormat(spec->format), FormatToMiniaudioFormat(wanted_spec->format), spec->channel_count, wanted_spec->channel_count, spec->sample_rate, spec->sample_rate);
 
 		ma_data_converter converter;
 		if (ma_data_converter_init(&config, &converter) == MA_SUCCESS)
@@ -70,7 +73,7 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 				unsigned char in_buffer[0x1000];
 				size_t in_buffer_remaining = 0;
 
-				const size_t size_of_in_frame = ma_get_bytes_per_sample(format) * CHANNEL_COUNT;
+				const size_t size_of_in_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(spec->format)) * CHANNEL_COUNT;
 
 				const size_t size_of_out_frame = sizeof(float) * CHANNEL_COUNT;
 				const size_t size_of_out_buffer = 0x1000 / size_of_out_frame;
@@ -97,7 +100,7 @@ PredecoderData* Predecoder_DecodeData(DecoderInfo *info, void *decoder, size_t (
 
 				predecoder_data->decoded_data = MemoryStream_GetBuffer(memory_stream);
 				predecoder_data->decoded_data_size = MemoryStream_GetPosition(memory_stream);
-				predecoder_data->sample_rate = info->sample_rate;
+				predecoder_data->sample_rate = spec->sample_rate;
 			}
 
 			ma_data_converter_uninit(&converter);
@@ -115,8 +118,10 @@ void Predecoder_UnloadData(PredecoderData *data)
 	free(data);
 }
 
-Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info)
+Predecoder* Predecoder_Create(PredecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
+	(void)wanted_spec;
+
 	Predecoder *predecoder = (Predecoder*)malloc(sizeof(Predecoder));
 
 	if (predecoder != NULL)
@@ -127,9 +132,9 @@ Predecoder* Predecoder_Create(PredecoderData *data, bool loop, DecoderInfo *info
 		{
 			predecoder->loop = loop;
 
-			info->sample_rate = data->sample_rate;
-			info->channel_count = CHANNEL_COUNT;
-			info->format = DECODER_FORMAT_F32;
+			spec->sample_rate = data->sample_rate;
+			spec->channel_count = CHANNEL_COUNT;
+			spec->format = DECODER_FORMAT_F32;
 
 			return predecoder;
 		}

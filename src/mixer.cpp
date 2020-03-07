@@ -30,6 +30,8 @@
 #include <pthread.h>
 #endif
 
+#include "decoding/decoders/common.h"
+
 #include "decoding/split_decoder.h"
 
 #define CHANNEL_COUNT 2
@@ -153,7 +155,12 @@ CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, Clo
 {
 	ClownMixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
-	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, mixer->sample_rate);
+	DecoderSpec wanted_spec, spec;
+	wanted_spec.sample_rate = mixer->sample_rate;
+	wanted_spec.channel_count = 2;
+	wanted_spec.format = DECODER_FORMAT_F32;
+
+	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, &wanted_spec, &spec);
 
 	if (split_decoder != NULL)
 	{

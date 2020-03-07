@@ -29,18 +29,19 @@
 
 #include "common.h"
 
-Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_DR_FLAC* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)loop;	// This is ignored in simple decoders
+	(void)wanted_spec;
 
 	drflac *backend = drflac_open_memory(data, data_size, NULL);
 
 	if (backend != NULL)
 	{
-		info->sample_rate = backend->sampleRate;
-		info->channel_count = backend->channels;
-		info->format = DECODER_FORMAT_S32;
-		info->is_complex = false;
+		spec->sample_rate = backend->sampleRate;
+		spec->channel_count = backend->channels;
+		spec->format = DECODER_FORMAT_S32;
+		spec->is_complex = false;
 	}
 
 	return (Decoder_DR_FLAC*)backend;

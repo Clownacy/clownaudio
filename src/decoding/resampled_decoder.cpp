@@ -25,6 +25,8 @@
 
 #include "../miniaudio.h"
 
+#include "decoders/common.h"
+
 #include "decoder_selector.h"
 
 #define RESAMPLE_BUFFER_SIZE 0x1000
@@ -40,6 +42,16 @@ struct ResampledDecoder
 	size_t buffer_remaining;
 };
 
+static ma_format FormatToMiniaudioFormat(DecoderFormat format)
+{
+	if (format == DECODER_FORMAT_S16)
+		return ma_format_s16;
+	else if (format == DECODER_FORMAT_S32)
+		return ma_format_s32;
+	else //if (format == DECODER_FORMAT_F32)
+		return ma_format_f32;
+}
+
 ResampledDecoderData* ResampledDecoder_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
 {
 	return DecoderSelector_LoadData(file_buffer, file_size, predecode);
@@ -50,10 +62,10 @@ void ResampledDecoder_UnloadData(ResampledDecoderData *data)
 	DecoderSelector_UnloadData(data);
 }
 
-ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop, unsigned long sample_rate)
+ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
-	DecoderInfo info;
-	void *decoder = DecoderSelector_Create(data, loop, &info);
+	DecoderSpec child_spec;
+	void *decoder = DecoderSelector_Create(data, loop, wanted_spec, &child_spec);
 
 	if (decoder != NULL)
 	{
@@ -63,22 +75,18 @@ ResampledDecoder* ResampledDecoder_Create(ResampledDecoderData *data, bool loop,
 		{
 			resampled_decoder->decoder = (DecoderSelector*)decoder;
 
-			ma_format format;
-			if (info.format == DECODER_FORMAT_S16)
-				format = ma_format_s16;
-			else if (info.format == DECODER_FORMAT_S32)
-				format = ma_format_s32;
-			else //if (info.format == DECODER_FORMAT_F32)
-				format = ma_format_f32;
-
-			ma_data_converter_config config = ma_data_converter_config_init(format, ma_format_f32, info.channel_count, CHANNEL_COUNT, info.sample_rate, sample_rate);
+			ma_data_converter_config config = ma_data_converter_config_init(FormatToMiniaudioFormat(child_spec.format), FormatToMiniaudioFormat(wanted_spec->format), child_spec.channel_count, wanted_spec->channel_count, child_spec.sample_rate, wanted_spec->sample_rate);
 			config.resampling.allowDynamicSampleRate = MA_TRUE;
 
 			if (ma_data_converter_init(&config, &resampled_decoder->converter) == MA_SUCCESS)
 			{
-				resampled_decoder->size_of_frame = ma_get_bytes_per_sample(format) * CHANNEL_COUNT;
+				spec->sample_rate = wanted_spec->sample_rate;
+				spec->channel_count = wanted_spec->channel_count;
+				spec->format = wanted_spec->format;
+
+				resampled_decoder->size_of_frame = ma_get_bytes_per_sample(FormatToMiniaudioFormat(spec->format)) * CHANNEL_COUNT;
 				resampled_decoder->buffer_remaining = 0;
-				resampled_decoder->sample_rate = sample_rate;
+				resampled_decoder->sample_rate = spec->sample_rate;
 
 				return resampled_decoder;
 			}
