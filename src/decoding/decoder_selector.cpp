@@ -146,7 +146,7 @@ static const DecoderFunctions predecoder_functions = {
 	(void(*)(void*))Predecoder_Rewind,
 	(size_t(*)(void*,void*,size_t))Predecoder_GetSamples
 };
-#include <stdio.h>
+
 DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
 {
 	DecoderType decoder_type;
