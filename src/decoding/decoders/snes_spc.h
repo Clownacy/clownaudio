@@ -26,7 +26,7 @@
 
 typedef struct Decoder_SNES_SPC Decoder_SNES_SPC;
 
-Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
+Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
 void Decoder_SNES_SPC_Destroy(Decoder_SNES_SPC *decoder);
 void Decoder_SNES_SPC_Rewind(Decoder_SNES_SPC *decoder);
 size_t Decoder_SNES_SPC_GetSamples(Decoder_SNES_SPC *decoder, void *buffer, size_t frames_to_do);

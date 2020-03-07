@@ -82,9 +82,10 @@ static const ov_callbacks ov_callback_memory = {
 	ftell_wrapper
 };
 
-Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)loop;	// This is ignored in simple decoders
+	(void)wanted_spec;
 
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
 
@@ -103,10 +104,10 @@ Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t da
 				decoder->vorbis_file = vorbis_file;
 				decoder->channel_count = v_info->channels;
 
-				info->sample_rate = v_info->rate;
-				info->channel_count = v_info->channels;
-				info->format = DECODER_FORMAT_F32;
-				info->is_complex = false;
+				spec->sample_rate = v_info->rate;
+				spec->channel_count = v_info->channels;
+				spec->format = DECODER_FORMAT_F32;
+				spec->is_complex = false;
 
 				return decoder;
 			}

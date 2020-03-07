@@ -37,9 +37,10 @@ struct Decoder_SNES_SPC
 	SPC_Filter *filter;
 };
 
-Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)loop;	// Unusable, sadly - looping is up to the music file
+	(void)wanted_spec;
 
 	SNES_SPC *snes_spc = spc_new();
 
@@ -60,10 +61,10 @@ Decoder_SNES_SPC* Decoder_SNES_SPC_Create(const unsigned char *data, size_t data
 			decoder->snes_spc = snes_spc;
 			decoder->filter = filter;
 
-			info->sample_rate = spc_sample_rate;
-			info->channel_count = CHANNEL_COUNT;
-			info->format = DECODER_FORMAT_S16;
-			info->is_complex = true;
+			spec->sample_rate = spc_sample_rate;
+			spec->channel_count = CHANNEL_COUNT;
+			spec->format = DECODER_FORMAT_S16;
+			spec->is_complex = true;
 
 			return decoder;
 		}

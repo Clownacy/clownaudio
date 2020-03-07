@@ -38,9 +38,10 @@
 
 #include "common.h"
 
-Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)loop;	// This is ignored in simple decoders
+	(void)wanted_spec;
 
 	stb_vorbis *instance = stb_vorbis_open_memory(data, data_size, NULL, NULL);
 
@@ -48,10 +49,10 @@ Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t 
 	{
 		const stb_vorbis_info vorbis_info = stb_vorbis_get_info(instance);
 
-		info->sample_rate = vorbis_info.sample_rate;
-		info->channel_count = vorbis_info.channels;
-		info->format = DECODER_FORMAT_F32;
-		info->is_complex = false;
+		spec->sample_rate = vorbis_info.sample_rate;
+		spec->channel_count = vorbis_info.channels;
+		spec->format = DECODER_FORMAT_F32;
+		spec->is_complex = false;
 	}
 
 	return (Decoder_STB_Vorbis*)instance;

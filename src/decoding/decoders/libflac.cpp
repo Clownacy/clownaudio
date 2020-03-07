@@ -36,7 +36,7 @@ struct Decoder_libFLAC
 {
 	ROMemoryStream *memory_stream;
 	FLAC__StreamDecoder *flac_stream_decoder;
-	DecoderInfo *info;
+	DecoderSpec *spec;
 
 	unsigned int channel_count;
 
@@ -152,10 +152,10 @@ static void MetadataCallback(const FLAC__StreamDecoder *flac_stream_decoder, con
 
 	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
-	decoder->info->sample_rate = metadata->data.stream_info.sample_rate;
-	decoder->info->channel_count = decoder->channel_count = metadata->data.stream_info.channels;
-	decoder->info->format = DECODER_FORMAT_S32;	// libFLAC doesn't do float32
-	decoder->info->is_complex = false;
+	decoder->spec->sample_rate = metadata->data.stream_info.sample_rate;
+	decoder->spec->channel_count = decoder->channel_count = metadata->data.stream_info.channels;
+	decoder->spec->format = DECODER_FORMAT_S32;	// libFLAC doesn't do float32
+	decoder->spec->is_complex = false;
 
 	decoder->bits_per_sample = metadata->data.stream_info.bits_per_sample;
 
@@ -175,9 +175,10 @@ static void ErrorCallback(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__
 	decoder->error = true;
 }
 
-Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)loop;	// This is ignored in simple decoders
+	(void)wanted_spec;
 
 	Decoder_libFLAC *decoder = (Decoder_libFLAC*)malloc(sizeof(Decoder_libFLAC));
 
@@ -194,7 +195,7 @@ Decoder_libFLAC* Decoder_libFLAC_Create(const unsigned char *data, size_t data_s
 				if (FLAC__stream_decoder_init_stream(decoder->flac_stream_decoder, fread_wrapper, fseek_wrapper, ftell_wrapper, GetSize, CheckEOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
 				{
 					decoder->error = false;
-					decoder->info = info;
+					decoder->spec = spec;
 					FLAC__stream_decoder_process_until_end_of_metadata(decoder->flac_stream_decoder);
 
 					if (!decoder->error)

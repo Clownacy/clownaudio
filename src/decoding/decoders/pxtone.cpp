@@ -39,8 +39,10 @@ struct Decoder_PxTone
 	bool loop;
 };
 
-Decoder_PxTone* Decoder_PxTone_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_PxTone* Decoder_PxTone_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
+	(void)wanted_spec;
+
 	pxtnService *pxtn = new pxtnService();
 
 	if (pxtn->init() == pxtnOK)
@@ -66,10 +68,10 @@ Decoder_PxTone* Decoder_PxTone_Create(const unsigned char *data, size_t data_siz
 						decoder->pxtn = pxtn;
 						decoder->loop = loop;
 
-						info->sample_rate = SAMPLE_RATE;
-						info->channel_count = CHANNEL_COUNT;
-						info->format = DECODER_FORMAT_S16;	// PxTone uses int16_t internally
-						info->is_complex = true;
+						spec->sample_rate = SAMPLE_RATE;
+						spec->channel_count = CHANNEL_COUNT;
+						spec->format = DECODER_FORMAT_S16;	// PxTone uses int16_t internally
+						spec->is_complex = true;
 
 						return decoder;
 					}

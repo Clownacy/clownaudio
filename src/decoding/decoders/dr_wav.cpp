@@ -30,9 +30,10 @@
 
 #include "common.h"
 
-Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)loop;	// This is ignored in simple decoders
+	(void)wanted_spec;
 
 	drwav *instance = (drwav*)malloc(sizeof(drwav));
 
@@ -40,10 +41,10 @@ Decoder_DR_WAV* Decoder_DR_WAV_Create(const unsigned char *data, size_t data_siz
 	{
 		if (drwav_init_memory(instance, data, data_size, NULL))
 		{
-			info->sample_rate = instance->sampleRate;
-			info->channel_count = instance->channels;
-			info->format = DECODER_FORMAT_F32;
-			info->is_complex = false;
+			spec->sample_rate = instance->sampleRate;
+			spec->channel_count = instance->channels;
+			spec->format = DECODER_FORMAT_F32;
+			spec->is_complex = false;
 
 			return (Decoder_DR_WAV*)instance;
 		}

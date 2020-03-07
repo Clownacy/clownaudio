@@ -89,9 +89,10 @@ static SF_VIRTUAL_IO sfvirtual = {
 	ftell_wrapper
 };
 
-Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)loop;	// This is ignored in simple decoders
+	(void)wanted_spec;
 
 	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
 
@@ -111,10 +112,10 @@ Decoder_libSndfile* Decoder_libSndfile_Create(const unsigned char *data, size_t 
 				decoder->sndfile = sndfile;
 				decoder->memory_stream = memory_stream;
 
-				info->sample_rate = sf_info.samplerate;
-				info->channel_count = sf_info.channels;
-				info->format = DECODER_FORMAT_F32;
-				info->is_complex = false;
+				spec->sample_rate = sf_info.samplerate;
+				spec->channel_count = sf_info.channels;
+				spec->format = DECODER_FORMAT_F32;
+				spec->is_complex = false;
 
 				return decoder;
 			}

@@ -37,8 +37,10 @@ struct Decoder_libXMPLite
 	bool loop;
 };
 
-Decoder_libXMPLite* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_libXMPLite* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
+	(void)wanted_spec;
+
 	xmp_context context = xmp_create_context();
 
 	if (!xmp_load_module_from_memory(context, (void*)data, data_size))
@@ -52,10 +54,10 @@ Decoder_libXMPLite* Decoder_libXMPLite_Create(const unsigned char *data, size_t 
 			decoder->context = context;
 			decoder->loop = loop;
 
-			info->sample_rate = SAMPLE_RATE;
-			info->channel_count = CHANNEL_COUNT;
-			info->format = DECODER_FORMAT_S16;
-			info->is_complex = true;
+			spec->sample_rate = SAMPLE_RATE;
+			spec->channel_count = CHANNEL_COUNT;
+			spec->format = DECODER_FORMAT_S16;
+			spec->is_complex = true;
 
 			return decoder;
 		}

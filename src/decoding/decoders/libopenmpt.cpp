@@ -29,16 +29,18 @@
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
-Decoder_libOpenMPT* Decoder_libOpenMPT_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_libOpenMPT* Decoder_libOpenMPT_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
+	(void)wanted_spec;
+
 	openmpt_module *module = openmpt_module_create_from_memory2(data, data_size, openmpt_log_func_silent, NULL, openmpt_error_func_ignore, NULL, NULL, NULL, NULL);
 
 	if (module != NULL)
 	{
-		info->sample_rate = SAMPLE_RATE;
-		info->channel_count = CHANNEL_COUNT;
-		info->format = DECODER_FORMAT_F32;
-		info->is_complex = true;
+		spec->sample_rate = SAMPLE_RATE;
+		spec->channel_count = CHANNEL_COUNT;
+		spec->format = DECODER_FORMAT_F32;
+		spec->is_complex = true;
 
 		if (loop)
 			openmpt_module_set_repeat_count(module, -1);

@@ -38,9 +38,10 @@ struct Decoder_PxToneNoise
 	void *buffer;
 };
 
-Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
+Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)loop;	// This is ignored in simple decoders
+	(void)wanted_spec;
 
 	pxtoneNoise *pxtn = new pxtoneNoise();
 
@@ -68,10 +69,10 @@ Decoder_PxToneNoise* Decoder_PxToneNoise_Create(const unsigned char *data, size_
 							decoder->memory_stream = memory_stream;
 							decoder->buffer = buffer;
 
-							info->sample_rate = SAMPLE_RATE;
-							info->channel_count = CHANNEL_COUNT;
-							info->format = DECODER_FORMAT_S16;	// PxTone uses int16_t internally
-							info->is_complex = false;
+							spec->sample_rate = SAMPLE_RATE;
+							spec->channel_count = CHANNEL_COUNT;
+							spec->format = DECODER_FORMAT_S16;	// PxTone uses int16_t internally
+							spec->is_complex = false;
 
 							delete pxtn;
 

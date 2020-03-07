@@ -26,7 +26,7 @@
 
 typedef struct Decoder_libVorbis Decoder_libVorbis;
 
-Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info);
+Decoder_libVorbis* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
 void Decoder_libVorbis_Destroy(Decoder_libVorbis *decoder);
 void Decoder_libVorbis_Rewind(Decoder_libVorbis *decoder);
 size_t Decoder_libVorbis_GetSamples(Decoder_libVorbis *decoder, void *buffer, size_t frames_to_do);
