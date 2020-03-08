@@ -26,7 +26,7 @@ ifneq ($(RELEASE),)
 else
   CXXFLAGS = -Og -ggdb3
 endif
-ALL_CXXFLAGS = -MMD -MP -MF $@.d $(CXXFLAGS)
+ALL_CXXFLAGS = -std=c++98 -MMD -MP -MF $@.d $(CXXFLAGS)
 
 ifneq ($(RELEASE),)
   LDFLAGS = -s
@@ -234,7 +234,7 @@ all: test
 obj/test.o: test.cpp
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 -Wall -Wextra -pedantic -I. -I../include $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic -I. -I../include $< -o $@ -c
 
 obj/clownaudio/%.c.o: $(CLOWNAUDIO_DIR)/%.c
 	$(info Compiling $<)
@@ -244,7 +244,7 @@ obj/clownaudio/%.c.o: $(CLOWNAUDIO_DIR)/%.c
 obj/clownaudio/%.cpp.o: $(CLOWNAUDIO_DIR)/%.cpp
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 -Wall -Wextra -pedantic -I. -I../include/clownaudio $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic -I. -I../include/clownaudio $< -o $@ -c
 
 obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
 	$(info Compiling $<)
@@ -254,7 +254,7 @@ obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
 obj/spc/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ -c
 
 obj/pxtone/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/pxtone/%
 	$(info Compiling $<)
