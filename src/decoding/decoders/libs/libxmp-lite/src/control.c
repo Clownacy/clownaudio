@@ -518,7 +518,9 @@ int xmp_set_instrument_path(xmp_context opaque, char *path)
 	if (m->instrument_path != NULL)
 		free(m->instrument_path);
 
-	m->instrument_path = strdup(path);
+	size_t length = strlen(path);
+	m->instrument_path = malloc(length + 1);
+	memcpy(m->instrument_path, path, length + 1);
 	if (m->instrument_path == NULL) {
 		return -XMP_ERROR_SYSTEM;
 	}
