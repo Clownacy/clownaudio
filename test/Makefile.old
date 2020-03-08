@@ -249,7 +249,7 @@ obj/clownaudio/%.cpp.o: $(CLOWNAUDIO_DIR)/%.cpp
 obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -std=gnu99 -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -I$(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 -Dinline=__inline -D_USE_MATH_DEFINES=1 -DBUILDING_STATIC=1 $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -I$(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 -Dinline=__inline -D_USE_MATH_DEFINES=1 -DBUILDING_STATIC=1 $< -o $@ -c
 
 obj/spc/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
 	$(info Compiling $<)
