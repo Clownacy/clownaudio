@@ -72,7 +72,7 @@ void SplitDecoder_UnloadData(SplitDecoderData *data)
 
 SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
-	SplitDecoder *split_decoder = split_decoder = (SplitDecoder*)malloc(sizeof(SplitDecoder));
+	SplitDecoder *split_decoder = (SplitDecoder*)malloc(sizeof(SplitDecoder));
 
 	if (split_decoder != NULL)
 	{
