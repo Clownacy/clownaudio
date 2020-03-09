@@ -32,6 +32,9 @@
 #ifdef USE_STB_VORBIS
 #include "decoders/stb_vorbis.h"
 #endif
+#ifdef USE_DR_MP3
+#include "decoders/dr_mp3.h"
+#endif
 #ifdef USE_LIBFLAC
 #include "decoders/libflac.h"
 #endif
@@ -107,6 +110,9 @@ static const DecoderFunctions decoder_function_list[] = {
 #endif
 #ifdef USE_STB_VORBIS
 	DECODER_FUNCTIONS(STB_Vorbis),
+#endif
+#ifdef USE_DR_MP3
+	DECODER_FUNCTIONS(DR_MP3),
 #endif
 #ifdef USE_LIBFLAC
 	DECODER_FUNCTIONS(libFLAC),

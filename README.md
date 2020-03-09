@@ -5,6 +5,7 @@ variety of formats.
 
 Supported formats include...
 * Ogg Vorbis
+* MP3
 * FLAC
 * WAV
 * Opus
@@ -30,6 +31,7 @@ Library | Format | Licence | Included in-tree
 --------|--------|---------|-----------------
 libogg/libvorbis/libvorbisfile | Ogg Vorbis | BSD | No
 stb_vorbis | Ogg Vorbis | Public-domain/MIT-0 | Yes
+dr_mp3 | MP3 | Public-domain/MIT-0 | Yes
 libFLAC | FLAC | BSD | No
 dr_flac | FLAC | Public-domain/MIT-0 | Yes
 dr_wav | WAV | Public-domain/MIT-0 | Yes

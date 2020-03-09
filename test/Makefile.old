@@ -1,5 +1,6 @@
 USE_LIBVORBIS = false
 USE_STB_VORBIS = true
+USE_DR_MP3 = true
 USE_LIBFLAC = false
 USE_DR_FLAC = true
 USE_DR_WAV = true
@@ -64,6 +65,11 @@ ifeq ($(USE_STB_VORBIS), true)
   CLOWNAUDIO_SOURCES += decoding/decoders/stb_vorbis.cpp
   ALL_CXXFLAGS += -DUSE_STB_VORBIS
   ALL_LIBS += -lm
+endif
+
+ifeq ($(USE_DR_MP3), true)
+  CLOWNAUDIO_SOURCES += decoding/decoders/dr_mp3.cpp
+  ALL_CXXFLAGS += -DUSE_DR_MP3
 endif
 
 ifeq ($(USE_LIBFLAC), true)

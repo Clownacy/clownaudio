@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 
 option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
 option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" ON)
+option(CLOWNAUDIO_DR_MP3 "Enable the dr_mp3 decoder backend" ON)
 option(CLOWNAUDIO_LIBFLAC "Enable the libFLAC decoder backend" OFF)
 option(CLOWNAUDIO_DR_FLAC "Enable the dr_flac decoder backend" ON)
 option(CLOWNAUDIO_DR_WAV "Enable the dr_wav decoder backend" ON)
@@ -103,6 +104,14 @@ if(CLOWNAUDIO_STB_VORBIS)
 		target_link_libraries(clownaudio PRIVATE m)
 		list(APPEND STATIC_LIBS m)
 	endif()
+endif()
+
+if(CLOWNAUDIO_DR_MP3)
+	target_compile_definitions(clownaudio PRIVATE USE_DR_MP3)
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/dr_mp3.cpp"
+		"src/decoding/decoders/dr_mp3.h"
+	)
 endif()
 
 if(CLOWNAUDIO_LIBFLAC)
