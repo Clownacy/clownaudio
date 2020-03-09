@@ -27,6 +27,8 @@
 
 #include "clownaudio_export.h"
 
+#include "config.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -40,11 +42,11 @@ CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void);
 CLOWNAUDIO_EXPORT void ClownAudio_Pause(void);
 CLOWNAUDIO_EXPORT void ClownAudio_Unpause(void);
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode);
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config);
 CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound);
 
 // If `free_when_done` is true, the sound will be destroyed once it finishes playing
-CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done);
+CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, ClownAudio_SoundConfig *config);
 CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Sound instance);
 
 CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Sound instance);

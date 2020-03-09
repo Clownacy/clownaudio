@@ -22,6 +22,7 @@
 
 #include <stddef.h>
 
+#include "config.h"
 #include "mixer.h"
 #include "playback/playback.h"
 
@@ -82,9 +83,9 @@ CLOWNAUDIO_EXPORT void ClownAudio_Unpause(void)
 	Backend_ResumeStream(stream);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
 {
-	return (ClownAudio_SoundData*)ClownMixer_LoadSoundData(file_buffer1, file_size1, file_buffer2, file_size2, predecode);
+	return (ClownAudio_SoundData*)ClownMixer_LoadSoundData(file_buffer1, file_size1, file_buffer2, file_size2, config);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
@@ -92,9 +93,9 @@ CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
 	ClownMixer_UnloadSoundData((ClownMixer_SoundData*)sound);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, bool loop, bool free_when_done)
+CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, ClownAudio_SoundConfig *config)
 {
-	return ClownMixer_CreateSound(mixer, (ClownMixer_SoundData*)sound, loop, free_when_done);
+	return ClownMixer_CreateSound(mixer, (ClownMixer_SoundData*)sound, config);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Sound instance)

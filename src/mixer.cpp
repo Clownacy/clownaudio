@@ -30,6 +30,8 @@
 #include <pthread.h>
 #endif
 
+#include "config.h"
+
 #include "decoding/decoders/common.h"
 
 #include "decoding/split_decoder.h"
@@ -141,9 +143,9 @@ CLOWNAUDIO_EXPORT void ClownMixer_Destroy(ClownMixer *mixer)
 	free(mixer);
 }
 
-CLOWNAUDIO_EXPORT ClownMixer_SoundData* ClownMixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
+CLOWNAUDIO_EXPORT ClownMixer_SoundData* ClownMixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
 {
-	return (ClownMixer_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, predecode);
+	return (ClownMixer_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, config->predecode);
 }
 
 CLOWNAUDIO_EXPORT void ClownMixer_UnloadSoundData(ClownMixer_SoundData *sound)
@@ -151,7 +153,7 @@ CLOWNAUDIO_EXPORT void ClownMixer_UnloadSoundData(ClownMixer_SoundData *sound)
 	SplitDecoder_UnloadData((SplitDecoderData*)sound);
 }
 
-CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, ClownMixer_SoundData *sound, bool loop, bool free_when_done)
+CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, ClownMixer_SoundData *sound, ClownAudio_SoundConfig *config)
 {
 	ClownMixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
 
@@ -160,7 +162,7 @@ CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, Clo
 	wanted_spec.channel_count = CHANNEL_COUNT;
 	wanted_spec.format = DECODER_FORMAT_F32;
 
-	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, loop, &wanted_spec, &spec);
+	SplitDecoder *split_decoder = SplitDecoder_Create((SplitDecoderData*)sound, config->loop, &wanted_spec, &spec);
 
 	if (split_decoder != NULL)
 	{
@@ -173,7 +175,7 @@ CLOWNAUDIO_EXPORT ClownMixer_Sound ClownMixer_CreateSound(ClownMixer *mixer, Clo
 		channel->volume_right = 1.0f;
 		channel->instance = instance;
 		channel->paused = true;
-		channel->free_when_done = free_when_done;
+		channel->free_when_done = !config->do_not_free_when_done;
 		channel->fade_out_counter_max = 0;
 		channel->fade_in_counter_max = 0;
 

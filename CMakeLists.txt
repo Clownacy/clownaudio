@@ -18,7 +18,9 @@ set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: 
 project(clownaudio VERSION 0.2 DESCRIPTION "Stereo audio engine supporting various formats" LANGUAGES C CXX)
 
 add_library(clownaudio
+	"include/clownaudio/config.h"
 	"include/clownaudio/mixer.h"
+	"src/config.cpp"
 	"src/miniaudio.cpp"
 	"src/miniaudio.h"
 	"src/mixer.cpp"
@@ -61,9 +63,9 @@ target_include_directories(clownaudio PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_D
 set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 
 if(CLOWNAUDIO_NO_PLAYBACK)
-	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h;include/clownaudio/config.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 else()
-	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h;include/clownaudio/config.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 endif()
 
 set_target_properties(clownaudio PROPERTIES

@@ -80,14 +80,19 @@ int main(int argc, char *argv[])
 			file_sizes[1] = 0;
 		}
 
-		ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], false);
+		ClownAudio_SoundDataConfig config;
+		ClownAudio_InitSoundDataConfig(&config);
+		ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], &config);
 
 		if (sound_data != NULL)
 		{
 			printf("Loaded sound data\n");
 			fflush(stdout);
 
-			ClownAudio_Sound instance = ClownAudio_CreateSound(sound_data, true, true);
+			ClownAudio_SoundConfig config2;
+			ClownAudio_InitSoundConfig(&config2);
+			config2.loop = true;
+			ClownAudio_Sound instance = ClownAudio_CreateSound(sound_data, &config2);
 			ClownAudio_UnpauseSound(instance);
 
 			if (instance != 0)
