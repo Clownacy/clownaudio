@@ -23,9 +23,13 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#define MA_NO_DECODING
+#define MA_NO_ENCODING
+
 #ifndef MINIAUDIO_ENABLE_DEVICE_IO
  #define MA_NO_DEVICE_IO
 #endif
+
 #include "../miniaudio.h"
 
 #include "decoders/common.h"
