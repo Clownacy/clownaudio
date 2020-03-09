@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
+option(BUILD_SHARED_LIBS "Build shared library" OFF)
 option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
 option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" ON)
 option(CLOWNAUDIO_DR_MP3 "Enable the dr_mp3 decoder backend" ON)
