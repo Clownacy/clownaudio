@@ -35,6 +35,9 @@
 #ifdef USE_DR_MP3
 #include "decoders/dr_mp3.h"
 #endif
+#ifdef USE_LIBOPUS
+#include "decoders/libopus.h"
+#endif
 #ifdef USE_LIBFLAC
 #include "decoders/libflac.h"
 #endif
@@ -44,24 +47,21 @@
 #ifdef USE_DR_WAV
 #include "decoders/dr_wav.h"
 #endif
-#ifdef USE_LIBOPUS
-#include "decoders/libopus.h"
-#endif
 #ifdef USE_LIBSNDFILE
 #include "decoders/libsndfile.h"
-#endif
-#ifdef USE_LIBXMPLITE
-#include "decoders/libxmp-lite.h"
 #endif
 #ifdef USE_LIBOPENMPT
 #include "decoders/libopenmpt.h"
 #endif
-#ifdef USE_SNES_SPC
-#include "decoders/snes_spc.h"
+#ifdef USE_LIBXMPLITE
+#include "decoders/libxmp-lite.h"
 #endif
 #ifdef USE_PXTONE
 #include "decoders/pxtone.h"
 #include "decoders/pxtone_noise.h"
+#endif
+#ifdef USE_SNES_SPC
+#include "decoders/snes_spc.h"
 #endif
 
 #define DECODER_FUNCTIONS(name) \
@@ -114,6 +114,9 @@ static const DecoderFunctions decoder_function_list[] = {
 #ifdef USE_DR_MP3
 	DECODER_FUNCTIONS(DR_MP3),
 #endif
+#ifdef USE_LIBOPUS
+	DECODER_FUNCTIONS(libOpus),
+#endif
 #ifdef USE_LIBFLAC
 	DECODER_FUNCTIONS(libFLAC),
 #endif
@@ -122,9 +125,6 @@ static const DecoderFunctions decoder_function_list[] = {
 #endif
 #ifdef USE_DR_WAV
 	DECODER_FUNCTIONS(DR_WAV),
-#endif
-#ifdef USE_LIBOPUS
-	DECODER_FUNCTIONS(libOpus),
 #endif
 #ifdef USE_LIBSNDFILE
 	DECODER_FUNCTIONS(libSndfile),
@@ -135,14 +135,14 @@ static const DecoderFunctions decoder_function_list[] = {
 #ifdef USE_LIBXMPLITE
 	DECODER_FUNCTIONS(libXMPLite),
 #endif
-#ifdef USE_SNES_SPC
-	DECODER_FUNCTIONS(SNES_SPC),
-#endif
 #ifdef USE_PXTONE
 	DECODER_FUNCTIONS(PxTone),
 #endif
 #ifdef USE_PXTONE
 	DECODER_FUNCTIONS(PxToneNoise),
+#endif
+#ifdef USE_SNES_SPC
+	DECODER_FUNCTIONS(SNES_SPC),
 #endif
 };
 

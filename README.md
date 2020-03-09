@@ -32,13 +32,13 @@ Library | Format | Licence | Included in-tree
 libogg/libvorbis/libvorbisfile | Ogg Vorbis | BSD | No
 stb_vorbis | Ogg Vorbis | Public-domain/MIT-0 | Yes
 dr_mp3 | MP3 | Public-domain/MIT-0 | Yes
+libopus | Opus | BSD | No
 libFLAC | FLAC | BSD | No
 dr_flac | FLAC | Public-domain/MIT-0 | Yes
 dr_wav | WAV | Public-domain/MIT-0 | Yes
-libopus | Opus | BSD | No
 libsndfile | Various (includes Ogg Vorbis, FLAC, WAV, AIFF, and others) | LGPL 2.1 | No
-libxmp-lite | .mod, .it, .xm, .s3m | MIT | Yes
 libopenmpt | Various (includes .mod, .it, .xm, .s3m, .mptm, and **many** others) | BSD | No
+libxmp-lite | .mod, .it, .xm, .s3m | MIT | Yes
 PxTone | PxTone Music/PxTone Noise | Custom (appears to be permissive) | Yes
 snes_spc | SNES SPC | LGPL 2.1 | Yes
 

@@ -1,15 +1,15 @@
 USE_LIBVORBIS = false
 USE_STB_VORBIS = true
 USE_DR_MP3 = true
+USE_LIBOPUS = false
 USE_LIBFLAC = false
 USE_DR_FLAC = true
 USE_DR_WAV = true
-USE_LIBOPUS = false
 USE_LIBSNDFILE = false
 USE_LIBOPENMPT = false
 USE_LIBXMPLITE = true
-USE_SNES_SPC = true
 USE_PXTONE = true
+USE_SNES_SPC = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
 
@@ -72,6 +72,12 @@ ifeq ($(USE_DR_MP3), true)
   ALL_CXXFLAGS += -DUSE_DR_MP3
 endif
 
+ifeq ($(USE_LIBOPUS), true)
+  CLOWNAUDIO_SOURCES += decoding/decoders/libopus.cpp
+  ALL_CXXFLAGS += -DUSE_LIBOPUS $(shell pkg-config opusfile --cflags)
+  ALL_LIBS += $(shell pkg-config opusfile --libs --static)
+endif
+
 ifeq ($(USE_LIBFLAC), true)
   CLOWNAUDIO_SOURCES += decoding/decoders/libflac.cpp
   ALL_CXXFLAGS += -DUSE_LIBFLAC $(shell pkg-config flac --cflags)
@@ -86,12 +92,6 @@ endif
 ifeq ($(USE_DR_WAV), true)
   CLOWNAUDIO_SOURCES += decoding/decoders/dr_wav.cpp
   ALL_CXXFLAGS += -DUSE_DR_WAV
-endif
-
-ifeq ($(USE_LIBOPUS), true)
-  CLOWNAUDIO_SOURCES += decoding/decoders/libopus.cpp
-  ALL_CXXFLAGS += -DUSE_LIBOPUS $(shell pkg-config opusfile --cflags)
-  ALL_LIBS += $(shell pkg-config opusfile --libs --static)
 endif
 
 ifeq ($(USE_LIBSNDFILE), true)
@@ -119,12 +119,6 @@ ifeq ($(USE_LIBXMPLITE), true)
   endif
 endif
 
-ifeq ($(USE_SNES_SPC), true)
-  CLOWNAUDIO_SOURCES += decoding/decoders/snes_spc.cpp
-  ALL_CXXFLAGS += -DUSE_SNES_SPC
-  ALL_LIBS += -lstdc++
-endif
-
 ifeq ($(USE_PXTONE), true)
   CLOWNAUDIO_SOURCES += decoding/decoders/pxtone.cpp decoding/decoders/pxtone_noise.cpp
   ALL_CXXFLAGS += -DUSE_PXTONE
@@ -133,6 +127,12 @@ ifeq ($(USE_PXTONE), true)
   ifeq ($(USE_LIBVORBIS), true)
     ALL_CXXFLAGS += -DpxINCLUDE_OGGVORBIS
   endif
+endif
+
+ifeq ($(USE_SNES_SPC), true)
+  CLOWNAUDIO_SOURCES += decoding/decoders/snes_spc.cpp
+  ALL_CXXFLAGS += -DUSE_SNES_SPC
+  ALL_LIBS += -lstdc++
 endif
 
 ifeq ($(BACKEND), miniaudio)
@@ -187,15 +187,6 @@ LIBXMPLITE_SOURCES = \
   src/loaders/s3m_load.c \
   src/loaders/it_load.c
 
-SPC_SOURCES = \
-  dsp.cpp \
-  SNES_SPC.cpp \
-  SNES_SPC_misc.cpp \
-  SNES_SPC_state.cpp \
-  spc.cpp \
-  SPC_DSP.cpp \
-  SPC_Filter.cpp
-
 PXTONE_SOURCES = \
   pxtnDelay.cpp \
   pxtnDescriptor.cpp \
@@ -219,6 +210,15 @@ PXTONE_SOURCES = \
   pxtnWoicePTV.cpp \
   pxtoneNoise.cpp
 
+SPC_SOURCES = \
+  dsp.cpp \
+  SNES_SPC.cpp \
+  SNES_SPC_misc.cpp \
+  SNES_SPC_state.cpp \
+  spc.cpp \
+  SPC_DSP.cpp \
+  SPC_Filter.cpp
+
 OBJECTS += obj/test.o
 OBJECTS += $(addprefix obj/clownaudio/, $(addsuffix .o, $(CLOWNAUDIO_SOURCES)))
 ifeq ($(USE_LIBXMPLITE), true)
@@ -226,11 +226,11 @@ ifeq ($(USE_LIBXMPLITE), true)
     OBJECTS += $(addprefix obj/libxmp-lite/, $(addsuffix .o, $(LIBXMPLITE_SOURCES)))
   endif
 endif
-ifeq ($(USE_SNES_SPC), true)
-  OBJECTS += $(addprefix obj/spc/, $(addsuffix .o, $(SPC_SOURCES)))
-endif
 ifeq ($(USE_PXTONE), true)
   OBJECTS += $(addprefix obj/pxtone/, $(addsuffix .o, $(PXTONE_SOURCES)))
+endif
+ifeq ($(USE_SNES_SPC), true)
+  OBJECTS += $(addprefix obj/spc/, $(addsuffix .o, $(SPC_SOURCES)))
 endif
 
 DEPENDENCIES = $(addsuffix .d, $(OBJECTS))
@@ -257,15 +257,15 @@ obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
 	@mkdir -p $(@D)
 	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -I$(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 $< -o $@ -c
 
-obj/spc/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
-	$(info Compiling $<)
-	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ -c
-
 obj/pxtone/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/pxtone/%
 	$(info Compiling $<)
 	@mkdir -p $(@D)
 	@$(CXX) $(ALL_CXXFLAGS) -std=c++11 -Wall -Wextra -pedantic $< -o $@ -c
+
+obj/spc/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
+	$(info Compiling $<)
+	@mkdir -p $(@D)
+	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ -c
 
 test: $(OBJECTS)
 	$(info Linking $@)

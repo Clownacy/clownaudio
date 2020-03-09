@@ -3,15 +3,15 @@ cmake_minimum_required(VERSION 3.12)
 option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
 option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" ON)
 option(CLOWNAUDIO_DR_MP3 "Enable the dr_mp3 decoder backend" ON)
+option(CLOWNAUDIO_LIBOPUS "Enable the libopus decoder backend" OFF)
 option(CLOWNAUDIO_LIBFLAC "Enable the libFLAC decoder backend" OFF)
 option(CLOWNAUDIO_DR_FLAC "Enable the dr_flac decoder backend" ON)
 option(CLOWNAUDIO_DR_WAV "Enable the dr_wav decoder backend" ON)
-option(CLOWNAUDIO_LIBOPUS "Enable the libopus decoder backend" OFF)
 option(CLOWNAUDIO_LIBSNDFILE "Enable the libsndfile decoder backend" OFF)
 option(CLOWNAUDIO_LIBOPENMPT "Enable the libopenmpt decoder backend" OFF)
 option(CLOWNAUDIO_LIBXMPLITE "Enable the libxmp-lite decoder backend" OFF)
-option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
 option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
+option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
 option(CLOWNAUDIO_NO_PLAYBACK "Disables playback capabilities" OFF)
 set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
 
@@ -114,6 +114,14 @@ if(CLOWNAUDIO_DR_MP3)
 	)
 endif()
 
+if(CLOWNAUDIO_LIBOPUS)
+	target_compile_definitions(clownaudio PRIVATE USE_LIBOPUS)
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/libopus.cpp"
+		"src/decoding/decoders/libopus.h"
+	)
+endif()
+
 if(CLOWNAUDIO_LIBFLAC)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBFLAC)
 	target_sources(clownaudio PRIVATE
@@ -140,14 +148,6 @@ if(CLOWNAUDIO_DR_WAV)
 	)
 endif()
 
-if(CLOWNAUDIO_LIBOPUS)
-	target_compile_definitions(clownaudio PRIVATE USE_LIBOPUS)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/libopus.cpp"
-		"src/decoding/decoders/libopus.h"
-	)
-endif()
-
 if(CLOWNAUDIO_LIBSNDFILE)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBSNDFILE)
 	target_sources(clownaudio PRIVATE
@@ -169,31 +169,6 @@ if(CLOWNAUDIO_LIBXMPLITE)
 	target_sources(clownaudio PRIVATE
 		"src/decoding/decoders/libxmp-lite.cpp"
 		"src/decoding/decoders/libxmp-lite.h"
-	)
-endif()
-
-if(CLOWNAUDIO_SNES_SPC)
-	target_compile_definitions(clownaudio PRIVATE USE_SNES_SPC)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/snes_spc.cpp"
-		"src/decoding/decoders/snes_spc.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_common.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_config.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_endian.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_source.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/dsp.cpp"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/dsp.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC.cpp"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC_misc.cpp"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC_state.cpp"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/spc.cpp"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/spc.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_CPU.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_DSP.cpp"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_DSP.h"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.cpp"
-		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.h"
 	)
 endif()
 
@@ -247,6 +222,31 @@ if(CLOWNAUDIO_PXTONE)
 		"src/decoding/decoders/libs/pxtone/pxtoneNoise.h"
 	)
 	list(APPEND STATIC_LIBS stdc++)
+endif()
+
+if(CLOWNAUDIO_SNES_SPC)
+	target_compile_definitions(clownaudio PRIVATE USE_SNES_SPC)
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/snes_spc.cpp"
+		"src/decoding/decoders/snes_spc.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_common.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_config.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_endian.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_source.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/dsp.cpp"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/dsp.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC.cpp"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC_misc.cpp"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SNES_SPC_state.cpp"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/spc.cpp"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/spc.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_CPU.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_DSP.cpp"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_DSP.h"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.cpp"
+		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.h"
+	)
 endif()
 
 
@@ -349,16 +349,6 @@ if(CLOWNAUDIO_LIBVORBIS)
 	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} vorbisfile")
 endif()
 
-if(CLOWNAUDIO_LIBFLAC)
-	if (NOT PkgConfig_FOUND)
-		message(FATAL_ERROR "pkg-config is needed by libflac, but it couldn't be found")
-	endif()
-
-	pkg_check_modules(flac REQUIRED IMPORTED_TARGET flac)
-	target_link_libraries(clownaudio PRIVATE PkgConfig::flac)
-	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} flac")
-endif()
-
 if(CLOWNAUDIO_LIBOPUS)
 	if (NOT PkgConfig_FOUND)
 		message(FATAL_ERROR "pkg-config is needed by libopus, but it couldn't be found")
@@ -367,6 +357,16 @@ if(CLOWNAUDIO_LIBOPUS)
 	pkg_check_modules(opusfile REQUIRED IMPORTED_TARGET opusfile)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::opusfile)
 	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} opusfile")
+endif()
+
+if(CLOWNAUDIO_LIBFLAC)
+	if (NOT PkgConfig_FOUND)
+		message(FATAL_ERROR "pkg-config is needed by libflac, but it couldn't be found")
+	endif()
+
+	pkg_check_modules(flac REQUIRED IMPORTED_TARGET flac)
+	target_link_libraries(clownaudio PRIVATE PkgConfig::flac)
+	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} flac")
 endif()
 
 if(CLOWNAUDIO_LIBSNDFILE)
