@@ -26,22 +26,22 @@
 #include "mixer.h"
 #include "playback/playback.h"
 
-static ClownMixer *mixer;
+static ClownAudio_Mixer *mixer;
 static BackendStream *stream;
 
 static void CallbackStream(void *user_data, float *output_buffer, size_t frames_to_do)
 {
-	ClownMixer *mixer = (ClownMixer*)user_data;
+	ClownAudio_Mixer *mixer = (ClownAudio_Mixer*)user_data;
 
 	for (size_t i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
 		output_buffer[i] = 0.0f;
 
-	ClownMixer_MixSamples(mixer, output_buffer, frames_to_do);
+	ClownAudio_Mixer_MixSamples(mixer, output_buffer, frames_to_do);
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 {
-	mixer = ClownMixer_Create(STREAM_SAMPLE_RATE);
+	mixer = ClownAudio_CreateMixer(STREAM_SAMPLE_RATE);
 
 	if (mixer != NULL)
 	{
@@ -60,7 +60,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 			Backend_Deinit();
 		}
 
-		ClownMixer_Destroy(mixer);
+		ClownAudio_DestroyMixer(mixer);
 	}
 
 	return false;
@@ -70,7 +70,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void)
 {
 	Backend_DestroyStream(stream);
 	Backend_Deinit();
-	ClownMixer_Destroy(mixer);
+	ClownAudio_DestroyMixer(mixer);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Pause(void)
@@ -85,70 +85,70 @@ CLOWNAUDIO_EXPORT void ClownAudio_Unpause(void)
 
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
 {
-	return (ClownAudio_SoundData*)ClownMixer_LoadSoundData(file_buffer1, file_size1, file_buffer2, file_size2, config);
+	return (ClownAudio_SoundData*)ClownAudio_Mixer_LoadSoundData(file_buffer1, file_size1, file_buffer2, file_size2, config);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
 {
-	ClownMixer_UnloadSoundData((ClownMixer_SoundData*)sound);
+	ClownAudio_Mixer_UnloadSoundData((ClownAudio_Mixer_SoundData*)sound);
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_SoundData *sound, ClownAudio_SoundConfig *config)
 {
-	return ClownMixer_CreateSound(mixer, (ClownMixer_SoundData*)sound, config);
+	return ClownAudio_Mixer_CreateSound(mixer, (ClownAudio_Mixer_SoundData*)sound, config);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Sound instance)
 {
-	ClownMixer_DestroySound(mixer, instance);
+	ClownAudio_Mixer_DestroySound(mixer, instance);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Sound instance)
 {
-	ClownMixer_RewindSound(mixer, instance);
+	ClownAudio_Mixer_RewindSound(mixer, instance);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_PauseSound(ClownAudio_Sound instance)
 {
-	ClownMixer_PauseSound(mixer, instance);
+	ClownAudio_Mixer_PauseSound(mixer, instance);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_UnpauseSound(ClownAudio_Sound instance)
 {
-	ClownMixer_UnpauseSound(mixer, instance);
+	ClownAudio_Mixer_UnpauseSound(mixer, instance);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_FadeOutSound(ClownAudio_Sound instance, unsigned int duration)
 {
-	ClownMixer_FadeOutSound(mixer, instance, duration);
+	ClownAudio_Mixer_FadeOutSound(mixer, instance, duration);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_FadeInSound(ClownAudio_Sound instance, unsigned int duration)
 {
-	ClownMixer_FadeInSound(mixer, instance, duration);
+	ClownAudio_Mixer_FadeInSound(mixer, instance, duration);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_CancelFade(ClownAudio_Sound instance)
 {
-	ClownMixer_CancelFade(mixer, instance);
+	ClownAudio_Mixer_CancelFade(mixer, instance);
 }
 
 CLOWNAUDIO_EXPORT int ClownAudio_GetSoundStatus(ClownAudio_Sound instance)
 {
-	return ClownMixer_GetSoundStatus(mixer, instance);
+	return ClownAudio_Mixer_GetSoundStatus(mixer, instance);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Sound instance, float volume_left, float volume_right)
 {
-	ClownMixer_SetSoundVolume(mixer, instance, volume_left, volume_right);
+	ClownAudio_Mixer_SetSoundVolume(mixer, instance, volume_left, volume_right);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Sound instance, bool loop)
 {
-	ClownMixer_SetSoundLoop(mixer, instance, loop);
+	ClownAudio_Mixer_SetSoundLoop(mixer, instance, loop);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
 {
-	ClownMixer_SetSoundSampleRate(mixer, instance, sample_rate1, sample_rate2);
+	ClownAudio_Mixer_SetSoundSampleRate(mixer, instance, sample_rate1, sample_rate2);
 }
