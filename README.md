@@ -6,9 +6,9 @@ variety of formats.
 Supported formats include...
 * Ogg Vorbis
 * MP3
+* Opus
 * FLAC
 * WAV
-* Opus
 * Various tracker formats ('.it', '.xm', '.mod', etc.)
 * PxTone Music
 * PxTone Noise
