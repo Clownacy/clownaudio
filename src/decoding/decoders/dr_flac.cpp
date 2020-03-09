@@ -24,7 +24,6 @@
 
 #define DR_FLAC_IMPLEMENTATION
 #define DR_FLAC_NO_STDIO
-
 #include "libs/dr_flac.h"
 
 #include "common.h"
