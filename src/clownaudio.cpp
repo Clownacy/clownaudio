@@ -31,7 +31,7 @@ static BackendStream *stream;
 
 static void CallbackStream(void *user_data, float *output_buffer, size_t frames_to_do)
 {
-	ClownAudio_Mixer *mixer = (ClownAudio_Mixer*)user_data;
+	(void)user_data;
 
 	for (size_t i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
 		output_buffer[i] = 0.0f;
@@ -47,7 +47,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 	{
 		if (Backend_Init())
 		{
-			stream = Backend_CreateStream(CallbackStream, mixer);
+			stream = Backend_CreateStream(CallbackStream, NULL);
 
 			if (stream != NULL)
 			{
