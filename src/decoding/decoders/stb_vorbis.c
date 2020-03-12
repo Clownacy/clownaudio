@@ -41,9 +41,11 @@
 
 Decoder_STB_Vorbis* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, bool loop, DecoderInfo *info)
 {
-	(void)loop;	// This is ignored in simple decoders
+	stb_vorbis *instance;
 
-	stb_vorbis *instance = stb_vorbis_open_memory(data, data_size, NULL, NULL);
+	(void)loop;	/* This is ignored in simple decoders */
+
+	instance = stb_vorbis_open_memory(data, data_size, NULL, NULL);
 
 	if (instance != NULL)
 	{
