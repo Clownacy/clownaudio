@@ -48,45 +48,6 @@ endif()
 
 
 ####################
-# Misc. settings
-####################
-
-# Include the public headers
-target_include_directories(clownaudio INTERFACE
-	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-)
-target_include_directories(clownaudio PRIVATE "include/clownaudio")
-
-# Export symbols
-include(GenerateExportHeader)
-GENERATE_EXPORT_HEADER(clownaudio EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
-target_include_directories(clownaudio PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/export>")
-
-set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
-
-# Define public header
-if(CLOWNAUDIO_NO_PLAYBACK)
-	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h;include/clownaudio/config.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
-else()
-	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h;include/clownaudio/config.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
-endif()
-
-# Set language standards
-set_target_properties(clownaudio PROPERTIES
-	C_STANDARD 99
-	C_EXTENSIONS OFF
-	CXX_STANDARD 11
-	CXX_EXTENSIONS OFF
-)
-
-# Shut up those stupid MSVC warnings
-if(MSVC)
-	target_compile_definitions(clownaudio PRIVATE _CRT_SECURE_NO_WARNINGS)
-endif()
-
-
-####################
 # Decoding backends
 ####################
 
@@ -462,6 +423,49 @@ if(CLOWNAUDIO_LIBXMPLITE)
 		target_compile_definitions(clownaudio PRIVATE LIBXMP_CORE_PLAYER=1)
 	endif()
 endif()
+
+
+####################
+# Misc. settings
+####################
+
+# Include the public headers
+target_include_directories(clownaudio INTERFACE
+	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+)
+target_include_directories(clownaudio PRIVATE "include/clownaudio")
+
+# Export symbols
+include(GenerateExportHeader)
+GENERATE_EXPORT_HEADER(clownaudio EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
+target_include_directories(clownaudio PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/export>")
+
+set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+
+# Define public header
+if(CLOWNAUDIO_NO_PLAYBACK)
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h;include/clownaudio/config.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
+else()
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h;include/clownaudio/config.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
+endif()
+
+# Set language standards
+set_target_properties(clownaudio PROPERTIES
+	C_STANDARD 99
+	C_EXTENSIONS OFF
+	CXX_STANDARD 11
+	CXX_EXTENSIONS OFF
+)
+
+# Shut up those stupid MSVC warnings
+if(MSVC)
+	target_compile_definitions(clownaudio PRIVATE _CRT_SECURE_NO_WARNINGS)
+endif()
+
+# Group files by directory when using an IDE
+get_target_property(CLOWNAUDIO_SOURCES clownaudio SOURCES) 
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES CLOWNAUDIO_SOURCES)
 
 
 ####################
