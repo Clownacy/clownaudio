@@ -51,24 +51,28 @@ endif()
 # Misc. settings
 ####################
 
+# Include the public headers
 target_include_directories(clownaudio INTERFACE
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 target_include_directories(clownaudio PRIVATE "include/clownaudio")
 
+# Export symbols
 include(GenerateExportHeader)
 GENERATE_EXPORT_HEADER(clownaudio EXPORT_FILE_NAME "${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 target_include_directories(clownaudio PUBLIC "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/export>")
 
 set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
 
+# Define public header
 if(CLOWNAUDIO_NO_PLAYBACK)
 	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h;include/clownaudio/config.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 else()
 	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/mixer.h;include/clownaudio/config.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 endif()
 
+# Set language standards
 set_target_properties(clownaudio PROPERTIES
 	C_STANDARD 99
 	C_EXTENSIONS OFF
@@ -76,8 +80,9 @@ set_target_properties(clownaudio PROPERTIES
 	CXX_EXTENSIONS OFF
 )
 
+# Shut up those stupid MSVC warnings
 if(MSVC)
-	target_compile_definitions(clownaudio PRIVATE _CRT_SECURE_NO_WARNINGS)	# Shut up those stupid MSVC warnings
+	target_compile_definitions(clownaudio PRIVATE _CRT_SECURE_NO_WARNINGS)
 endif()
 
 
@@ -290,6 +295,7 @@ if(NOT CLOWNAUDIO_NO_PLAYBACK)
 		message(FATAL_ERROR "Invalid BACKEND selected")
 	endif()
 endif()
+
 
 ####################
 # Find dependencies
