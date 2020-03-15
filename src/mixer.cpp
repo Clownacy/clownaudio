@@ -155,7 +155,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_Mixer_SoundDa
 
 CLOWNAUDIO_EXPORT ClownAudio_Mixer_Sound ClownAudio_Mixer_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_Mixer_SoundData *sound, ClownAudio_SoundConfig *config)
 {
-	ClownAudio_Mixer_Sound instance = 0;	// TODO: This is an error value - never let instance_allocator generate it
+	ClownAudio_Mixer_Sound instance = 0;
 
 	DecoderSpec wanted_spec, spec;
 	wanted_spec.sample_rate = mixer->sample_rate;
@@ -166,7 +166,10 @@ CLOWNAUDIO_EXPORT ClownAudio_Mixer_Sound ClownAudio_Mixer_CreateSound(ClownAudio
 
 	if (split_decoder != NULL)
 	{
-		instance = ++mixer->instance_allocator;
+		do
+		{
+			instance = ++mixer->instance_allocator;
+		} while (instance == 0);	// Do not let it allocate 0 - it is an error value
 
 		Channel *channel = (Channel*)malloc(sizeof(Channel));
 
