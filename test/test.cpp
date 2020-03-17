@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
 				ClownAudio_SoundDataConfig config;
 				ClownAudio_InitSoundDataConfig(&config);
-				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundData(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], &config);
+				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromMemory(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], &config);
 
 				if (sound_data != NULL)
 				{
