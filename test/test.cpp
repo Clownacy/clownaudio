@@ -45,26 +45,29 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
+	printf("Initialising playback backend\n");
+	fflush(stdout);
+
 	if (ClownAudio_InitPlayback())
 	{
-		printf("Initialised playback backend\n");
+		printf("Creating mixer\n");
 		fflush(stdout);
 
 		ClownAudio_Mixer *mixer = ClownAudio_CreateMixer(CLOWNAUDIO_STREAM_SAMPLE_RATE);
 
 		if (mixer != NULL)
 		{
-			printf("Created mixer\n");
+			printf("Creating stream\n");
 			fflush(stdout);
 
 			ClownAudio_Stream *stream = ClownAudio_CreateStream(StreamCallback, mixer);
 
 			if (stream != NULL)
 			{
-				printf("Created stream\n");
-				fflush(stdout);
-
 				ClownAudio_ResumeStream(stream);
+
+				printf("Loading sound data\n");
+				fflush(stdout);
 
 				const char *file_paths[2];
 				if (argc == 3)
@@ -84,7 +87,7 @@ int main(int argc, char *argv[])
 
 				if (sound_data != NULL)
 				{
-					printf("Loaded sound data\n");
+					printf("Creating sound\n");
 					fflush(stdout);
 
 					ClownAudio_SoundConfig config2;
@@ -95,9 +98,6 @@ int main(int argc, char *argv[])
 
 					if (instance != 0)
 					{
-						printf("Started sound\n");
-						fflush(stdout);
-
 						printf("\n"
 							   "Controls:\n"
 							   " q                - Quit\n"
@@ -223,13 +223,13 @@ int main(int argc, char *argv[])
 							}
 						}
 
-						printf("Stopping sound\n");
+						printf("Destroying sound\n");
 						fflush(stdout);
 						ClownAudio_DestroySound(mixer, instance);
 					}
 					else
 					{
-						printf("Couldn't start sound\n");
+						printf("Couldn't create sound\n");
 					}
 
 					printf("Unloading sound data\n");
