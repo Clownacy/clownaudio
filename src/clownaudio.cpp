@@ -27,13 +27,13 @@
 #include "playback/playback.h"
 
 static ClownAudio_Mixer *mixer;
-static BackendStream *stream;
+static ClownAudio_Stream *stream;
 
 static void CallbackStream(void *user_data, float *output_buffer, size_t frames_to_do)
 {
 	(void)user_data;
 
-	for (size_t i = 0; i < frames_to_do * STREAM_CHANNEL_COUNT; ++i)
+	for (size_t i = 0; i < frames_to_do * CLOWNAUDIO_STREAM_CHANNEL_COUNT; ++i)
 		output_buffer[i] = 0.0f;
 
 	ClownAudio_Mixer_MixSamples(mixer, output_buffer, frames_to_do);
@@ -41,23 +41,23 @@ static void CallbackStream(void *user_data, float *output_buffer, size_t frames_
 
 CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 {
-	mixer = ClownAudio_CreateMixer(STREAM_SAMPLE_RATE);
+	mixer = ClownAudio_CreateMixer(CLOWNAUDIO_STREAM_SAMPLE_RATE);
 
 	if (mixer != NULL)
 	{
-		if (Backend_Init())
+		if (ClownAudio_PlaybackInit())
 		{
-			stream = Backend_CreateStream(CallbackStream, NULL);
+			stream = ClownAudio_CreateStream(CallbackStream, NULL);
 
 			if (stream != NULL)
 			{
-				if (Backend_ResumeStream(stream))
+				if (ClownAudio_ResumeStream(stream))
 					return true;
 
-				Backend_DestroyStream(stream);
+				ClownAudio_DestroyStream(stream);
 			}
 
-			Backend_Deinit();
+			ClownAudio_PlaybackDeinit();
 		}
 
 		ClownAudio_DestroyMixer(mixer);
@@ -68,19 +68,19 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 
 CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void)
 {
-	Backend_DestroyStream(stream);
-	Backend_Deinit();
+	ClownAudio_DestroyStream(stream);
+	ClownAudio_PlaybackDeinit();
 	ClownAudio_DestroyMixer(mixer);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Pause(void)
 {
-	Backend_PauseStream(stream);
+	ClownAudio_PauseStream(stream);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Unpause(void)
 {
-	Backend_ResumeStream(stream);
+	ClownAudio_ResumeStream(stream);
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
