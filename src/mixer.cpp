@@ -84,24 +84,34 @@ static bool LoadFileToMemory(const char *path, unsigned char **buffer, size_t *s
 {
 	bool success = false;
 
-	FILE *file = fopen(path, "rb");
-
-	if (file != NULL)
+	if (path == NULL)
 	{
-		fseek(file, 0, SEEK_END);
-		*size = ftell(file);
-		rewind(file);
+		*buffer = NULL;
+		*size = 0;
 
-		*buffer = (unsigned char*)malloc(*size);
+		success = true;
+	}
+	else
+	{
+		FILE *file = fopen(path, "rb");
 
-		if (buffer != NULL)
+		if (file != NULL)
 		{
-			fread(buffer, 1, *size, file);
+			fseek(file, 0, SEEK_END);
+			*size = ftell(file);
+			rewind(file);
 
-			success = true;
+			*buffer = (unsigned char*)malloc(*size);
+
+			if (*buffer != NULL)
+			{
+				fread(*buffer, 1, *size, file);
+
+				success = true;
+			}
+
+			fclose(file);
 		}
-
-		fclose(file);
 	}
 
 	return success;
@@ -215,14 +225,19 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const 
 		unsigned char *file_buffers[2];
 		size_t file_buffer_sizes[2];
 
-		if (LoadFileToMemory(intro_path, &file_buffers[0], &file_buffer_sizes[0]) && LoadFileToMemory(loop_path, &file_buffers[1], &file_buffer_sizes[1]))
+		if (LoadFileToMemory(intro_path, &file_buffers[0], &file_buffer_sizes[0]))
 		{
-			sound_data->split_decoder_data = SplitDecoder_LoadData(file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config->predecode);
+			if (LoadFileToMemory(loop_path, &file_buffers[1], &file_buffer_sizes[1]))
+			{
+				sound_data->split_decoder_data = SplitDecoder_LoadData(file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config->predecode);
 
-			sound_data->file_buffers[0] = file_buffers[0];
-			sound_data->file_buffers[1] = file_buffers[1];
+				sound_data->file_buffers[0] = file_buffers[0];
+				sound_data->file_buffers[1] = file_buffers[1];
 
-			return sound_data;
+				return sound_data;
+			}
+
+			free(file_buffers[0]);
 		}
 
 		free(sound_data);
