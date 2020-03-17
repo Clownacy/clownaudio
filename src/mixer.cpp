@@ -51,7 +51,7 @@ typedef struct Channel
 	float volume_left;
 	float volume_right;
 	SplitDecoder *split_decoder;
-	ClownAudio_Mixer_Sound instance;
+	ClownAudio_Sound instance;
 
 	unsigned long fade_out_counter_max;
 	unsigned long fade_in_counter_max;
@@ -72,7 +72,7 @@ struct ClownAudio_Mixer
 	Channel *channel_list_head;
 	Mutex mutex;
 	unsigned long sample_rate;
-	ClownAudio_Mixer_Sound instance_allocator;
+	ClownAudio_Sound instance_allocator;
 };
 
 static void MutexInit(Mutex *mutex)
@@ -111,7 +111,7 @@ static void MutexUnlock(Mutex *mutex)
 #endif
 }
 
-static Channel* FindChannel(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance)
+static Channel* FindChannel(ClownAudio_Mixer *mixer, ClownAudio_Sound instance)
 {
 	for (Channel *channel = mixer->channel_list_head; channel != NULL; channel = channel->next)
 		if (channel->instance == instance)
@@ -143,19 +143,19 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroyMixer(ClownAudio_Mixer *mixer)
 	free(mixer);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Mixer_SoundData* ClownAudio_Mixer_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
 {
-	return (ClownAudio_Mixer_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, config->predecode);
+	return (ClownAudio_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, config->predecode);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_Mixer_SoundData *sound)
+CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
 {
 	SplitDecoder_UnloadData((SplitDecoderData*)sound);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Mixer_Sound ClownAudio_Mixer_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_Mixer_SoundData *sound, ClownAudio_SoundConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound, ClownAudio_SoundConfig *config)
 {
-	ClownAudio_Mixer_Sound instance = 0;
+	ClownAudio_Sound instance = 0;
 
 	DecoderSpec wanted_spec, spec;
 	wanted_spec.sample_rate = mixer->sample_rate;
@@ -191,7 +191,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Mixer_Sound ClownAudio_Mixer_CreateSound(ClownAudio
 	return instance;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance)
+CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound instance)
 {
 	Channel *channel = NULL;
 
@@ -216,7 +216,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_DestroySound(ClownAudio_Mixer *mixer, Cl
 	}
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance)
+CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -228,7 +228,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_RewindSound(ClownAudio_Mixer *mixer, Clo
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_PauseSound(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance)
+CLOWNAUDIO_EXPORT void ClownAudio_PauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -240,7 +240,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_PauseSound(ClownAudio_Mixer *mixer, Clow
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance)
+CLOWNAUDIO_EXPORT void ClownAudio_UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -252,7 +252,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnpauseSound(ClownAudio_Mixer *mixer, Cl
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeOutSound(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance, unsigned int duration)
+CLOWNAUDIO_EXPORT void ClownAudio_FadeOutSound(ClownAudio_Mixer *mixer, ClownAudio_Sound instance, unsigned int duration)
 {
 	MutexLock(&mixer->mutex);
 
@@ -276,7 +276,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeOutSound(ClownAudio_Mixer *mixer, Cl
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeInSound(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance, unsigned int duration)
+CLOWNAUDIO_EXPORT void ClownAudio_FadeInSound(ClownAudio_Mixer *mixer, ClownAudio_Sound instance, unsigned int duration)
 {
 	MutexLock(&mixer->mutex);
 
@@ -300,7 +300,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeInSound(ClownAudio_Mixer *mixer, Clo
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_CancelFade(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance)
+CLOWNAUDIO_EXPORT void ClownAudio_CancelFade(ClownAudio_Mixer *mixer, ClownAudio_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -315,7 +315,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_CancelFade(ClownAudio_Mixer *mixer, Clow
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT int ClownAudio_Mixer_GetSoundStatus(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance)
+CLOWNAUDIO_EXPORT int ClownAudio_GetSoundStatus(ClownAudio_Mixer *mixer, ClownAudio_Sound instance)
 {
 	MutexLock(&mixer->mutex);
 
@@ -328,7 +328,7 @@ CLOWNAUDIO_EXPORT int ClownAudio_Mixer_GetSoundStatus(ClownAudio_Mixer *mixer, C
 	return status;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance, float volume_left, float volume_right)
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_Sound instance, float volume_left, float volume_right)
 {
 	MutexLock(&mixer->mutex);
 
@@ -343,7 +343,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundVolume(ClownAudio_Mixer *mixer, 
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance, bool loop)
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAudio_Sound instance, bool loop)
 {
 	MutexLock(&mixer->mutex);
 
@@ -355,7 +355,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundLoop(ClownAudio_Mixer *mixer, Cl
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_Mixer_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_Sound instance, unsigned long sample_rate1, unsigned long sample_rate2)
 {
 	MutexLock(&mixer->mutex);
 
@@ -367,7 +367,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mix
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, float *output_buffer, size_t frames_to_do)
+CLOWNAUDIO_EXPORT void ClownAudio_MixSamples(ClownAudio_Mixer *mixer, float *output_buffer, size_t frames_to_do)
 {
 	MutexLock(&mixer->mutex);
 
