@@ -21,6 +21,7 @@
 #include "mixer.h"
 
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -72,6 +73,39 @@ struct ClownAudio_Mixer
 	unsigned long sample_rate;
 	ClownAudio_Sound instance_allocator;
 };
+
+struct ClownAudio_SoundData
+{
+	SplitDecoderData *split_decoder_data;
+	unsigned char *file_buffers[2];
+};
+
+static bool LoadFileToMemory(const char *path, unsigned char **buffer, size_t *size)
+{
+	bool success = false;
+
+	FILE *file = fopen(path, "rb");
+
+	if (file != NULL)
+	{
+		fseek(file, 0, SEEK_END);
+		*size = ftell(file);
+		rewind(file);
+
+		*buffer = (unsigned char*)malloc(*size);
+
+		if (buffer != NULL)
+		{
+			fread(buffer, 1, *size, file);
+
+			success = true;
+		}
+
+		fclose(file);
+	}
+
+	return success;
+}
 
 static void MutexInit(Mutex *mutex)
 {
@@ -157,12 +191,52 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroyMixer(ClownAudio_Mixer *mixer)
 
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
 {
-	return (ClownAudio_SoundData*)SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, config->predecode);
+	ClownAudio_SoundData *sound_data = (ClownAudio_SoundData*)malloc(sizeof(ClownAudio_SoundData));
+
+	if (sound_data != NULL)
+	{
+		sound_data->split_decoder_data = SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, config->predecode);
+
+		sound_data->file_buffers[0] = NULL;
+		sound_data->file_buffers[1] = NULL;
+
+		return sound_data;
+	}
+
+	return NULL;
+}
+
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
+{
+	ClownAudio_SoundData *sound_data = (ClownAudio_SoundData*)malloc(sizeof(ClownAudio_SoundData));
+
+	if (sound_data != NULL)
+	{
+		unsigned char *file_buffers[2];
+		size_t file_buffer_sizes[2];
+
+		if (LoadFileToMemory(intro_path, &file_buffers[0], &file_buffer_sizes[0]) && LoadFileToMemory(loop_path, &file_buffers[1], &file_buffer_sizes[1]))
+		{
+			sound_data->split_decoder_data = SplitDecoder_LoadData(file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config->predecode);
+
+			sound_data->file_buffers[0] = file_buffers[0];
+			sound_data->file_buffers[1] = file_buffers[1];
+
+			return sound_data;
+		}
+
+		free(sound_data);
+	}
+
+	return NULL;
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound)
 {
-	SplitDecoder_UnloadData((SplitDecoderData*)sound);
+	SplitDecoder_UnloadData(sound->split_decoder_data);
+
+	free(sound->file_buffers[0]);
+	free(sound->file_buffers[1]);
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound, ClownAudio_SoundConfig *config)
