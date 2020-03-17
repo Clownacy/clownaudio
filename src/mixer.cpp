@@ -30,8 +30,6 @@
 #include <pthread.h>
 #endif
 
-#include "config.h"
-
 #include "decoding/decoders/common.h"
 
 #include "decoding/split_decoder.h"
@@ -118,6 +116,20 @@ static Channel* FindChannel(ClownAudio_Mixer *mixer, ClownAudio_Sound instance)
 			return channel;
 
 	return NULL;
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_InitSoundDataConfig(ClownAudio_SoundDataConfig *config)
+{
+	config->predecode = false;
+	config->must_predecode = false;
+	config->dynamic_sample_rate = false;
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_InitSoundConfig(ClownAudio_SoundConfig *config)
+{
+	config->loop = false;
+	config->do_not_free_when_done = false;
+	config->dynamic_sample_rate = false;
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_Mixer* ClownAudio_CreateMixer(unsigned long sample_rate)

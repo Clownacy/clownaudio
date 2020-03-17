@@ -20,16 +20,3 @@
 
 #include "config.h"
 
-CLOWNAUDIO_EXPORT void ClownAudio_InitSoundDataConfig(ClownAudio_SoundDataConfig *config)
-{
-	config->predecode = false;
-	config->must_predecode = false;
-	config->dynamic_sample_rate = false;
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_InitSoundConfig(ClownAudio_SoundConfig *config)
-{
-	config->loop = false;
-	config->do_not_free_when_done = false;
-	config->dynamic_sample_rate = false;
-}

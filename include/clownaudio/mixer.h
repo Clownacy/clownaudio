@@ -27,8 +27,6 @@
 
 #include "clownaudio_export.h"
 
-#include "config.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,6 +34,23 @@ extern "C" {
 typedef struct ClownAudio_Mixer ClownAudio_Mixer;
 typedef struct ClownAudio_SoundData ClownAudio_SoundData;
 typedef unsigned int ClownAudio_Sound;
+
+typedef struct ClownAudio_SoundDataConfig
+{
+	bool predecode;
+	bool must_predecode;
+	bool dynamic_sample_rate;
+} ClownAudio_SoundDataConfig;
+
+typedef struct ClownAudio_SoundConfig
+{
+	bool loop;
+	bool do_not_free_when_done;
+	bool dynamic_sample_rate;
+} ClownAudio_SoundConfig;
+
+CLOWNAUDIO_EXPORT void ClownAudio_InitSoundDataConfig(ClownAudio_SoundDataConfig *config);
+CLOWNAUDIO_EXPORT void ClownAudio_InitSoundConfig(ClownAudio_SoundConfig *config);
 
 CLOWNAUDIO_EXPORT ClownAudio_Mixer* ClownAudio_CreateMixer(unsigned long sample_rate);
 CLOWNAUDIO_EXPORT void ClownAudio_DestroyMixer(ClownAudio_Mixer *mixer);
