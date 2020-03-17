@@ -57,7 +57,7 @@ static void StateCallback(cubeb_stream *stream, void *user_data, cubeb_state sta
 	(void)state;
 }
 
-bool ClownAudio_InitPlayback(void)
+CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 {
 #ifdef _WIN32
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);	// Cubeb needs us to init COM
@@ -66,7 +66,7 @@ bool ClownAudio_InitPlayback(void)
 	return cubeb_init(&cubeb_context, NULL, NULL) == CUBEB_OK;
 }
 
-void ClownAudio_DeinitPlayback(void)
+CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 {
 	cubeb_destroy(cubeb_context);
 
@@ -75,7 +75,7 @@ void ClownAudio_DeinitPlayback(void)
 #endif
 }
 
-ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
+CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
 {
 	cubeb_stream_params output_params;
 	output_params.format = CUBEB_SAMPLE_FLOAT32LE;
@@ -111,7 +111,7 @@ ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, 
 	return NULL;
 }
 
-bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -131,7 +131,7 @@ bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 	return success;
 }
 
-bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
+CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
 {
 	bool success = true;
 
@@ -141,7 +141,7 @@ bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
 	return success;
 }
 
-bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -151,7 +151,7 @@ bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
 	return success;
 }
 
-bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
 {
 	bool success = true;
 

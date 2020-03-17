@@ -53,17 +53,17 @@ static int Callback(const void *input_buffer, void *output_buffer_void, unsigned
 	return 0;
 }
 
-bool ClownAudio_InitPlayback(void)
+CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 {
 	return Pa_Initialize() == paNoError;
 }
 
-void ClownAudio_DeinitPlayback(void)
+CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 {
 	Pa_Terminate();
 }
 
-ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
+CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
 {
 	ClownAudio_Stream *stream = (ClownAudio_Stream*)malloc(sizeof(ClownAudio_Stream));
 
@@ -85,7 +85,7 @@ ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, 
 	return NULL;
 }
 
-bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -98,7 +98,7 @@ bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 	return success;
 }
 
-bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
+CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
 {
 	if (stream != NULL)
 		stream->volume = volume * volume;
@@ -106,7 +106,7 @@ bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
 	return true;
 }
 
-bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -116,7 +116,7 @@ bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
 	return success;
 }
 
-bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
