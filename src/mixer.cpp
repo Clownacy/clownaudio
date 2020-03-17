@@ -18,7 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#include "mixer.h"
+#include "clownaudio/mixer.h"
 
 #include <stddef.h>
 #include <stdio.h>

@@ -25,7 +25,9 @@
 #endif
 #include <stddef.h>
 
+#if !defined(CLOWNAUDIO_EXPORT) && !defined(CLOWNAUDIO_NO_EXPORT)
 #include "clownaudio_export.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
