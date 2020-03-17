@@ -64,7 +64,7 @@ static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_d
 			output_buffer[i] *= stream->volume;
 }
 
-bool ClownAudio_Init(void)
+bool ClownAudio_InitPlayback(void)
 {
 	bool success = true;
 
@@ -77,7 +77,7 @@ bool ClownAudio_Init(void)
 	return success;
 }
 
-void ClownAudio_Deinit(void)
+void ClownAudio_DeinitPlayback(void)
 {
 	if (!sdl_already_init)
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);

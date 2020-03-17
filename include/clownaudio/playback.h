@@ -36,8 +36,8 @@ extern "C" {
 
 typedef struct ClownAudio_Stream ClownAudio_Stream;
 
-CLOWNAUDIO_EXPORT bool ClownAudio_PlaybackInit(void);
-CLOWNAUDIO_EXPORT void ClownAudio_PlaybackDeinit(void);
+CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void);
+CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void);
 CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*callback)(void*, float*, size_t), void *user_data);
 CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream);
 CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume);

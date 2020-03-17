@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	if (ClownAudio_PlaybackInit())
+	if (ClownAudio_InitPlayback())
 	{
 		printf("Initialised playback backend\n");
 		fflush(stdout);
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
 
 		printf("Deinitialising playback backend\n");
 		fflush(stdout);
-		ClownAudio_PlaybackDeinit();
+		ClownAudio_DeinitPlayback();
 	}
 	else
 	{

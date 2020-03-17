@@ -53,12 +53,12 @@ static int Callback(const void *input_buffer, void *output_buffer_void, unsigned
 	return 0;
 }
 
-bool ClownAudio_PlaybackInit(void)
+bool ClownAudio_InitPlayback(void)
 {
 	return Pa_Initialize() == paNoError;
 }
 
-void ClownAudio_PlaybackDeinit(void)
+void ClownAudio_DeinitPlayback(void)
 {
 	Pa_Terminate();
 }

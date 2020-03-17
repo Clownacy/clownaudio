@@ -57,7 +57,7 @@ static void StateCallback(cubeb_stream *stream, void *user_data, cubeb_state sta
 	(void)state;
 }
 
-bool ClownAudio_PlaybackInit(void)
+bool ClownAudio_InitPlayback(void)
 {
 #ifdef _WIN32
 	CoInitializeEx(NULL, COINIT_MULTITHREADED);	// Cubeb needs us to init COM
@@ -66,7 +66,7 @@ bool ClownAudio_PlaybackInit(void)
 	return cubeb_init(&cubeb_context, NULL, NULL) == CUBEB_OK;
 }
 
-void ClownAudio_PlaybackDeinit(void)
+void ClownAudio_DeinitPlayback(void)
 {
 	cubeb_destroy(cubeb_context);
 

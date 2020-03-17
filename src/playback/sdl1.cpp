@@ -79,7 +79,7 @@ static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_d
 	}
 }
 
-bool ClownAudio_PlaybackInit(void)
+bool ClownAudio_InitPlayback(void)
 {
 	bool success = true;
 
@@ -92,7 +92,7 @@ bool ClownAudio_PlaybackInit(void)
 	return success;
 }
 
-void ClownAudio_PlaybackDeinit(void)
+void ClownAudio_DeinitPlayback(void)
 {
 	if (!sdl_already_init)
 		SDL_QuitSubSystem(SDL_INIT_AUDIO);

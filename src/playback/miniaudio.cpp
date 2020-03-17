@@ -52,12 +52,12 @@ static void Callback(ma_device *device, void *output_buffer_void, const void *in
 			output_buffer[i] *= stream->volume;
 }
 
-bool ClownAudio_PlaybackInit(void)
+bool ClownAudio_InitPlayback(void)
 {
 	return true;
 }
 
-void ClownAudio_PlaybackDeinit(void)
+void ClownAudio_DeinitPlayback(void)
 {
 	
 }
