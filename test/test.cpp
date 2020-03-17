@@ -28,32 +28,6 @@
 #include "clownaudio/mixer.h"
 #include "clownaudio/playback.h"
 
-static void FileToMemory(const char *filename, unsigned char **buffer, size_t *size)
-{
-	*buffer = NULL;
-	*size = 0;
-
-	FILE *file = fopen(filename, "rb");
-
-	if (file != NULL)
-	{
-		fseek(file, 0, SEEK_END);
-		size_t _size = ftell(file);
-		rewind(file);
-
-		unsigned char *_buffer = (unsigned char*)malloc(_size);
-
-		if (_buffer != NULL)
-		{
-			fread(_buffer, 1, _size, file);
-			*buffer = _buffer;
-			*size = _size;
-		}
-
-		fclose(file);
-	}
-}
-
 static void StreamCallback(void *user_data, float *output_buffer, size_t frames_to_do)
 {
 	// Clear buffer (ClownAudio_MixSamples mixes directly with the output buffer)
@@ -92,23 +66,21 @@ int main(int argc, char *argv[])
 
 				ClownAudio_ResumeStream(stream);
 
-				unsigned char *file_buffers[2];
-				size_t file_sizes[2];
+				const char *file_paths[2];
 				if (argc == 3)
 				{
-					FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
-					FileToMemory(argv[2], &file_buffers[1], &file_sizes[1]);
+					file_paths[0] = argv[1];
+					file_paths[1] = argv[2];
 				}
 				else if (argc == 2)
 				{
-					FileToMemory(argv[1], &file_buffers[0], &file_sizes[0]);
-					file_buffers[1] = NULL;
-					file_sizes[1] = 0;
+					file_paths[0] = argv[1];
+					file_paths[1] = NULL;
 				}
 
 				ClownAudio_SoundDataConfig config;
 				ClownAudio_InitSoundDataConfig(&config);
-				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromMemory(file_buffers[0], file_sizes[0], file_buffers[1], file_sizes[1], &config);
+				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromFiles(file_paths[0], file_paths[1], &config);
 
 				if (sound_data != NULL)
 				{
@@ -263,9 +235,6 @@ int main(int argc, char *argv[])
 					printf("Unloading sound data\n");
 					fflush(stdout);
 					ClownAudio_UnloadSoundData(sound_data);
-
-					free(file_buffers[1]);
-					free(file_buffers[0]);
 				}
 				else
 				{
