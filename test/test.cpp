@@ -131,7 +131,6 @@ int main(int argc, char *argv[])
 				tinydir_close(&dir);
 
 				bool quit = false;
-				bool show_demo_window = true;
 
 				while (!quit)
 				{
@@ -295,12 +294,9 @@ int main(int argc, char *argv[])
 
 						if (ImGui::Button("Cancel fade"))
 							ClownAudio_CancelFade(mixer, selected_sound);
-
-
 					ImGui::End();
 
-					if (show_demo_window)
-						ImGui::ShowDemoWindow(&show_demo_window);
+					ImGui::ShowDemoWindow();
 
 					ImGui::Render();
 					glClear(GL_COLOR_BUFFER_BIT);
