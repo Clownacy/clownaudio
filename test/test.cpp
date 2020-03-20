@@ -294,6 +294,16 @@ int main(int argc, char *argv[])
 
 						if (ImGui::Button("Cancel fade"))
 							ClownAudio_CancelFade(mixer, selected_sound);
+
+						static float volume=1.0f;
+						ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f, "%.3f");
+						ClownAudio_SetSoundVolume(mixer, selected_sound, volume, volume);
+
+						static int sample_rate = 48000;
+						ImGui::InputInt("Sample rate", &sample_rate);
+
+						if (ImGui::Button("Apply sample rate"))
+							ClownAudio_SetSoundSampleRate(mixer, selected_sound, sample_rate, sample_rate);
 					ImGui::End();
 
 					ImGui::ShowDemoWindow();
