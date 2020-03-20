@@ -85,7 +85,6 @@ int main(int argc, char *argv[])
 		SDL_GL_MakeCurrent(window, gl_context);
 		SDL_GL_SetSwapInterval(1); // Enable vsync
 
-
 		if (gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
 		{
 			// Check if the platform supports OpenGL 3.2
@@ -177,12 +176,12 @@ int main(int argc, char *argv[])
 
 						if (ImGui::Button("Load sound data"))
 						{
-							SoundDataListEntry *sound_data_list_entry = (SoundDataListEntry*)malloc(sizeof(SoundDataListEntry));
+							SoundDataListEntry *entry = (SoundDataListEntry*)malloc(sizeof(SoundDataListEntry));
 
-							sound_data_list_entry->sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
-							sound_data_list_entry->next = sound_data_list_head;
+							entry->sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
+							entry->next = sound_data_list_head;
 
-							sound_data_list_head = sound_data_list_entry;
+							sound_data_list_head = entry;
 						}
 					ImGui::End();
 
@@ -193,12 +192,12 @@ int main(int argc, char *argv[])
 
 						if (ImGui::Button("Create sound"))
 						{
-							SoundListEntry *sound_list_entry = (SoundListEntry*)malloc(sizeof(SoundListEntry));
+							SoundListEntry *entry = (SoundListEntry*)malloc(sizeof(SoundListEntry));
 
-							sound_list_entry->sound = ClownAudio_CreateSound(mixer, selected_sound_data, &sound_config);
-							sound_list_entry->next = sound_list_head;
+							entry->sound = ClownAudio_CreateSound(mixer, selected_sound_data, &sound_config);
+							entry->next = sound_list_head;
 
-							sound_list_head = sound_list_entry;
+							sound_list_head = entry;
 						}
 					ImGui::End();
 
