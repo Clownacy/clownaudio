@@ -286,6 +286,8 @@ int main(int argc, char *argv[])
 						if (ImGui::Button("Pause"))
 							ClownAudio_PauseSound(mixer, selected_sound);
 
+						ImGui::SameLine();
+
 						if (ImGui::Button("Unpause"))
 							ClownAudio_UnpauseSound(mixer, selected_sound);
 
@@ -295,15 +297,19 @@ int main(int argc, char *argv[])
 						if (ImGui::Button("Fade-out"))
 							ClownAudio_FadeOutSound(mixer, selected_sound, 5 * 1000);
 
+						ImGui::SameLine();
+
 						if (ImGui::Button("Fade-in"))
 							ClownAudio_FadeInSound(mixer, selected_sound, 5 * 1000);
+
+						ImGui::SameLine();
 
 						if (ImGui::Button("Cancel fade"))
 							ClownAudio_CancelFade(mixer, selected_sound);
 
-						static float volume=1.0f;
-						ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f, "%.3f");
-						ClownAudio_SetSoundVolume(mixer, selected_sound, volume, volume);
+						static float volume = 1.0f;
+						if (ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f, "%.3f"))
+							ClownAudio_SetSoundVolume(mixer, selected_sound, volume, volume);
 
 						static int sample_rate = 48000;
 						ImGui::InputInt("Sample rate", &sample_rate);
