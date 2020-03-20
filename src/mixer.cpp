@@ -186,6 +186,8 @@ CLOWNAUDIO_EXPORT ClownAudio_Mixer* ClownAudio_CreateMixer(unsigned long sample_
 
 		mixer->sample_rate = sample_rate;
 
+		mixer->sound_allocator = 0;
+
 		MutexInit(&mixer->mutex);
 	}
 
