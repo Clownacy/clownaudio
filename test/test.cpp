@@ -154,14 +154,22 @@ int main(int argc, char *argv[])
 						{
 							static bool ItemGetter(void* data, int idx, const char** out_str)
 							{
-								tinydir_file *files = (tinydir_file*)data;
-								*out_str = files[idx].name;
+								if (idx == 0)
+								{
+									*out_str = "No file";
+								}
+								else
+								{
+									tinydir_file *files = (tinydir_file*)data;
+									*out_str = files[idx - 1].name;
+								}
+
 								return true;
 							}
 						};
 
-						ImGui::Combo("Intro file", &intro_file, &FuncHolder::ItemGetter, files, files_total);
-						ImGui::Combo("Loop file", &loop_file, &FuncHolder::ItemGetter, files, files_total);
+						ImGui::Combo("Intro file", &intro_file, &FuncHolder::ItemGetter, files, files_total + 1);
+						ImGui::Combo("Loop file", &loop_file, &FuncHolder::ItemGetter, files, files_total + 1);
 
 						ImGui::Checkbox("Predecode", &data_config.predecode);
 						ImGui::Checkbox("Must predecode", &data_config.must_predecode);
@@ -171,7 +179,7 @@ int main(int argc, char *argv[])
 						{
 							SoundDataListEntry *sound_data_list_entry = (SoundDataListEntry*)malloc(sizeof(SoundDataListEntry));
 
-							sound_data_list_entry->sound_data = ClownAudio_LoadSoundDataFromFiles(files[intro_file].path, files[loop_file].path, &data_config);
+							sound_data_list_entry->sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
 							sound_data_list_entry->next = sound_data_list_head;
 
 							sound_data_list_head = sound_data_list_entry;
