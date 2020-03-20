@@ -26,7 +26,7 @@ add_executable(test
 )
 
 if(SUBDIRECTORY)
-	add_subdirectory("../../" "clownaudio" EXCLUDE_FROM_ALL)
+	add_subdirectory(".." "clownaudio" EXCLUDE_FROM_ALL)
 else()
 	find_package(clownaudio REQUIRED)
 endif()

@@ -6,10 +6,18 @@
 
 #include "glad/glad.h"
 #include "SDL.h"
+#include "tinydir.h"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/imgui_impl_sdl.h"
+
+typedef struct SoundDataListEntry
+{
+	ClownAudio_SoundData *sound_data;
+
+	struct SoundDataListEntry *next;
+} SoundDataListEntry;
 
 typedef struct SoundListEntry
 {
@@ -18,6 +26,7 @@ typedef struct SoundListEntry
 	struct SoundListEntry *next;
 } SoundListEntry;
 
+static SoundDataListEntry *sound_data_list_head;
 static SoundListEntry *sound_list_head;
 
 static void StreamCallback(void *user_data, float *output_buffer, size_t frames_to_do)
@@ -38,8 +47,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	const char *intro_file_path = argc > 1 ? argv[1] : NULL;
-	const char *loop_file_path = argc > 2 ? argv[2] : NULL;
+	const char *file_directory = argc > 1 ? argv[1] : ".";
 
 	///////////////////////////
 	// Initialise clownaudio //
@@ -94,14 +102,34 @@ int main(int argc, char *argv[])
 				ImGui_ImplOpenGL3_Init(glsl_version);
 
 				// Load sound
-				ClownAudio_SoundData *sound_data = NULL;
 				ClownAudio_SoundDataConfig data_config;
 				ClownAudio_InitSoundDataConfig(&data_config);
 
 				ClownAudio_SoundConfig sound_config;
 				ClownAudio_InitSoundConfig(&sound_config);
 
+				ClownAudio_SoundData *selected_sound_data = NULL;
 				ClownAudio_Sound selected_sound = 0;
+
+				int intro_file = 0;
+				int loop_file = 0;
+
+				// tinydir stuff
+				tinydir_dir dir;
+				tinydir_open_sorted(&dir, file_directory);
+
+				tinydir_file *files = (tinydir_file*)malloc(sizeof(tinydir_file) * dir.n_files);
+				size_t files_total = 0;
+
+				for (size_t i = 0; i < dir.n_files; ++i)
+				{
+					tinydir_readfile_n(&dir, &files[files_total], i);
+
+					if (!files[files_total].is_dir)
+						++files_total;
+				}
+
+				tinydir_close(&dir);
 
 				bool quit = false;
 				bool show_demo_window = true;
@@ -121,17 +149,32 @@ int main(int argc, char *argv[])
 					ImGui_ImplSDL2_NewFrame(window);
 					ImGui::NewFrame();
 
-					ImGui::Begin("Sound Data", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+					ImGui::Begin("Sound Data Creation", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+						struct FuncHolder
+						{
+							static bool ItemGetter(void* data, int idx, const char** out_str)
+							{
+								tinydir_file *files = (tinydir_file*)data;
+								*out_str = files[idx].name;
+								return true;
+							}
+						};
+
+						ImGui::Combo("Intro file", &intro_file, &FuncHolder::ItemGetter, files, files_total);
+						ImGui::Combo("Loop file", &loop_file, &FuncHolder::ItemGetter, files, files_total);
+
 						ImGui::Checkbox("Predecode", &data_config.predecode);
 						ImGui::Checkbox("Must predecode", &data_config.must_predecode);
 						ImGui::Checkbox("Dynamic sample rate", &data_config.dynamic_sample_rate);
 
 						if (ImGui::Button("Load sound data"))
 						{
-							if (sound_data != NULL)
-								ClownAudio_UnloadSoundData(sound_data);
+							SoundDataListEntry *sound_data_list_entry = (SoundDataListEntry*)malloc(sizeof(SoundDataListEntry));
 
-							sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file_path, loop_file_path, &data_config);
+							sound_data_list_entry->sound_data = ClownAudio_LoadSoundDataFromFiles(files[intro_file].path, files[loop_file].path, &data_config);
+							sound_data_list_entry->next = sound_data_list_head;
+
+							sound_data_list_head = sound_data_list_entry;
 						}
 					ImGui::End();
 
@@ -144,10 +187,20 @@ int main(int argc, char *argv[])
 						{
 							SoundListEntry *sound_list_entry = (SoundListEntry*)malloc(sizeof(SoundListEntry));
 
-							sound_list_entry->sound = ClownAudio_CreateSound(mixer, sound_data, &sound_config);
+							sound_list_entry->sound = ClownAudio_CreateSound(mixer, selected_sound_data, &sound_config);
 							sound_list_entry->next = sound_list_head;
 
 							sound_list_head = sound_list_entry;
+						}
+					ImGui::End();
+
+					ImGui::Begin("Sound Data", NULL);
+						for (SoundDataListEntry *entry = sound_data_list_head; entry != NULL; entry = entry->next)
+						{
+							char name[32];
+							sprintf(name, "Sound data %p", entry->sound_data);
+							if (ImGui::Selectable(name, selected_sound_data == entry->sound_data))
+								selected_sound_data = entry->sound_data;
 						}
 					ImGui::End();
 
