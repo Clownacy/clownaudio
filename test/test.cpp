@@ -231,8 +231,26 @@ int main(int argc, char *argv[])
 					ImGui::Begin("Sounds", NULL);
 						for (SoundListEntry *sound_list_entry = sound_list_head; sound_list_entry != NULL; sound_list_entry = sound_list_entry->next)
 						{
+							int status = ClownAudio_GetSoundStatus(mixer, sound_list_entry->sound);
+
 							char name[32];
-							sprintf(name, "Sound %u", sound_list_entry->sound);
+
+							switch (status)
+							{
+								case 0:
+									sprintf(name, "Sound %u - Playing", sound_list_entry->sound);
+									break;
+
+								case 1:
+									sprintf(name, "Sound %u - Paused", sound_list_entry->sound);
+									break;
+
+								case -1:
+									sprintf(name, "Sound %u - Freed", sound_list_entry->sound);
+									break;
+
+							}
+
 							if (ImGui::Selectable(name, selected_sound == sound_list_entry->sound))
 								selected_sound = sound_list_entry->sound;
 						}
