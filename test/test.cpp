@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 						}
 					ImGui::End();
 
-					ImGui::Begin("Sound controls", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+					ImGui::Begin("Sound Controls", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 						if (ImGui::Button("Pause"))
 							ClownAudio_PauseSound(mixer, selected_sound);
 
