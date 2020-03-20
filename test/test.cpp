@@ -192,12 +192,17 @@ int main(int argc, char *argv[])
 
 						if (ImGui::Button("Create sound"))
 						{
-							SoundListEntry *entry = (SoundListEntry*)malloc(sizeof(SoundListEntry));
+							ClownAudio_Sound sound = ClownAudio_CreateSound(mixer, selected_sound_data, &sound_config);
 
-							entry->sound = ClownAudio_CreateSound(mixer, selected_sound_data, &sound_config);
-							entry->next = sound_list_head;
+							if (sound != 0)
+							{
+								SoundListEntry *entry = (SoundListEntry*)malloc(sizeof(SoundListEntry));
 
-							sound_list_head = entry;
+								entry->sound = sound;
+								entry->next = sound_list_head;
+
+								sound_list_head = entry;
+							}
 						}
 					ImGui::End();
 
@@ -221,6 +226,7 @@ int main(int argc, char *argv[])
 									SoundDataListEntry *next_sound_data = (*entry)->next;
 									free(*entry);
 									*entry = next_sound_data;
+									selected_sound_data = *entry == NULL ? NULL : (*entry)->sound_data;
 									break;
 								}
 							}

@@ -260,10 +260,13 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const 
 
 CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound_data)
 {
-	SplitDecoder_UnloadData(sound_data->split_decoder_data);
+	if (sound_data != NULL)
+	{
+		SplitDecoder_UnloadData(sound_data->split_decoder_data);
 
-	free(sound_data->file_buffers[0]);
-	free(sound_data->file_buffers[1]);
+		free(sound_data->file_buffers[0]);
+		free(sound_data->file_buffers[1]);
+	}
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config)
