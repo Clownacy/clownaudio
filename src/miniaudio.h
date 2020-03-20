@@ -32555,6 +32555,9 @@ static ma_result ma_linear_resampler_set_rate_internal(ma_linear_resampler* pRes
         return MA_INVALID_ARGS;
     }
 
+    ma_atomic_exchange_32(&pResampler->config.sampleRateIn, sampleRateIn);
+    ma_atomic_exchange_32(&pResampler->config.sampleRateOut, sampleRateOut);
+
     /* Simplify the sample rate. */
     gcf = ma_gcf_u32(pResampler->config.sampleRateIn, pResampler->config.sampleRateOut);
     pResampler->config.sampleRateIn  /= gcf;
