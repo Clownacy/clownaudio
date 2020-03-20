@@ -180,6 +180,9 @@ int main(int argc, char *argv[])
 							entry->sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
 							entry->next = sound_data_list_head;
 
+							if (sound_data_list_head == NULL)
+								selected_sound_data = entry->sound_data;
+
 							sound_data_list_head = entry;
 						}
 					ImGui::End();
@@ -199,6 +202,9 @@ int main(int argc, char *argv[])
 
 								entry->sound = sound;
 								entry->next = sound_list_head;
+
+								if (sound_list_head == NULL)
+									selected_sound = entry->sound;
 
 								sound_list_head = entry;
 							}
