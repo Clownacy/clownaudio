@@ -86,7 +86,8 @@ void Decoder_libXMPLite_Rewind(Decoder_libXMPLite *decoder)
 
 size_t Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *decoder, void *buffer, size_t frames_to_do)
 {
-	xmp_play_buffer(decoder->context, buffer, frames_to_do * CHANNEL_COUNT * sizeof(short), !decoder->loop);
-
-	return frames_to_do;
+	if (xmp_play_buffer(decoder->context, buffer, frames_to_do * CHANNEL_COUNT * sizeof(short), !decoder->loop) == -XMP_END)
+		return 0;
+	else
+		return frames_to_do;
 }
