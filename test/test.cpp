@@ -229,43 +229,43 @@ int main(int argc, char *argv[])
 					ImGui::End();
 
 					ImGui::Begin("Sounds", NULL);
-						for (SoundListEntry *sound_list_entry = sound_list_head; sound_list_entry != NULL; sound_list_entry = sound_list_entry->next)
+						for (SoundListEntry *entry = sound_list_head; entry != NULL; entry = entry->next)
 						{
-							int status = ClownAudio_GetSoundStatus(mixer, sound_list_entry->sound);
+							int status = ClownAudio_GetSoundStatus(mixer, entry->sound);
 
 							char name[32];
 
 							switch (status)
 							{
 								case 0:
-									sprintf(name, "Sound %u - Playing", sound_list_entry->sound);
+									sprintf(name, "Sound %u - Playing", entry->sound);
 									break;
 
 								case 1:
-									sprintf(name, "Sound %u - Paused", sound_list_entry->sound);
+									sprintf(name, "Sound %u - Paused", entry->sound);
 									break;
 
 								case -1:
-									sprintf(name, "Sound %u - Freed", sound_list_entry->sound);
+									sprintf(name, "Sound %u - Freed", entry->sound);
 									break;
 
 							}
 
-							if (ImGui::Selectable(name, selected_sound == sound_list_entry->sound))
-								selected_sound = sound_list_entry->sound;
+							if (ImGui::Selectable(name, selected_sound == entry->sound))
+								selected_sound = entry->sound;
 						}
 
 						if (ImGui::Button("Destroy"))
 						{
 							ClownAudio_DestroySound(mixer, selected_sound);
 
-							for (SoundListEntry **sound_list_entry = &sound_list_head; *sound_list_entry != NULL; sound_list_entry = &(*sound_list_entry)->next)
+							for (SoundListEntry **entry = &sound_list_head; *entry != NULL; entry = &(*entry)->next)
 							{
-								if ((*sound_list_entry)->sound == selected_sound)
+								if ((*entry)->sound == selected_sound)
 								{
-									SoundListEntry *next_sound = (*sound_list_entry)->next;
-									free(*sound_list_entry);
-									*sound_list_entry = next_sound;
+									SoundListEntry *next_sound = (*entry)->next;
+									free(*entry);
+									*entry = next_sound;
 									break;
 								}
 							}
