@@ -108,11 +108,11 @@ size_t Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *decoder, void *buffer, 
 			xmp_get_frame_info(decoder->context, &decoder->frame_info);
 
 			decoder->buffer_size = decoder->frame_info.buffer_size / (CHANNEL_COUNT * sizeof(short));
-
-			if (!decoder->loop)
-				if (decoder->frame_info.loop_count != 0)
-					return frames_done;
 		}
+
+		if (!decoder->loop)
+			if (decoder->frame_info.loop_count != 0)
+				return frames_done;
 
 		size_t frames = MIN(frames_to_do - frames_done, decoder->buffer_size - decoder->buffer_done);
 
