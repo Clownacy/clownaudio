@@ -210,6 +210,22 @@ int main(int argc, char *argv[])
 							if (ImGui::Selectable(name, selected_sound_data == entry->sound_data))
 								selected_sound_data = entry->sound_data;
 						}
+
+						if (ImGui::Button("Destroy"))
+						{
+							ClownAudio_UnloadSoundData(selected_sound_data);
+
+							for (SoundDataListEntry **entry = &sound_data_list_head; *entry != NULL; entry = &(*entry)->next)
+							{
+								if ((*entry)->sound_data == selected_sound_data)
+								{
+									SoundDataListEntry *next_sound_data = (*entry)->next;
+									free(*entry);
+									*entry = next_sound_data;
+									break;
+								}
+							}
+						}
 					ImGui::End();
 
 					ImGui::Begin("Sounds", NULL);
@@ -220,9 +236,7 @@ int main(int argc, char *argv[])
 							if (ImGui::Selectable(name, selected_sound == sound_list_entry->sound))
 								selected_sound = sound_list_entry->sound;
 						}
-					ImGui::End();
 
-					ImGui::Begin("Sound controls", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 						if (ImGui::Button("Destroy"))
 						{
 							ClownAudio_DestroySound(mixer, selected_sound);
@@ -238,7 +252,9 @@ int main(int argc, char *argv[])
 								}
 							}
 						}
+					ImGui::End();
 
+					ImGui::Begin("Sound controls", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 						if (ImGui::Button("Pause"))
 							ClownAudio_PauseSound(mixer, selected_sound);
 
