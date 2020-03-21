@@ -328,52 +328,64 @@ int main(int argc, char *argv[])
 						}
 						else
 						{
-							if (ImGui::Button("Pause"))
-								ClownAudio_PauseSound(mixer, selected_sound->sound);
+							int status = ClownAudio_GetSoundStatus(mixer, selected_sound->sound);
 
-							ImGui::SameLine();
+							if (status == -1)
+							{
+								ImGui::Text("Selected sound has been freed...");
+							}
+							else
+							{
+								if (status == 0)
+								{
+									if (ImGui::Button("Pause"))
+										ClownAudio_PauseSound(mixer, selected_sound->sound);
+								}
+								else
+								{
+									if (ImGui::Button("Unpause"))
+										ClownAudio_UnpauseSound(mixer, selected_sound->sound);
+								}
 
-							if (ImGui::Button("Unpause"))
-								ClownAudio_UnpauseSound(mixer, selected_sound->sound);
+								ImGui::SameLine();
 
-							ImGui::Spacing();
+								if (ImGui::Button("Rewind"))
+									ClownAudio_RewindSound(mixer, selected_sound->sound);
 
-							if (ImGui::Button("Rewind"))
-								ClownAudio_RewindSound(mixer, selected_sound->sound);
+								ImGui::Spacing();
 
-							ImGui::Spacing();
+								if (ImGui::Button("Fade-out"))
+									ClownAudio_FadeOutSound(mixer, selected_sound->sound, 5 * 1000);
 
-							if (ImGui::Button("Fade-out"))
-								ClownAudio_FadeOutSound(mixer, selected_sound->sound, 5 * 1000);
+								ImGui::SameLine();
 
-							ImGui::SameLine();
+								if (ImGui::Button("Fade-in"))
+									ClownAudio_FadeInSound(mixer, selected_sound->sound, 5 * 1000);
 
-							if (ImGui::Button("Fade-in"))
-								ClownAudio_FadeInSound(mixer, selected_sound->sound, 5 * 1000);
+								ImGui::SameLine();
 
-							ImGui::SameLine();
+								if (ImGui::Button("Cancel fade"))
+									ClownAudio_CancelFade(mixer, selected_sound->sound);
 
-							if (ImGui::Button("Cancel fade"))
-								ClownAudio_CancelFade(mixer, selected_sound->sound);
+								ImGui::Spacing();
 
-							ImGui::Spacing();
+								if (ImGui::SliderFloat("Master volume", &selected_sound->master_volume, 0.0f, 1.0f, "%.3f"))
+									ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
-							if (ImGui::SliderFloat("Master volume", &selected_sound->master_volume, 0.0f, 1.0f, "%.3f"))
-								ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+								if (ImGui::SliderFloat("Left volume", &selected_sound->volume_left, 0.0f, 1.0f, "%.3f"))
+									ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
-							if (ImGui::SliderFloat("Left volume", &selected_sound->volume_left, 0.0f, 1.0f, "%.3f"))
-								ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+								if (ImGui::SliderFloat("Right volume", &selected_sound->volume_right, 0.0f, 1.0f, "%.3f"))
+									ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
-							if (ImGui::SliderFloat("Right volume", &selected_sound->volume_right, 0.0f, 1.0f, "%.3f"))
-								ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+								ImGui::Spacing();
 
-							ImGui::Spacing();
+								static int sample_rate = 0;
+								ImGui::InputInt("Sample rate", &sample_rate, 0);
 
-							static int sample_rate = 0;
-							ImGui::InputInt("Sample rate", &sample_rate, 0);
-
-							if (ImGui::Button("Apply sample rate"))
-								ClownAudio_SetSoundSampleRate(mixer, selected_sound->sound, sample_rate, sample_rate);
+								if (ImGui::Button("Apply sample rate"))
+									ClownAudio_SetSoundSampleRate(mixer, selected_sound->sound, sample_rate, sample_rate);
+							}
 						}
 					ImGui::End();
 
