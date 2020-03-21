@@ -22,6 +22,9 @@ typedef struct SoundDataListEntry
 typedef struct SoundListEntry
 {
 	ClownAudio_Sound sound;
+	float master_volume;
+	float volume_left;
+	float volume_right;
 
 	struct SoundListEntry *next;
 } SoundListEntry;
@@ -107,8 +110,8 @@ int main(int argc, char *argv[])
 				ClownAudio_SoundConfig sound_config;
 				ClownAudio_InitSoundConfig(&sound_config);
 
-				ClownAudio_SoundData *selected_sound_data = NULL;
-				ClownAudio_Sound selected_sound = 0;
+				SoundDataListEntry *selected_sound_data = NULL;
+				SoundListEntry *selected_sound = NULL;
 
 				int intro_file = 0;
 				int loop_file = 0;
@@ -169,44 +172,68 @@ int main(int argc, char *argv[])
 						ImGui::Combo("Intro file", &intro_file, &FuncHolder::ItemGetter, files, files_total + 1);
 						ImGui::Combo("Loop file", &loop_file, &FuncHolder::ItemGetter, files, files_total + 1);
 
+						ImGui::Spacing();
+
 						ImGui::Checkbox("Predecode", &data_config.predecode);
 						ImGui::Checkbox("Must predecode", &data_config.must_predecode);
 						ImGui::Checkbox("Dynamic sample rate", &data_config.dynamic_sample_rate);
 
+						ImGui::Spacing();
+
 						if (ImGui::Button("Load sound data"))
 						{
-							SoundDataListEntry *entry = (SoundDataListEntry*)malloc(sizeof(SoundDataListEntry));
+							SoundDataListEntry *new_entry = (SoundDataListEntry*)malloc(sizeof(SoundDataListEntry));
 
-							entry->sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
-							entry->next = sound_data_list_head;
+							new_entry->sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
+							new_entry->next = NULL;
 
-							if (sound_data_list_head == NULL)
-								selected_sound_data = entry->sound_data;
+							SoundDataListEntry **entry = &sound_data_list_head;
+							while (*entry != NULL)
+								entry = &(*entry)->next;
 
-							sound_data_list_head = entry;
+							*entry = new_entry;
+
+							if (selected_sound_data == NULL)
+								selected_sound_data = new_entry;
 						}
 					ImGui::End();
 
 					ImGui::Begin("Sound Creation", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-						ImGui::Checkbox("Loop", &sound_config.loop);
-						ImGui::Checkbox("Do not free when done", &sound_config.do_not_free_when_done);
-						ImGui::Checkbox("Dynamic sample rate", &sound_config.dynamic_sample_rate);
-
-						if (ImGui::Button("Create sound"))
+						if (selected_sound_data == NULL)
 						{
-							ClownAudio_Sound sound = ClownAudio_CreateSound(mixer, selected_sound_data, &sound_config);
+							ImGui::Text("No sound data selected...");
+						}
+						else
+						{
+							ImGui::Checkbox("Loop", &sound_config.loop);
+							ImGui::Checkbox("Do not free when done", &sound_config.do_not_free_when_done);
+							ImGui::Checkbox("Dynamic sample rate", &sound_config.dynamic_sample_rate);
 
-							if (sound != 0)
+							ImGui::Spacing();
+
+							if (ImGui::Button("Create sound"))
 							{
-								SoundListEntry *entry = (SoundListEntry*)malloc(sizeof(SoundListEntry));
+								ClownAudio_Sound sound = ClownAudio_CreateSound(mixer, selected_sound_data->sound_data, &sound_config);
 
-								entry->sound = sound;
-								entry->next = sound_list_head;
+								if (sound != 0)
+								{
+									SoundListEntry *new_entry = (SoundListEntry*)malloc(sizeof(SoundListEntry));
 
-								if (sound_list_head == NULL)
-									selected_sound = entry->sound;
+									new_entry->sound = sound;
+									new_entry->master_volume = 1.0f;
+									new_entry->volume_left = 1.0f;
+									new_entry->volume_right = 1.0f;
+									new_entry->next = NULL;
 
-								sound_list_head = entry;
+									SoundListEntry **entry = &sound_list_head;
+									while (*entry != NULL)
+										entry = &(*entry)->next;
+
+									*entry = new_entry;
+
+									if (selected_sound == NULL)
+										selected_sound = new_entry;
+								}
 							}
 						}
 					ImGui::End();
@@ -216,23 +243,28 @@ int main(int argc, char *argv[])
 						{
 							char name[32];
 							sprintf(name, "Sound data %p", entry->sound_data);
-							if (ImGui::Selectable(name, selected_sound_data == entry->sound_data))
-								selected_sound_data = entry->sound_data;
+							if (ImGui::Selectable(name, selected_sound_data == entry))
+								selected_sound_data = entry;
 						}
 
-						if (ImGui::Button("Destroy"))
+						if (selected_sound_data != NULL)
 						{
-							ClownAudio_UnloadSoundData(selected_sound_data);
+							ImGui::Spacing();
 
-							for (SoundDataListEntry **entry = &sound_data_list_head; *entry != NULL; entry = &(*entry)->next)
+							if (ImGui::Button("Destroy"))
 							{
-								if ((*entry)->sound_data == selected_sound_data)
+								ClownAudio_UnloadSoundData(selected_sound_data->sound_data);
+
+								for (SoundDataListEntry **entry = &sound_data_list_head; *entry != NULL; entry = &(*entry)->next)
 								{
-									SoundDataListEntry *next_sound_data = (*entry)->next;
-									free(*entry);
-									*entry = next_sound_data;
-									selected_sound_data = *entry == NULL ? NULL : (*entry)->sound_data;
-									break;
+									if (*entry == selected_sound_data)
+									{
+										SoundDataListEntry *next_sound_data = (*entry)->next;
+										free(*entry);
+										*entry = next_sound_data;
+										selected_sound_data = *entry == NULL ? NULL : *entry;
+										break;
+									}
 								}
 							}
 						}
@@ -261,61 +293,88 @@ int main(int argc, char *argv[])
 
 							}
 
-							if (ImGui::Selectable(name, selected_sound == entry->sound))
-								selected_sound = entry->sound;
+							if (ImGui::Selectable(name, selected_sound == entry))
+								selected_sound = entry;
 						}
 
-						if (ImGui::Button("Destroy"))
+						if (selected_sound != NULL)
 						{
-							ClownAudio_DestroySound(mixer, selected_sound);
+							ImGui::Spacing();
 
-							for (SoundListEntry **entry = &sound_list_head; *entry != NULL; entry = &(*entry)->next)
+							if (ImGui::Button("Destroy"))
 							{
-								if ((*entry)->sound == selected_sound)
+								ClownAudio_DestroySound(mixer, selected_sound->sound);
+
+								for (SoundListEntry **entry = &sound_list_head; *entry != NULL; entry = &(*entry)->next)
 								{
-									SoundListEntry *next_sound = (*entry)->next;
-									free(*entry);
-									*entry = next_sound;
-									break;
+									if (*entry == selected_sound)
+									{
+										SoundListEntry *next_sound = (*entry)->next;
+										free(*entry);
+										*entry = next_sound;
+										break;
+									}
 								}
+
+								selected_sound = NULL;
 							}
 						}
 					ImGui::End();
 
 					ImGui::Begin("Sound Controls", NULL, ImGuiWindowFlags_AlwaysAutoResize);
-						if (ImGui::Button("Pause"))
-							ClownAudio_PauseSound(mixer, selected_sound);
+						if (selected_sound == NULL)
+						{
+							ImGui::Text("No sound selected...");
+						}
+						else
+						{
+							if (ImGui::Button("Pause"))
+								ClownAudio_PauseSound(mixer, selected_sound->sound);
 
-						ImGui::SameLine();
+							ImGui::SameLine();
 
-						if (ImGui::Button("Unpause"))
-							ClownAudio_UnpauseSound(mixer, selected_sound);
+							if (ImGui::Button("Unpause"))
+								ClownAudio_UnpauseSound(mixer, selected_sound->sound);
 
-						if (ImGui::Button("Rewind"))
-							ClownAudio_RewindSound(mixer, selected_sound);
+							ImGui::Spacing();
 
-						if (ImGui::Button("Fade-out"))
-							ClownAudio_FadeOutSound(mixer, selected_sound, 5 * 1000);
+							if (ImGui::Button("Rewind"))
+								ClownAudio_RewindSound(mixer, selected_sound->sound);
 
-						ImGui::SameLine();
+							ImGui::Spacing();
 
-						if (ImGui::Button("Fade-in"))
-							ClownAudio_FadeInSound(mixer, selected_sound, 5 * 1000);
+							if (ImGui::Button("Fade-out"))
+								ClownAudio_FadeOutSound(mixer, selected_sound->sound, 5 * 1000);
 
-						ImGui::SameLine();
+							ImGui::SameLine();
 
-						if (ImGui::Button("Cancel fade"))
-							ClownAudio_CancelFade(mixer, selected_sound);
+							if (ImGui::Button("Fade-in"))
+								ClownAudio_FadeInSound(mixer, selected_sound->sound, 5 * 1000);
 
-						static float volume = 1.0f;
-						if (ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f, "%.3f"))
-							ClownAudio_SetSoundVolume(mixer, selected_sound, volume, volume);
+							ImGui::SameLine();
 
-						static int sample_rate = 48000;
-						ImGui::InputInt("Sample rate", &sample_rate);
+							if (ImGui::Button("Cancel fade"))
+								ClownAudio_CancelFade(mixer, selected_sound->sound);
 
-						if (ImGui::Button("Apply sample rate"))
-							ClownAudio_SetSoundSampleRate(mixer, selected_sound, sample_rate, sample_rate);
+							ImGui::Spacing();
+
+							if (ImGui::SliderFloat("Master volume", &selected_sound->master_volume, 0.0f, 1.0f, "%.3f"))
+								ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+
+							if (ImGui::SliderFloat("Left volume", &selected_sound->volume_left, 0.0f, 1.0f, "%.3f"))
+								ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+
+							if (ImGui::SliderFloat("Right volume", &selected_sound->volume_right, 0.0f, 1.0f, "%.3f"))
+								ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+
+							ImGui::Spacing();
+
+							static int sample_rate = 0;
+							ImGui::InputInt("Sample rate", &sample_rate, 0);
+
+							if (ImGui::Button("Apply sample rate"))
+								ClownAudio_SetSoundSampleRate(mixer, selected_sound->sound, sample_rate, sample_rate);
+						}
 					ImGui::End();
 
 					ImGui::ShowDemoWindow();
