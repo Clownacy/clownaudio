@@ -42,6 +42,8 @@ set_target_properties(test PROPERTIES
 	CXX_EXTENSIONS OFF
 )
 
+target_link_libraries(test PRIVATE ${CMAKE_DL_LIBS})
+
 target_include_directories(test PRIVATE "glad/include")
 target_compile_definitions(test PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
 
