@@ -359,13 +359,13 @@ int main(int argc, char *argv[])
 
 												ImGui::Spacing();
 
-												if (ImGui::SliderFloat("Master volume", &selected_sound->master_volume, 0.0f, 1.0f, "%.3f"))
+												if (ImGui::SliderFloat("Master volume", &selected_sound->master_volume, 0.0f, 1.0f, "%.3f", 2.0f))
 													ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
-												if (ImGui::SliderFloat("Left volume", &selected_sound->volume_left, 0.0f, 1.0f, "%.3f"))
+												if (ImGui::SliderFloat("Left volume", &selected_sound->volume_left, 0.0f, 1.0f, "%.3f", 2.0f))
 													ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
-												if (ImGui::SliderFloat("Right volume", &selected_sound->volume_right, 0.0f, 1.0f, "%.3f"))
+												if (ImGui::SliderFloat("Right volume", &selected_sound->volume_right, 0.0f, 1.0f, "%.3f", 2.0f))
 													ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
 												ImGui::Spacing();
