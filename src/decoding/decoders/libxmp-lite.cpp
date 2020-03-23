@@ -90,8 +90,9 @@ void Decoder_libXMPLite_Destroy(Decoder_libXMPLite *decoder)
 void Decoder_libXMPLite_Rewind(Decoder_libXMPLite *decoder)
 {
 	xmp_restart_module(decoder->context);
-	xmp_play_frame(decoder->context);
-	xmp_get_frame_info(decoder->context, &decoder->frame_info);
+
+	decoder->buffer_done = 0;
+	decoder->buffer_size = 0;
 }
 
 size_t Decoder_libXMPLite_GetSamples(Decoder_libXMPLite *decoder, void *buffer, size_t frames_to_do)
