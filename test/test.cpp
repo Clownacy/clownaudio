@@ -45,12 +45,6 @@ static void StreamCallback(void *user_data, float *output_buffer, size_t frames_
 
 int main(int argc, char *argv[])
 {
-	if (argc < 2)
-	{
-		printf("clownaudio test program\n\nUsage: %s [intro file path] [loop file path (optional)]\n\n", argv[0]);
-		return 0;
-	}
-
 	const char *file_directory = argc > 1 ? argv[1] : ".";
 
 	/////////////////////
