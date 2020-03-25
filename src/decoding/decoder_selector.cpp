@@ -79,20 +79,20 @@ typedef enum DecoderType
 	DECODER_TYPE_SIMPLE
 } DecoderType;
 
-typedef struct DecoderFunctions
+typedef struct DecoderFunctionsExtra
 {
 	void* (*Create)(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
 	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
-} DecoderFunctions;
+} DecoderFunctionsExtra;
 
 struct DecoderSelectorData
 {
 	const unsigned char *file_buffer;
 	size_t file_size;
 	DecoderType decoder_type;
-	const DecoderFunctions *decoder_functions;
+	const DecoderFunctionsExtra *decoder_functions;
 	PredecoderData *predecoder_data;
 	size_t size_of_frame;
 };
@@ -104,7 +104,7 @@ struct DecoderSelector
 	bool loop;
 };
 
-static const DecoderFunctions decoder_function_list[] = {
+static const DecoderFunctionsExtra decoder_function_list[] = {
 #ifdef USE_LIBVORBIS
 	DECODER_FUNCTIONS(libVorbis),
 #endif
@@ -146,7 +146,7 @@ static const DecoderFunctions decoder_function_list[] = {
 #endif
 };
 
-static const DecoderFunctions predecoder_functions = {
+static const DecoderFunctionsExtra predecoder_functions = {
 	NULL,
 	(void(*)(void*))Predecoder_Destroy,
 	(void(*)(void*))Predecoder_Rewind,
@@ -156,7 +156,7 @@ static const DecoderFunctions predecoder_functions = {
 DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
 {
 	DecoderType decoder_type;
-	const DecoderFunctions *decoder_functions = NULL;
+	const DecoderFunctionsExtra *decoder_functions = NULL;
 	PredecoderData *predecoder_data = NULL;
 
 	DecoderSpec wanted_spec, spec;
