@@ -33,13 +33,13 @@
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
-struct Decoder_PxTone
+typedef struct Decoder_PxTone
 {
 	pxtnService *pxtn;
 	bool loop;
-};
+} Decoder_PxTone;
 
-Decoder_PxTone* Decoder_PxTone_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
+void* Decoder_PxTone_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)wanted_spec;
 
@@ -87,15 +87,19 @@ Decoder_PxTone* Decoder_PxTone_Create(const unsigned char *data, size_t data_siz
 	return NULL;
 }
 
-void Decoder_PxTone_Destroy(Decoder_PxTone *decoder)
+void Decoder_PxTone_Destroy(void *decoder_void)
 {
+	Decoder_PxTone *decoder = (Decoder_PxTone*)decoder_void;
+
 	decoder->pxtn->evels->Release();
 	delete decoder->pxtn;
 	free(decoder);
 }
 
-void Decoder_PxTone_Rewind(Decoder_PxTone *decoder)
+void Decoder_PxTone_Rewind(void *decoder_void)
 {
+	Decoder_PxTone *decoder = (Decoder_PxTone*)decoder_void;
+
 	pxtnVOMITPREPARATION prep = pxtnVOMITPREPARATION();
 	if (decoder->loop)
 		prep.flags |= pxtnVOMITPREPFLAG_loop;
@@ -105,8 +109,10 @@ void Decoder_PxTone_Rewind(Decoder_PxTone *decoder)
 	decoder->pxtn->moo_preparation(&prep);
 }
 
-size_t Decoder_PxTone_GetSamples(Decoder_PxTone *decoder, void *buffer, size_t frames_to_do)
+size_t Decoder_PxTone_GetSamples(void *decoder_void, void *buffer, size_t frames_to_do)
 {
+	Decoder_PxTone *decoder = (Decoder_PxTone*)decoder_void;
+
 	const size_t size_of_frame = sizeof(int16_t) * CHANNEL_COUNT;
 
 	memset(buffer, 0, frames_to_do * size_of_frame);

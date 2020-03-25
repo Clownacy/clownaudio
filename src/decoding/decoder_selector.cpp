@@ -66,10 +66,10 @@
 
 #define DECODER_FUNCTIONS(name) \
 { \
-	(void*(*)(const unsigned char*,size_t,bool,const DecoderSpec*,DecoderSpec*))Decoder_##name##_Create, \
-	(void(*)(void*))Decoder_##name##_Destroy, \
-	(void(*)(void*))Decoder_##name##_Rewind, \
-	(size_t(*)(void*,void*,size_t))Decoder_##name##_GetSamples \
+	Decoder_##name##_Create, \
+	Decoder_##name##_Destroy, \
+	Decoder_##name##_Rewind, \
+	Decoder_##name##_GetSamples \
 }
 
 typedef enum DecoderType
