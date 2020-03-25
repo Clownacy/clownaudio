@@ -24,11 +24,7 @@
 
 #include "decoders/common.h"
 
-typedef struct DecoderSelectorData ResampledDecoderData;	// This is deliberate
-
-ResampledDecoderData* ResampledDecoder_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode);
-void ResampledDecoder_UnloadData(ResampledDecoderData *data);
-void* ResampledDecoder_Create(ResampledDecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
+void* ResampledDecoder_Create(DecoderStage *next_stage, const DecoderSpec *wanted_spec, const DecoderSpec *child_spec);
 void ResampledDecoder_Destroy(void *resampled_decoder);
 void ResampledDecoder_Rewind(void *resampled_decoder);
 size_t ResampledDecoder_GetSamples(void *resampled_decoder, void *buffer, size_t frames_to_do);

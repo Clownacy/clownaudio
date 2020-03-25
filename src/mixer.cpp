@@ -33,6 +33,8 @@
 
 #include "decoding/decoders/common.h"
 
+#include "decoding/decoder_selector.h"
+#include "decoding/resampled_decoder.h"
 #include "decoding/split_decoder.h"
 
 #define CHANNEL_COUNT 2
@@ -49,7 +51,8 @@ typedef struct Channel
 	bool free_when_done;
 	float volume_left;
 	float volume_right;
-	void *split_decoder;
+	DecoderStage *pipeline;
+	void *resampled_decoder;
 	ClownAudio_Sound sound;
 
 	unsigned long fade_out_counter_max;
@@ -76,7 +79,7 @@ struct ClownAudio_Mixer
 
 struct ClownAudio_SoundData
 {
-	SplitDecoderData *split_decoder_data;
+	DecoderSelectorData *decoder_selector_data[2];
 	unsigned char *file_buffers[2];
 };
 
@@ -88,7 +91,6 @@ static bool LoadFileToMemory(const char *path, unsigned char **buffer, size_t *s
 	{
 		*buffer = NULL;
 		*size = 0;
-
 		success = true;
 	}
 	else
@@ -207,17 +209,33 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const
 
 	if (sound_data != NULL)
 	{
-		sound_data->split_decoder_data = SplitDecoder_LoadData(file_buffer1, file_size1, file_buffer2, file_size2, config->predecode);
-
-		if (sound_data->split_decoder_data != NULL)
+		if (file_buffer1 != NULL && file_buffer2 != NULL)
 		{
-			sound_data->file_buffers[0] = NULL;
-			sound_data->file_buffers[1] = NULL;
+			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode);
+			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode);
 
-			return sound_data;
+			if (sound_data->decoder_selector_data[0] != NULL && sound_data->decoder_selector_data[1] != NULL)
+				return sound_data;
+
+			DecoderSelector_UnloadData(sound_data->decoder_selector_data[1]);
+			DecoderSelector_UnloadData(sound_data->decoder_selector_data[0]);
 		}
+		else if (file_buffer1 != NULL)
+		{
+			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode);
+			sound_data->decoder_selector_data[1] = NULL;
 
-		free(sound_data);
+			if (sound_data->decoder_selector_data[0] != NULL)
+				return sound_data;
+		}
+		else if (file_buffer2 != NULL)
+		{
+			sound_data->decoder_selector_data[0] = NULL;
+			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode);
+
+			if (sound_data->decoder_selector_data[1] != NULL)
+					return sound_data;
+		}
 	}
 
 	return NULL;
@@ -225,9 +243,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const
 
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
 {
-	ClownAudio_SoundData *sound_data = (ClownAudio_SoundData*)malloc(sizeof(ClownAudio_SoundData));
-
-	if (sound_data != NULL)
+	if (intro_path != NULL || loop_path != NULL)
 	{
 		unsigned char *file_buffers[2];
 		size_t file_buffer_sizes[2];
@@ -236,9 +252,9 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const 
 		{
 			if (LoadFileToMemory(loop_path, &file_buffers[1], &file_buffer_sizes[1]))
 			{
-				sound_data->split_decoder_data = SplitDecoder_LoadData(file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config->predecode);
+				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromMemory(file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config);
 
-				if (sound_data->split_decoder_data != NULL)
+				if (sound_data != NULL)
 				{
 					sound_data->file_buffers[0] = file_buffers[0];
 					sound_data->file_buffers[1] = file_buffers[1];
@@ -251,8 +267,6 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const 
 
 			free(file_buffers[0]);
 		}
-
-		free(sound_data);
 	}
 
 	return NULL;
@@ -262,7 +276,8 @@ CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound_da
 {
 	if (sound_data != NULL)
 	{
-		SplitDecoder_UnloadData(sound_data->split_decoder_data);
+		DecoderSelector_UnloadData(sound_data->decoder_selector_data[0]);
+		DecoderSelector_UnloadData(sound_data->decoder_selector_data[1]);
 
 		free(sound_data->file_buffers[0]);
 		free(sound_data->file_buffers[1]);
@@ -275,36 +290,198 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 	if (sound_data != NULL)
 	{
-		DecoderSpec wanted_spec, spec;
+		DecoderSpec wanted_spec;
 		wanted_spec.sample_rate = mixer->sample_rate;
 		wanted_spec.channel_count = CHANNEL_COUNT;
 		wanted_spec.format = DECODER_FORMAT_F32;
 
-		void *split_decoder = SplitDecoder_Create(sound_data->split_decoder_data, config->loop, &wanted_spec, &spec);
+		// Begin constructing the decoder pipeline
 
-		if (split_decoder != NULL)
+		DecoderStage *stage = (DecoderStage*)malloc(sizeof(DecoderStage));
+
+		if (stage == NULL)
+			return 0;
+
+		// Let's start with the decoder-selectors
+
+		DecoderStage *selector_stages = (DecoderStage*)malloc(sizeof(DecoderStage) * 2);
+
+		if (selector_stages == NULL)
 		{
-			do
-			{
-				sound = ++mixer->sound_allocator;
-			} while (sound == 0);	// Do not let it allocate 0 - it is an error value
-
-			Channel *channel = (Channel*)malloc(sizeof(Channel));
-
-			channel->split_decoder = split_decoder;
-			channel->volume_left = 1.0f;
-			channel->volume_right = 1.0f;
-			channel->sound = sound;
-			channel->paused = true;
-			channel->free_when_done = !config->do_not_free_when_done;
-			channel->fade_out_counter_max = 0;
-			channel->fade_in_counter_max = 0;
-
-			MutexLock(&mixer->mutex);
-			channel->next = mixer->channel_list_head;
-			mixer->channel_list_head = channel;
-			MutexUnlock(&mixer->mutex);
+			free(selector_stages);
+			return 0;
 		}
+
+		void *decoder_selectors[2];
+		DecoderSpec specs[2];
+
+		if (sound_data->decoder_selector_data[0] != NULL)
+		{
+			decoder_selectors[0] = DecoderSelector_Create(sound_data->decoder_selector_data[0], sound_data->decoder_selector_data[1] != NULL ? false : config->loop, &wanted_spec, &specs[0]);
+
+			if (decoder_selectors[0] != NULL)
+			{
+				selector_stages[0].decoder = decoder_selectors[0];
+				selector_stages[0].Destroy = DecoderSelector_Destroy;
+				selector_stages[0].Rewind = DecoderSelector_Rewind;
+				selector_stages[0].GetSamples = DecoderSelector_GetSamples;
+				selector_stages[0].SetLoop = DecoderSelector_SetLoop;
+			}
+		}
+
+		if (sound_data->decoder_selector_data[1] != NULL)
+		{
+			decoder_selectors[1] = DecoderSelector_Create(sound_data->decoder_selector_data[1], config->loop, &wanted_spec, &specs[1]);
+
+			if (decoder_selectors[1] != NULL)
+			{
+				selector_stages[1].decoder = decoder_selectors[1];
+				selector_stages[1].Destroy = DecoderSelector_Destroy;
+				selector_stages[1].Rewind = DecoderSelector_Rewind;
+				selector_stages[1].GetSamples = DecoderSelector_GetSamples;
+				selector_stages[1].SetLoop = DecoderSelector_SetLoop;
+			}
+		}
+
+		if (decoder_selectors[0] == NULL && decoder_selectors[1] == NULL)
+		{
+			free(selector_stages);
+			return 0;
+		}
+
+		// Now for the split-decoder, if needed
+
+		void *split_decoder = NULL;
+
+		if (decoder_selectors[0] != NULL && decoder_selectors[1] != NULL)
+		{
+			split_decoder = SplitDecoder_Create(&selector_stages[0], &selector_stages[1]);
+
+			if (split_decoder == NULL)
+			{
+				if (decoder_selectors[0] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[0]);
+
+				if (decoder_selectors[1] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[1]);
+
+				free(selector_stages);
+				return 0;
+			}
+
+			stage->decoder = split_decoder;
+			stage->Destroy = SplitDecoder_Destroy;
+			stage->Rewind = SplitDecoder_Rewind;
+			stage->GetSamples = SplitDecoder_GetSamples;
+			stage->SetLoop = SplitDecoder_SetLoop;
+		}
+		else
+		{
+			if (decoder_selectors[0] != NULL)
+				stage->decoder = decoder_selectors[0];
+			else
+				stage->decoder = decoder_selectors[1];
+
+			stage->Destroy = DecoderSelector_Destroy;
+			stage->Rewind = DecoderSelector_Rewind;
+			stage->GetSamples = DecoderSelector_GetSamples;
+			stage->SetLoop = DecoderSelector_SetLoop;
+		}
+
+		// Now for the resampler
+
+		void *resampled_decoder = ResampledDecoder_Create(stage, &wanted_spec, &specs[0]);
+
+		if (resampled_decoder == NULL)
+		{
+			if (split_decoder != NULL)
+			{
+				SplitDecoder_Destroy(split_decoder);
+			}
+			else
+			{
+				if (decoder_selectors[0] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[0]);
+
+				if (decoder_selectors[1] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[1]);
+			}
+
+			free(selector_stages);
+			return 0;
+		}
+
+		stage = (DecoderStage*)malloc(sizeof(DecoderStage));
+
+		if (stage == NULL)
+		{
+			if (split_decoder != NULL)
+			{
+				SplitDecoder_Destroy(split_decoder);
+			}
+			else
+			{
+				if (decoder_selectors[0] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[0]);
+
+				if (decoder_selectors[1] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[1]);
+			}
+
+			free(selector_stages);
+			return 0;
+		}
+
+		stage->decoder = resampled_decoder;
+		stage->Destroy = ResampledDecoder_Destroy;
+		stage->Rewind = ResampledDecoder_Rewind;
+		stage->GetSamples = ResampledDecoder_GetSamples;
+		stage->SetLoop = ResampledDecoder_SetLoop;
+
+		// Finally we're done - now just allocate the channel
+
+		Channel *channel = (Channel*)malloc(sizeof(Channel));
+
+		if (channel == NULL)
+		{
+			free(stage);
+
+			if (split_decoder != NULL)
+			{
+				SplitDecoder_Destroy(split_decoder);
+			}
+			else
+			{
+				if (decoder_selectors[0] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[0]);
+
+				if (decoder_selectors[1] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[1]);
+			}
+
+			free(selector_stages);
+			return 0;
+		}
+
+		do
+		{
+			sound = ++mixer->sound_allocator;
+		} while (sound == 0);	// Do not let it allocate 0 - it is an error value
+
+		channel->pipeline = stage;
+		channel->resampled_decoder = resampled_decoder;
+		channel->volume_left = 1.0f;
+		channel->volume_right = 1.0f;
+		channel->sound = sound;
+		channel->paused = true;
+		channel->free_when_done = !config->do_not_free_when_done;
+		channel->fade_out_counter_max = 0;
+		channel->fade_in_counter_max = 0;
+
+		MutexLock(&mixer->mutex);
+		channel->next = mixer->channel_list_head;
+		mixer->channel_list_head = channel;
+		MutexUnlock(&mixer->mutex);
 	}
 
 	return sound;
@@ -330,7 +507,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAud
 
 	if (channel != NULL)
 	{
-		SplitDecoder_Destroy(channel->split_decoder);
+		channel->pipeline->Destroy(channel->pipeline->decoder);
 		free(channel);
 	}
 }
@@ -342,7 +519,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Mixer *mixer, ClownAudi
 	Channel *channel = FindChannel(mixer, sound);
 
 	if (channel != NULL)
-		SplitDecoder_Rewind(channel->split_decoder);
+		channel->pipeline->Rewind(channel->pipeline->decoder);
 
 	MutexUnlock(&mixer->mutex);
 }
@@ -469,7 +646,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAud
 	Channel *channel = FindChannel(mixer, sound);
 
 	if (channel != NULL)
-		SplitDecoder_SetLoop(channel->split_decoder, loop);
+		channel->pipeline->SetLoop(channel->pipeline->decoder, loop);
 
 	MutexUnlock(&mixer->mutex);
 }
@@ -481,7 +658,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Mixer *mixer, Cl
 	Channel *channel = FindChannel(mixer, sound);
 
 	if (channel != NULL)
-		SplitDecoder_SetSampleRate(channel->split_decoder, sample_rate);
+		ResampledDecoder_SetSampleRate(channel->resampled_decoder, sample_rate);
 
 	MutexUnlock(&mixer->mutex);
 }
@@ -505,7 +682,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_MixSamples(ClownAudio_Mixer *mixer, float *out
 				float read_buffer[0x1000];
 
 				const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
-				sub_frames_done = SplitDecoder_GetSamples(channel->split_decoder, read_buffer, sub_frames_to_do);
+				sub_frames_done = channel->pipeline->GetSamples(channel->pipeline->decoder, read_buffer, sub_frames_to_do);
 
 				float *read_buffer_pointer = read_buffer;
 
@@ -551,7 +728,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_MixSamples(ClownAudio_Mixer *mixer, float *out
 			{
 				if (channel->free_when_done)
 				{
-					SplitDecoder_Destroy(channel->split_decoder);
+					channel->pipeline->Destroy(channel->pipeline->decoder);
 					*channel_pointer = channel->next;
 					free(channel);
 					continue;

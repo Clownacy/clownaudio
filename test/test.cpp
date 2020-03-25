@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
 												ImGui::InputInt("Sample rate", &sample_rate, 0);
 
 												if (ImGui::Button("Apply sample rate"))
-													ClownAudio_SetSoundSampleRate(mixer, selected_sound->sound, sample_rate, sample_rate);
+													ClownAudio_SetSoundSampleRate(mixer, selected_sound->sound, sample_rate);
 											}
 										}
 									ImGui::End();

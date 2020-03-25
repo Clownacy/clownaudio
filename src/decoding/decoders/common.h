@@ -37,9 +37,12 @@ typedef struct DecoderSpec
 	bool is_complex;
 } DecoderSpec;
 
-typedef struct DecoderFunctions
+typedef struct DecoderStage
 {
+	void *decoder;
+
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
 	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
+	void (*SetLoop)(void *decoder, bool loop);
 } DecoderFunctions;
