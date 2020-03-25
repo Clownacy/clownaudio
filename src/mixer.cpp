@@ -474,14 +474,14 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAud
 	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_Sound sound, unsigned long sample_rate1, unsigned long sample_rate2)
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_Sound sound, unsigned long sample_rate)
 {
 	MutexLock(&mixer->mutex);
 
 	Channel *channel = FindChannel(mixer, sound);
 
 	if (channel != NULL)
-		SplitDecoder_SetSampleRate(channel->split_decoder, sample_rate1, sample_rate2);
+		SplitDecoder_SetSampleRate(channel->split_decoder, sample_rate);
 
 	MutexUnlock(&mixer->mutex);
 }
