@@ -276,8 +276,11 @@ CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound_da
 {
 	if (sound_data != NULL)
 	{
-		DecoderSelector_UnloadData(sound_data->decoder_selector_data[0]);
-		DecoderSelector_UnloadData(sound_data->decoder_selector_data[1]);
+		if (sound_data->decoder_selector_data[0] != NULL)
+			DecoderSelector_UnloadData(sound_data->decoder_selector_data[0]);
+
+		if (sound_data->decoder_selector_data[1] != NULL)
+			DecoderSelector_UnloadData(sound_data->decoder_selector_data[1]);
 
 		free(sound_data->file_buffers[0]);
 		free(sound_data->file_buffers[1]);
@@ -304,15 +307,26 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 		// Let's start with the decoder-selectors
 
-		DecoderStage *selector_stages = (DecoderStage*)malloc(sizeof(DecoderStage) * 2);
+		DecoderStage *selector_stages[2];
 
-		if (selector_stages == NULL)
+		selector_stages[0] = (DecoderStage*)malloc(sizeof(DecoderStage));
+
+		if (selector_stages[0] == NULL)
 		{
-			free(selector_stages);
+			free(stage);
 			return 0;
 		}
 
-		void *decoder_selectors[2];
+		selector_stages[1] = (DecoderStage*)malloc(sizeof(DecoderStage));
+
+		if (selector_stages[1] == NULL)
+		{
+			free(selector_stages[0]);
+			free(stage);
+			return 0;
+		}
+
+		void *decoder_selectors[2] = {NULL, NULL};
 		DecoderSpec specs[2];
 
 		if (sound_data->decoder_selector_data[0] != NULL)
@@ -321,11 +335,11 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 			if (decoder_selectors[0] != NULL)
 			{
-				selector_stages[0].decoder = decoder_selectors[0];
-				selector_stages[0].Destroy = DecoderSelector_Destroy;
-				selector_stages[0].Rewind = DecoderSelector_Rewind;
-				selector_stages[0].GetSamples = DecoderSelector_GetSamples;
-				selector_stages[0].SetLoop = DecoderSelector_SetLoop;
+				selector_stages[0]->decoder = decoder_selectors[0];
+				selector_stages[0]->Destroy = DecoderSelector_Destroy;
+				selector_stages[0]->Rewind = DecoderSelector_Rewind;
+				selector_stages[0]->GetSamples = DecoderSelector_GetSamples;
+				selector_stages[0]->SetLoop = DecoderSelector_SetLoop;
 			}
 		}
 
@@ -335,17 +349,19 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 			if (decoder_selectors[1] != NULL)
 			{
-				selector_stages[1].decoder = decoder_selectors[1];
-				selector_stages[1].Destroy = DecoderSelector_Destroy;
-				selector_stages[1].Rewind = DecoderSelector_Rewind;
-				selector_stages[1].GetSamples = DecoderSelector_GetSamples;
-				selector_stages[1].SetLoop = DecoderSelector_SetLoop;
+				selector_stages[1]->decoder = decoder_selectors[1];
+				selector_stages[1]->Destroy = DecoderSelector_Destroy;
+				selector_stages[1]->Rewind = DecoderSelector_Rewind;
+				selector_stages[1]->GetSamples = DecoderSelector_GetSamples;
+				selector_stages[1]->SetLoop = DecoderSelector_SetLoop;
 			}
 		}
 
 		if (decoder_selectors[0] == NULL && decoder_selectors[1] == NULL)
 		{
-			free(selector_stages);
+			free(selector_stages[0]);
+			free(selector_stages[1]);
+			free(stage);
 			return 0;
 		}
 
@@ -357,27 +373,25 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 		{
 			if (specs[0].sample_rate != specs[1].sample_rate || specs[0].channel_count != specs[1].channel_count || specs[0].format != specs[1].format)
 			{
-				if (decoder_selectors[0] != NULL)
-					DecoderSelector_Destroy(decoder_selectors[0]);
+				DecoderSelector_Destroy(decoder_selectors[0]);
+				DecoderSelector_Destroy(decoder_selectors[1]);
 
-				if (decoder_selectors[1] != NULL)
-					DecoderSelector_Destroy(decoder_selectors[1]);
-
-				free(selector_stages);
+				free(selector_stages[0]);
+				free(selector_stages[1]);
+				free(stage);
 				return 0;
 			}
 
-			split_decoder = SplitDecoder_Create(&selector_stages[0], &selector_stages[1]);
+			split_decoder = SplitDecoder_Create(selector_stages[0], selector_stages[1]);
 
 			if (split_decoder == NULL)
 			{
-				if (decoder_selectors[0] != NULL)
-					DecoderSelector_Destroy(decoder_selectors[0]);
+				DecoderSelector_Destroy(decoder_selectors[0]);
+				DecoderSelector_Destroy(decoder_selectors[1]);
 
-				if (decoder_selectors[1] != NULL)
-					DecoderSelector_Destroy(decoder_selectors[1]);
-
-				free(selector_stages);
+				free(selector_stages[0]);
+				free(selector_stages[1]);
+				free(stage);
 				return 0;
 			}
 
@@ -402,7 +416,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 		// Now for the resampler
 
-		void *resampled_decoder = ResampledDecoder_Create(stage, &wanted_spec, &specs[0]);
+		void *resampled_decoder = ResampledDecoder_Create(stage, &wanted_spec, decoder_selectors[0] != NULL ? &specs[0] : &specs[1]);
 
 		if (resampled_decoder == NULL)
 		{
@@ -419,7 +433,9 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 					DecoderSelector_Destroy(decoder_selectors[1]);
 			}
 
-			free(selector_stages);
+			free(selector_stages[0]);
+			free(selector_stages[1]);
+			free(stage);
 			return 0;
 		}
 
@@ -440,7 +456,9 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 					DecoderSelector_Destroy(decoder_selectors[1]);
 			}
 
-			free(selector_stages);
+			free(selector_stages[0]);
+			free(selector_stages[1]);
+			free(stage);
 			return 0;
 		}
 
@@ -471,7 +489,9 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 					DecoderSelector_Destroy(decoder_selectors[1]);
 			}
 
-			free(selector_stages);
+			free(selector_stages[0]);
+			free(selector_stages[1]);
+			free(stage);
 			return 0;
 		}
 

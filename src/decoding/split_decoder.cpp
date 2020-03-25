@@ -83,7 +83,8 @@ void SplitDecoder_Destroy(void *split_decoder_void)
 	if (split_decoder->next_stage[1] != NULL)
 		split_decoder->next_stage[1]->Destroy(split_decoder->next_stage[1]->decoder);
 
-	free(split_decoder->next_stage);
+	free(split_decoder->next_stage[0]);
+	free(split_decoder->next_stage[1]);
 	free(split_decoder);
 }
 
