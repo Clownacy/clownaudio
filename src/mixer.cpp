@@ -49,7 +49,7 @@ typedef struct Channel
 	bool free_when_done;
 	float volume_left;
 	float volume_right;
-	SplitDecoder *split_decoder;
+	void *split_decoder;
 	ClownAudio_Sound sound;
 
 	unsigned long fade_out_counter_max;
@@ -280,7 +280,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 		wanted_spec.channel_count = CHANNEL_COUNT;
 		wanted_spec.format = DECODER_FORMAT_F32;
 
-		SplitDecoder *split_decoder = SplitDecoder_Create(sound_data->split_decoder_data, config->loop, &wanted_spec, &spec);
+		void *split_decoder = SplitDecoder_Create(sound_data->split_decoder_data, config->loop, &wanted_spec, &spec);
 
 		if (split_decoder != NULL)
 		{

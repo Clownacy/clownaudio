@@ -29,16 +29,16 @@
 
 #define CHANNEL_COUNT 2
 
+typedef struct SplitDecoder
+{
+	void *resampled_decoder[2];
+	unsigned int current_decoder;
+	bool last_decoder;
+} SplitDecoder;
+
 struct SplitDecoderData
 {
 	ResampledDecoderData *resampled_decoder_data[2];
-};
-
-struct SplitDecoder
-{
-	ResampledDecoder *resampled_decoder[2];
-	unsigned int current_decoder;
-	bool last_decoder;
 };
 
 SplitDecoderData* SplitDecoder_LoadData(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, bool predecode)
@@ -70,7 +70,7 @@ void SplitDecoder_UnloadData(SplitDecoderData *data)
 	free(data);
 }
 
-SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
+void* SplitDecoder_Create(SplitDecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	SplitDecoder *split_decoder = (SplitDecoder*)malloc(sizeof(SplitDecoder));
 
@@ -119,8 +119,10 @@ SplitDecoder* SplitDecoder_Create(SplitDecoderData *data, bool loop, const Decod
 	return NULL;
 }
 
-void SplitDecoder_Destroy(SplitDecoder *split_decoder)
+void SplitDecoder_Destroy(void *split_decoder_void)
 {
+	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
+
 	if (split_decoder->resampled_decoder[0] != NULL)
 		ResampledDecoder_Destroy(split_decoder->resampled_decoder[0]);
 
@@ -130,8 +132,10 @@ void SplitDecoder_Destroy(SplitDecoder *split_decoder)
 	free(split_decoder);
 }
 
-void SplitDecoder_Rewind(SplitDecoder *split_decoder)
+void SplitDecoder_Rewind(void *split_decoder_void)
 {
+	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
+
 	if (split_decoder->resampled_decoder[0] != NULL)
 		ResampledDecoder_Rewind(split_decoder->resampled_decoder[0]);
 
@@ -139,8 +143,10 @@ void SplitDecoder_Rewind(SplitDecoder *split_decoder)
 		ResampledDecoder_Rewind(split_decoder->resampled_decoder[1]);
 }
 
-size_t SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_void, size_t frames_to_do)
+size_t SplitDecoder_GetSamples(void *split_decoder_void, void *buffer_void, size_t frames_to_do)
 {
+	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
+
 	float *buffer = (float*)buffer_void;
 
 	size_t frames_done = 0;
@@ -163,13 +169,17 @@ size_t SplitDecoder_GetSamples(SplitDecoder *split_decoder, void *buffer_void, s
 	return frames_done;
 }
 
-void SplitDecoder_SetLoop(SplitDecoder *split_decoder, bool loop)
+void SplitDecoder_SetLoop(void *split_decoder_void, bool loop)
 {
+	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
+
 	ResampledDecoder_SetLoop(split_decoder->resampled_decoder[split_decoder->last_decoder ? split_decoder->current_decoder : 1], loop);
 }
 
-void SplitDecoder_SetSampleRate(SplitDecoder *split_decoder, unsigned long sample_rate)
+void SplitDecoder_SetSampleRate(void *split_decoder_void, unsigned long sample_rate)
 {
+	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
+
 	if (split_decoder->resampled_decoder[0] != NULL)
 		ResampledDecoder_SetSampleRate(split_decoder->resampled_decoder[0], sample_rate);
 

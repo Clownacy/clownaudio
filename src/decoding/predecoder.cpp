@@ -37,17 +37,17 @@
 
 #define CHANNEL_COUNT 2
 
+typedef struct Predecoder
+{
+	ROMemoryStream *memory_stream;
+	bool loop;
+} Predecoder;
+
 struct PredecoderData
 {
 	void *decoded_data;
 	size_t decoded_data_size;
 	unsigned long sample_rate;
-};
-
-struct Predecoder
-{
-	ROMemoryStream *memory_stream;
-	bool loop;
 };
 
 static ma_format FormatToMiniaudioFormat(DecoderFormat format)
@@ -127,7 +127,7 @@ void Predecoder_UnloadData(PredecoderData *data)
 	free(data);
 }
 
-Predecoder* Predecoder_Create(PredecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
+void* Predecoder_Create(PredecoderData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)wanted_spec;
 
@@ -154,18 +154,24 @@ Predecoder* Predecoder_Create(PredecoderData *data, bool loop, const DecoderSpec
 	return NULL;
 }
 
-void Predecoder_Destroy(Predecoder *predecoder)
+void Predecoder_Destroy(void *predecoder_void)
 {
+	Predecoder *predecoder = (Predecoder*)predecoder_void;
+
 	ROMemoryStream_Destroy(predecoder->memory_stream);
 }
 
-void Predecoder_Rewind(Predecoder *predecoder)
+void Predecoder_Rewind(void *predecoder_void)
 {
+	Predecoder *predecoder = (Predecoder*)predecoder_void;
+
 	ROMemoryStream_Rewind(predecoder->memory_stream);
 }
 
-size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, size_t frames_to_do)
+size_t Predecoder_GetSamples(void *predecoder_void, void *buffer_void, size_t frames_to_do)
 {
+	Predecoder *predecoder = (Predecoder*)predecoder_void;
+
 	float *buffer = (float*)buffer_void;
 
 	size_t frames_done = 0;
@@ -183,7 +189,9 @@ size_t Predecoder_GetSamples(Predecoder *predecoder, void *buffer_void, size_t f
 	return frames_done;
 }
 
-void Predecoder_SetLoop(Predecoder *predecoder, bool loop)
+void Predecoder_SetLoop(void *predecoder_void, bool loop)
 {
+	Predecoder *predecoder = (Predecoder*)predecoder_void;
+
 	predecoder->loop = loop;
 }
