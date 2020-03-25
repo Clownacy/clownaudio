@@ -69,8 +69,7 @@
 	Decoder_##name##_Create, \
 	Decoder_##name##_Destroy, \
 	Decoder_##name##_Rewind, \
-	Decoder_##name##_GetSamples, \
-	NULL \
+	Decoder_##name##_GetSamples \
 }
 
 typedef enum DecoderType
@@ -80,14 +79,13 @@ typedef enum DecoderType
 	DECODER_TYPE_SIMPLE
 } DecoderType;
 
-typedef struct DecoderFunctionsExtra
+typedef struct DecoderFunctions
 {
 	void* (*Create)(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
 	void (*Destroy)(void *decoder);
 	void (*Rewind)(void *decoder);
 	size_t (*GetSamples)(void *decoder, void *buffer, size_t frames_to_do);
-	void (*SetLoop)(void *decoder, bool loop);
-} DecoderFunctionsExtra;
+} DecoderFunctions;
 
 typedef struct DecoderSelector
 {
@@ -101,12 +99,12 @@ struct DecoderSelectorData
 	const unsigned char *file_buffer;
 	size_t file_size;
 	DecoderType decoder_type;
-	const DecoderFunctionsExtra *decoder_functions;
+	const DecoderFunctions *decoder_functions;
 	PredecoderData *predecoder_data;
 	size_t size_of_frame;
 };
 
-static const DecoderFunctionsExtra decoder_function_list[] = {
+static const DecoderFunctions decoder_function_list[] = {
 #ifdef USE_LIBVORBIS
 	DECODER_FUNCTIONS(libVorbis),
 #endif
@@ -148,7 +146,7 @@ static const DecoderFunctionsExtra decoder_function_list[] = {
 #endif
 };
 
-static const DecoderFunctionsExtra predecoder_functions = {
+static const DecoderFunctions predecoder_functions = {
 	NULL,
 	Predecoder_Destroy,
 	Predecoder_Rewind,
@@ -158,7 +156,7 @@ static const DecoderFunctionsExtra predecoder_functions = {
 DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
 {
 	DecoderType decoder_type;
-	const DecoderFunctionsExtra *decoder_functions = NULL;
+	const DecoderFunctions *decoder_functions = NULL;
 	PredecoderData *predecoder_data = NULL;
 
 	DecoderSpec wanted_spec, spec;
@@ -177,11 +175,17 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 			decoder_type = spec.is_complex ? DECODER_TYPE_COMPLEX : DECODER_TYPE_SIMPLE;
 			decoder_functions = &decoder_function_list[i];
 
-			DecoderStage stage = {decoder, decoder_functions->Destroy, decoder_functions->Rewind, decoder_functions->GetSamples, decoder_functions->SetLoop};
+			DecoderStage *stage = (DecoderStage*)malloc(sizeof(DecoderStage));
+
+			stage->decoder = decoder;
+			stage->Destroy = decoder_functions->Destroy;
+			stage->Rewind = decoder_functions->Rewind;
+			stage->GetSamples = decoder_functions->GetSamples;
+			stage->SetLoop = NULL;
 
 			if (decoder_type == DECODER_TYPE_SIMPLE && predecode)
 			{
-				predecoder_data = Predecoder_DecodeData(&spec, &wanted_spec, &stage);
+				predecoder_data = Predecoder_DecodeData(&spec, &wanted_spec, stage);
 
 				if (predecoder_data != NULL)
 				{
@@ -189,8 +193,6 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 					decoder_functions = &predecoder_functions;
 				}
 			}
-
-			//decoder_function_list[i].Destroy(decoder);
 
 			break;
 		}
