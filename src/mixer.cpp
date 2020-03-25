@@ -355,6 +355,18 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 		if (decoder_selectors[0] != NULL && decoder_selectors[1] != NULL)
 		{
+			if (specs[0].sample_rate != specs[1].sample_rate || specs[0].channel_count != specs[1].channel_count || specs[0].format != specs[1].format)
+			{
+				if (decoder_selectors[0] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[0]);
+
+				if (decoder_selectors[1] != NULL)
+					DecoderSelector_Destroy(decoder_selectors[1]);
+
+				free(selector_stages);
+				return 0;
+			}
+
 			split_decoder = SplitDecoder_Create(&selector_stages[0], &selector_stages[1]);
 
 			if (split_decoder == NULL)
