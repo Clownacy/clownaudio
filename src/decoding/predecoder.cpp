@@ -58,7 +58,7 @@ PredecoderData* Predecoder_DecodeData(const DecoderSpec *in_spec, const DecoderS
 
 	if (memory_stream != NULL)
 	{
-		void *resampled_decoder = ResampledDecoder_Create(stage, out_spec, in_spec);
+		void *resampled_decoder = ResampledDecoder_Create(stage, false, out_spec, in_spec);
 
 		if (resampled_decoder != NULL)
 		{
@@ -96,7 +96,7 @@ PredecoderData* Predecoder_DecodeData(const DecoderSpec *in_spec, const DecoderS
 
 				predecoder_data->decoded_data = MemoryStream_GetBuffer(memory_stream);
 				predecoder_data->decoded_data_size = MemoryStream_GetPosition(memory_stream);
-				predecoder_data->sample_rate = in_spec->sample_rate;
+				predecoder_data->sample_rate = out_spec->sample_rate;
 			}
 
 			ResampledDecoder_Destroy(resampled_decoder);

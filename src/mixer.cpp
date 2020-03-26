@@ -423,7 +423,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 		// Now for the resampler
 
 		wanted_spec.sample_rate = mixer->sample_rate;	// Now update the sample rate, so the resampler converts to the mixer's expected rate
-		void *resampled_decoder = ResampledDecoder_Create(stage, &wanted_spec, decoder_selectors[0] != NULL ? &specs[0] : &specs[1]);
+		void *resampled_decoder = ResampledDecoder_Create(stage, config->dynamic_sample_rate, &wanted_spec, decoder_selectors[0] != NULL ? &specs[0] : &specs[1]);
 
 		if (resampled_decoder == NULL)
 		{
