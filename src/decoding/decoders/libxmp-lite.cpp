@@ -51,7 +51,9 @@ void* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, boo
 
 	if (!xmp_load_module_from_memory(context, (void*)data, data_size))
 	{
-		xmp_start_player(context, SAMPLE_RATE, 0);
+		unsigned long sample_rate = wanted_spec->sample_rate == 0 ? SAMPLE_RATE : wanted_spec->sample_rate;
+
+		xmp_start_player(context, sample_rate, 0);
 
 		Decoder_libXMPLite *decoder = (Decoder_libXMPLite*)malloc(sizeof(Decoder_libXMPLite));
 
@@ -62,7 +64,7 @@ void* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, boo
 			decoder->buffer_done = 0;
 			decoder->buffer_size = 0;
 
-			spec->sample_rate = SAMPLE_RATE;
+			spec->sample_rate = sample_rate;
 			spec->channel_count = CHANNEL_COUNT;
 			spec->format = DECODER_FORMAT_S16;
 			spec->is_complex = true;

@@ -300,7 +300,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 	if (sound_data != NULL)
 	{
 		DecoderSpec wanted_spec;
-		wanted_spec.sample_rate = mixer->sample_rate;
+		wanted_spec.sample_rate = config->dynamic_sample_rate ? 0 : mixer->sample_rate;
 		wanted_spec.channel_count = CHANNEL_COUNT;
 		wanted_spec.format = DECODER_FORMAT_F32;
 
@@ -422,6 +422,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 		// Now for the resampler
 
+		wanted_spec.sample_rate = mixer->sample_rate;
 		void *resampled_decoder = ResampledDecoder_Create(stage, &wanted_spec, decoder_selectors[0] != NULL ? &specs[0] : &specs[1]);
 
 		if (resampled_decoder == NULL)
