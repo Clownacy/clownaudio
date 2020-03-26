@@ -31,7 +31,7 @@
 
 typedef struct SplitDecoder
 {
-	DecoderStage *next_stage[2];
+	DecoderStage next_stage[2];
 	unsigned int current_decoder;
 	bool last_decoder;
 } SplitDecoder;
@@ -44,27 +44,11 @@ void* SplitDecoder_Create(DecoderStage *next_stage_intro, DecoderStage *next_sta
 
 		if (split_decoder != NULL)
 		{
-			if (next_stage_intro != NULL && next_stage_loop != NULL)
-			{
-	//			split_decoder->resampled_decoder[0] = ResampledDecoder_Create(data->resampled_decoder_data[0], false, wanted_spec, spec);
-	//			split_decoder->resampled_decoder[1] = ResampledDecoder_Create(data->resampled_decoder_data[1], loop, wanted_spec, spec);
+			split_decoder->current_decoder = 0;
+			split_decoder->last_decoder = false;
 
-				split_decoder->current_decoder = 0;
-				split_decoder->last_decoder = false;
-			}
-			else if (next_stage_intro != NULL)
-			{
-				split_decoder->current_decoder = 0;
-				split_decoder->last_decoder = true;
-			}
-			else //if (next_stage_loop != NULL)
-			{
-				split_decoder->current_decoder = 1;
-				split_decoder->last_decoder = true;
-			}
-
-			split_decoder->next_stage[0] = next_stage_intro;
-			split_decoder->next_stage[1] = next_stage_loop;
+			split_decoder->next_stage[0] = *next_stage_intro;
+			split_decoder->next_stage[1] = *next_stage_loop;
 
 			return split_decoder;
 		}
@@ -77,14 +61,9 @@ void SplitDecoder_Destroy(void *split_decoder_void)
 {
 	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
 
-	if (split_decoder->next_stage[0] != NULL)
-		split_decoder->next_stage[0]->Destroy(split_decoder->next_stage[0]->decoder);
+	split_decoder->next_stage[0].Destroy(split_decoder->next_stage[0].decoder);
+	split_decoder->next_stage[1].Destroy(split_decoder->next_stage[1].decoder);
 
-	if (split_decoder->next_stage[1] != NULL)
-		split_decoder->next_stage[1]->Destroy(split_decoder->next_stage[1]->decoder);
-
-	free(split_decoder->next_stage[0]);
-	free(split_decoder->next_stage[1]);
 	free(split_decoder);
 }
 
@@ -92,11 +71,8 @@ void SplitDecoder_Rewind(void *split_decoder_void)
 {
 	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
 
-	if (split_decoder->next_stage[0] != NULL)
-		split_decoder->next_stage[0]->Rewind(split_decoder->next_stage[0]->decoder);
-
-	if (split_decoder->next_stage[1] != NULL)
-		split_decoder->next_stage[1]->Rewind(split_decoder->next_stage[1]->decoder);
+	split_decoder->next_stage[0].Rewind(split_decoder->next_stage[0].decoder);
+	split_decoder->next_stage[1].Rewind(split_decoder->next_stage[1].decoder);
 }
 
 size_t SplitDecoder_GetSamples(void *split_decoder_void, void *buffer_void, size_t frames_to_do)
@@ -109,7 +85,7 @@ size_t SplitDecoder_GetSamples(void *split_decoder_void, void *buffer_void, size
 
 	for (;;)
 	{
-		frames_done += split_decoder->next_stage[split_decoder->current_decoder]->GetSamples(split_decoder->next_stage[split_decoder->current_decoder]->decoder, &buffer[frames_done * CHANNEL_COUNT], frames_to_do - frames_done);
+		frames_done += split_decoder->next_stage[split_decoder->current_decoder].GetSamples(split_decoder->next_stage[split_decoder->current_decoder].decoder, &buffer[frames_done * CHANNEL_COUNT], frames_to_do - frames_done);
 
 		if (frames_done != frames_to_do && !split_decoder->last_decoder)
 		{
@@ -129,5 +105,5 @@ void SplitDecoder_SetLoop(void *split_decoder_void, bool loop)
 {
 	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
 
-	split_decoder->next_stage[split_decoder->last_decoder ? split_decoder->current_decoder : 1]->SetLoop(split_decoder->next_stage[split_decoder->last_decoder ? split_decoder->current_decoder : 1], loop);
+	split_decoder->next_stage[split_decoder->last_decoder ? split_decoder->current_decoder : 1].SetLoop(split_decoder->next_stage[split_decoder->last_decoder ? split_decoder->current_decoder : 1].decoder, loop);
 }

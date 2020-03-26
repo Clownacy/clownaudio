@@ -171,17 +171,16 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 			decoder_type = spec.is_complex ? DECODER_TYPE_COMPLEX : DECODER_TYPE_SIMPLE;
 			decoder_functions = &decoder_function_list[i];
 
-			DecoderStage *stage = (DecoderStage*)malloc(sizeof(DecoderStage));
-
-			stage->decoder = decoder;
-			stage->Destroy = decoder_functions->Destroy;
-			stage->Rewind = decoder_functions->Rewind;
-			stage->GetSamples = decoder_functions->GetSamples;
-			stage->SetLoop = NULL;
+			DecoderStage stage;
+			stage.decoder = decoder;
+			stage.Destroy = decoder_functions->Destroy;
+			stage.Rewind = decoder_functions->Rewind;
+			stage.GetSamples = decoder_functions->GetSamples;
+			stage.SetLoop = NULL;
 
 			if (decoder_type == DECODER_TYPE_SIMPLE && (predecode || must_predecode))
 			{
-				predecoder_data = Predecoder_DecodeData(&spec, wanted_spec, stage);
+				predecoder_data = Predecoder_DecodeData(&spec, wanted_spec, &stage);
 
 				if (predecoder_data != NULL)
 				{

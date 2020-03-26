@@ -51,7 +51,7 @@ typedef struct Channel
 	bool free_when_done;
 	float volume_left;
 	float volume_right;
-	DecoderStage *pipeline;
+	DecoderStage pipeline;
 	void *resampled_decoder;
 	ClownAudio_Sound sound;
 
@@ -306,31 +306,11 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 		// Begin constructing the decoder pipeline
 
-		DecoderStage *stage = (DecoderStage*)malloc(sizeof(DecoderStage));
-
-		if (stage == NULL)
-			return 0;
+		DecoderStage stage;
 
 		// Let's start with the decoder-selectors
 
-		DecoderStage *selector_stages[2];
-
-		selector_stages[0] = (DecoderStage*)malloc(sizeof(DecoderStage));
-
-		if (selector_stages[0] == NULL)
-		{
-			free(stage);
-			return 0;
-		}
-
-		selector_stages[1] = (DecoderStage*)malloc(sizeof(DecoderStage));
-
-		if (selector_stages[1] == NULL)
-		{
-			free(selector_stages[0]);
-			free(stage);
-			return 0;
-		}
+		DecoderStage selector_stages[2];
 
 		void *decoder_selectors[2] = {NULL, NULL};
 		DecoderSpec specs[2];
@@ -341,11 +321,11 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 			if (decoder_selectors[0] != NULL)
 			{
-				selector_stages[0]->decoder = decoder_selectors[0];
-				selector_stages[0]->Destroy = DecoderSelector_Destroy;
-				selector_stages[0]->Rewind = DecoderSelector_Rewind;
-				selector_stages[0]->GetSamples = DecoderSelector_GetSamples;
-				selector_stages[0]->SetLoop = DecoderSelector_SetLoop;
+				selector_stages[0].decoder = decoder_selectors[0];
+				selector_stages[0].Destroy = DecoderSelector_Destroy;
+				selector_stages[0].Rewind = DecoderSelector_Rewind;
+				selector_stages[0].GetSamples = DecoderSelector_GetSamples;
+				selector_stages[0].SetLoop = DecoderSelector_SetLoop;
 			}
 		}
 
@@ -355,21 +335,16 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 			if (decoder_selectors[1] != NULL)
 			{
-				selector_stages[1]->decoder = decoder_selectors[1];
-				selector_stages[1]->Destroy = DecoderSelector_Destroy;
-				selector_stages[1]->Rewind = DecoderSelector_Rewind;
-				selector_stages[1]->GetSamples = DecoderSelector_GetSamples;
-				selector_stages[1]->SetLoop = DecoderSelector_SetLoop;
+				selector_stages[1].decoder = decoder_selectors[1];
+				selector_stages[1].Destroy = DecoderSelector_Destroy;
+				selector_stages[1].Rewind = DecoderSelector_Rewind;
+				selector_stages[1].GetSamples = DecoderSelector_GetSamples;
+				selector_stages[1].SetLoop = DecoderSelector_SetLoop;
 			}
 		}
 
 		if (decoder_selectors[0] == NULL && decoder_selectors[1] == NULL)
-		{
-			free(selector_stages[0]);
-			free(selector_stages[1]);
-			free(stage);
 			return 0;
-		}
 
 		// Now for the split-decoder, if needed
 
@@ -381,49 +356,41 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 			{
 				DecoderSelector_Destroy(decoder_selectors[0]);
 				DecoderSelector_Destroy(decoder_selectors[1]);
-
-				free(selector_stages[0]);
-				free(selector_stages[1]);
-				free(stage);
 				return 0;
 			}
 
-			split_decoder = SplitDecoder_Create(selector_stages[0], selector_stages[1]);
+			split_decoder = SplitDecoder_Create(&selector_stages[0], &selector_stages[1]);
 
 			if (split_decoder == NULL)
 			{
 				DecoderSelector_Destroy(decoder_selectors[0]);
 				DecoderSelector_Destroy(decoder_selectors[1]);
-
-				free(selector_stages[0]);
-				free(selector_stages[1]);
-				free(stage);
 				return 0;
 			}
 
-			stage->decoder = split_decoder;
-			stage->Destroy = SplitDecoder_Destroy;
-			stage->Rewind = SplitDecoder_Rewind;
-			stage->GetSamples = SplitDecoder_GetSamples;
-			stage->SetLoop = SplitDecoder_SetLoop;
+			stage.decoder = split_decoder;
+			stage.Destroy = SplitDecoder_Destroy;
+			stage.Rewind = SplitDecoder_Rewind;
+			stage.GetSamples = SplitDecoder_GetSamples;
+			stage.SetLoop = SplitDecoder_SetLoop;
 		}
 		else
 		{
 			if (decoder_selectors[0] != NULL)
-				stage->decoder = decoder_selectors[0];
+				stage.decoder = decoder_selectors[0];
 			else
-				stage->decoder = decoder_selectors[1];
+				stage.decoder = decoder_selectors[1];
 
-			stage->Destroy = DecoderSelector_Destroy;
-			stage->Rewind = DecoderSelector_Rewind;
-			stage->GetSamples = DecoderSelector_GetSamples;
-			stage->SetLoop = DecoderSelector_SetLoop;
+			stage.Destroy = DecoderSelector_Destroy;
+			stage.Rewind = DecoderSelector_Rewind;
+			stage.GetSamples = DecoderSelector_GetSamples;
+			stage.SetLoop = DecoderSelector_SetLoop;
 		}
 
 		// Now for the resampler
 
 		wanted_spec.sample_rate = mixer->sample_rate;	// Now update the sample rate, so the resampler converts to the mixer's expected rate
-		void *resampled_decoder = ResampledDecoder_Create(stage, config->dynamic_sample_rate, &wanted_spec, decoder_selectors[0] != NULL ? &specs[0] : &specs[1]);
+		void *resampled_decoder = ResampledDecoder_Create(&stage, config->dynamic_sample_rate, &wanted_spec, decoder_selectors[0] != NULL ? &specs[0] : &specs[1]);
 
 		if (resampled_decoder == NULL)
 		{
@@ -440,40 +407,14 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 					DecoderSelector_Destroy(decoder_selectors[1]);
 			}
 
-			free(selector_stages[0]);
-			free(selector_stages[1]);
-			free(stage);
 			return 0;
 		}
 
-		stage = (DecoderStage*)malloc(sizeof(DecoderStage));
-
-		if (stage == NULL)
-		{
-			if (split_decoder != NULL)
-			{
-				SplitDecoder_Destroy(split_decoder);
-			}
-			else
-			{
-				if (decoder_selectors[0] != NULL)
-					DecoderSelector_Destroy(decoder_selectors[0]);
-
-				if (decoder_selectors[1] != NULL)
-					DecoderSelector_Destroy(decoder_selectors[1]);
-			}
-
-			free(selector_stages[0]);
-			free(selector_stages[1]);
-			free(stage);
-			return 0;
-		}
-
-		stage->decoder = resampled_decoder;
-		stage->Destroy = ResampledDecoder_Destroy;
-		stage->Rewind = ResampledDecoder_Rewind;
-		stage->GetSamples = ResampledDecoder_GetSamples;
-		stage->SetLoop = ResampledDecoder_SetLoop;
+		stage.decoder = resampled_decoder;
+		stage.Destroy = ResampledDecoder_Destroy;
+		stage.Rewind = ResampledDecoder_Rewind;
+		stage.GetSamples = ResampledDecoder_GetSamples;
+		stage.SetLoop = ResampledDecoder_SetLoop;
 
 		// Finally we're done - now just allocate the channel
 
@@ -481,8 +422,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 
 		if (channel == NULL)
 		{
-			free(stage);
-
 			if (split_decoder != NULL)
 			{
 				SplitDecoder_Destroy(split_decoder);
@@ -496,9 +435,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixe
 					DecoderSelector_Destroy(decoder_selectors[1]);
 			}
 
-			free(selector_stages[0]);
-			free(selector_stages[1]);
-			free(stage);
 			return 0;
 		}
 
@@ -546,7 +482,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAud
 
 	if (channel != NULL)
 	{
-		channel->pipeline->Destroy(channel->pipeline->decoder);
+		channel->pipeline.Destroy(channel->pipeline.decoder);
 		free(channel);
 	}
 }
@@ -558,7 +494,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Mixer *mixer, ClownAudi
 	Channel *channel = FindChannel(mixer, sound);
 
 	if (channel != NULL)
-		channel->pipeline->Rewind(channel->pipeline->decoder);
+		channel->pipeline.Rewind(channel->pipeline.decoder);
 
 	MutexUnlock(&mixer->mutex);
 }
@@ -685,7 +621,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAud
 	Channel *channel = FindChannel(mixer, sound);
 
 	if (channel != NULL)
-		channel->pipeline->SetLoop(channel->pipeline->decoder, loop);
+		channel->pipeline.SetLoop(channel->pipeline.decoder, loop);
 
 	MutexUnlock(&mixer->mutex);
 }
@@ -721,7 +657,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_MixSamples(ClownAudio_Mixer *mixer, float *out
 				float read_buffer[0x1000];
 
 				const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
-				sub_frames_done = channel->pipeline->GetSamples(channel->pipeline->decoder, read_buffer, sub_frames_to_do);
+				sub_frames_done = channel->pipeline.GetSamples(channel->pipeline.decoder, read_buffer, sub_frames_to_do);
 
 				float *read_buffer_pointer = read_buffer;
 
@@ -767,7 +703,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_MixSamples(ClownAudio_Mixer *mixer, float *out
 			{
 				if (channel->free_when_done)
 				{
-					channel->pipeline->Destroy(channel->pipeline->decoder);
+					channel->pipeline.Destroy(channel->pipeline.decoder);
 					*channel_pointer = channel->next;
 					free(channel);
 					continue;
