@@ -153,7 +153,7 @@ static const DecoderFunctions predecoder_functions = {
 	Predecoder_GetSamples
 };
 
-DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode)
+DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode, bool must_predecode)
 {
 	DecoderType decoder_type;
 	const DecoderFunctions *decoder_functions = NULL;
@@ -183,7 +183,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 			stage->GetSamples = decoder_functions->GetSamples;
 			stage->SetLoop = NULL;
 
-			if (decoder_type == DECODER_TYPE_SIMPLE && predecode)
+			if (decoder_type == DECODER_TYPE_SIMPLE && (predecode || must_predecode))
 			{
 				predecoder_data = Predecoder_DecodeData(&spec, &wanted_spec, stage);
 
@@ -198,7 +198,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 		}
 	}
 
-	if (decoder_functions != NULL)
+	if (decoder_functions != NULL && (!must_predecode || predecoder_data != NULL))
 	{
 		DecoderSelectorData *data = (DecoderSelectorData*)malloc(sizeof(DecoderSelectorData));
 

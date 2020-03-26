@@ -26,7 +26,7 @@
 
 typedef struct DecoderSelectorData DecoderSelectorData;
 
-DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *data, size_t data_size, bool predecode);
+DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *data, size_t data_size, bool predecode, bool must_predecode);
 void DecoderSelector_UnloadData(DecoderSelectorData *data);
 void* DecoderSelector_Create(DecoderSelectorData *data, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
 void DecoderSelector_Destroy(void *selector);

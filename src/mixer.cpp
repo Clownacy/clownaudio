@@ -211,8 +211,8 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const
 	{
 		if (file_buffer1 != NULL && file_buffer2 != NULL)
 		{
-			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode);
-			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode);
+			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode, config->must_predecode);
+			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode, config->must_predecode);
 
 			if (sound_data->decoder_selector_data[0] != NULL && sound_data->decoder_selector_data[1] != NULL)
 				return sound_data;
@@ -222,7 +222,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const
 		}
 		else if (file_buffer1 != NULL)
 		{
-			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode);
+			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode, config->must_predecode);
 			sound_data->decoder_selector_data[1] = NULL;
 
 			if (sound_data->decoder_selector_data[0] != NULL)
@@ -231,7 +231,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const
 		else if (file_buffer2 != NULL)
 		{
 			sound_data->decoder_selector_data[0] = NULL;
-			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode);
+			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode, config->must_predecode);
 
 			if (sound_data->decoder_selector_data[1] != NULL)
 					return sound_data;
