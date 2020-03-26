@@ -47,7 +47,9 @@ void* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, bo
 
 	if (pxtn->init())
 	{
-		if (pxtn->quality_set(CHANNEL_COUNT, SAMPLE_RATE, 16))
+		unsigned long sample_rate = wanted_spec->sample_rate == 0 ? SAMPLE_RATE : wanted_spec->sample_rate;
+
+		if (pxtn->quality_set(CHANNEL_COUNT, sample_rate, 16))
 		{
 			pxtnDescriptor desc;
 
@@ -69,7 +71,7 @@ void* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, bo
 							decoder->memory_stream = memory_stream;
 							decoder->buffer = buffer;
 
-							spec->sample_rate = SAMPLE_RATE;
+							spec->sample_rate = sample_rate;
 							spec->channel_count = CHANNEL_COUNT;
 							spec->format = DECODER_FORMAT_S16;	// PxTone uses int16_t internally
 							spec->is_complex = false;
