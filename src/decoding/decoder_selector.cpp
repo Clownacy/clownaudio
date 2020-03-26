@@ -181,11 +181,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 			if (decoder_type == DECODER_TYPE_SIMPLE && (predecode || must_predecode))
 			{
-				DecoderSpec adjusted_wanted_spec = *wanted_spec;
-				if (adjusted_wanted_spec.sample_rate == 0)
-					adjusted_wanted_spec.sample_rate = spec.sample_rate;
-
-				predecoder_data = Predecoder_DecodeData(&spec, &adjusted_wanted_spec, stage);
+				predecoder_data = Predecoder_DecodeData(&spec, wanted_spec, stage);
 
 				if (predecoder_data != NULL)
 				{
