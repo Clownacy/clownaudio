@@ -166,19 +166,24 @@ int main(int argc, char *argv[])
 
 										if (ImGui::Button("Load sound data"))
 										{
-											SoundDataListEntry *new_entry = (SoundDataListEntry*)malloc(sizeof(SoundDataListEntry));
+											ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
 
-											new_entry->sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
-											new_entry->next = NULL;
+											if (sound_data != NULL)
+											{
+												SoundDataListEntry *new_entry = (SoundDataListEntry*)malloc(sizeof(SoundDataListEntry));
 
-											SoundDataListEntry **entry = &sound_data_list_head;
-											while (*entry != NULL)
-												entry = &(*entry)->next;
+												new_entry->sound_data = sound_data;
+												new_entry->next = NULL;
 
-											*entry = new_entry;
+												SoundDataListEntry **entry = &sound_data_list_head;
+												while (*entry != NULL)
+													entry = &(*entry)->next;
 
-											if (selected_sound_data == NULL)
-												selected_sound_data = new_entry;
+												*entry = new_entry;
+
+												if (selected_sound_data == NULL)
+													selected_sound_data = new_entry;
+											}
 										}
 									ImGui::End();
 
