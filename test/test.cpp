@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 
 										if (ImGui::Button("Load sound data"))
 										{
-											ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
+											ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromFiles(mixer, intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
 
 											if (sound_data != NULL)
 											{

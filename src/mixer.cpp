@@ -203,16 +203,22 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroyMixer(ClownAudio_Mixer *mixer)
 	free(mixer);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(ClownAudio_Mixer *mixer, const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
 {
 	ClownAudio_SoundData *sound_data = (ClownAudio_SoundData*)malloc(sizeof(ClownAudio_SoundData));
 
 	if (sound_data != NULL)
 	{
+		DecoderSpec wanted_spec;
+
+		wanted_spec.sample_rate = config->dynamic_sample_rate ? 0 : mixer->sample_rate;	// Do not change the sample rate when dynamic resampling is enabled
+		wanted_spec.channel_count = CHANNEL_COUNT;
+		wanted_spec.format = DECODER_FORMAT_F32;
+
 		if (file_buffer1 != NULL && file_buffer2 != NULL)
 		{
-			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode, config->must_predecode);
-			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode, config->must_predecode);
+			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode, config->must_predecode, &wanted_spec);
+			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode, config->must_predecode, &wanted_spec);
 
 			if (sound_data->decoder_selector_data[0] != NULL && sound_data->decoder_selector_data[1] != NULL)
 				return sound_data;
@@ -222,7 +228,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const
 		}
 		else if (file_buffer1 != NULL)
 		{
-			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode, config->must_predecode);
+			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode, config->must_predecode, &wanted_spec);
 			sound_data->decoder_selector_data[1] = NULL;
 
 			if (sound_data->decoder_selector_data[0] != NULL)
@@ -231,7 +237,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const
 		else if (file_buffer2 != NULL)
 		{
 			sound_data->decoder_selector_data[0] = NULL;
-			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode, config->must_predecode);
+			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode, config->must_predecode, &wanted_spec);
 
 			if (sound_data->decoder_selector_data[1] != NULL)
 					return sound_data;
@@ -241,7 +247,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(ClownAudio_Mixer *mixer, const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
 {
 	if (intro_path != NULL || loop_path != NULL)
 	{
@@ -252,7 +258,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const 
 		{
 			if (LoadFileToMemory(loop_path, &file_buffers[1], &file_buffer_sizes[1]))
 			{
-				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromMemory(file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config);
+				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromMemory(mixer, file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config);
 
 				if (sound_data != NULL)
 				{

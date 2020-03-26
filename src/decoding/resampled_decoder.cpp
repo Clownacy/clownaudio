@@ -71,7 +71,7 @@ void* ResampledDecoder_Create(DecoderStage *next_stage, const DecoderSpec *wante
 		{
 			resampled_decoder->next_stage = next_stage;
 
-			ma_data_converter_config config = ma_data_converter_config_init(FormatToMiniaudioFormat(child_spec->format), FormatToMiniaudioFormat(wanted_spec->format), child_spec->channel_count, wanted_spec->channel_count, child_spec->sample_rate, wanted_spec->sample_rate);
+			ma_data_converter_config config = ma_data_converter_config_init(FormatToMiniaudioFormat(child_spec->format), FormatToMiniaudioFormat(wanted_spec->format), child_spec->channel_count, wanted_spec->channel_count, child_spec->sample_rate, wanted_spec->sample_rate == 0 ? child_spec->sample_rate : wanted_spec->sample_rate);
 			config.resampling.allowDynamicSampleRate = MA_TRUE;
 
 			if (ma_data_converter_init(&config, &resampled_decoder->converter) == MA_SUCCESS)

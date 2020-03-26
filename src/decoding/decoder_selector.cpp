@@ -153,22 +153,18 @@ static const DecoderFunctions predecoder_functions = {
 	Predecoder_GetSamples
 };
 
-DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode, bool must_predecode)
+DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, size_t file_size, bool predecode, bool must_predecode, const DecoderSpec *wanted_spec)
 {
 	DecoderType decoder_type;
 	const DecoderFunctions *decoder_functions = NULL;
 	PredecoderData *predecoder_data = NULL;
 
-	DecoderSpec wanted_spec, spec;
-
-	wanted_spec.sample_rate = 0;	// Dummy - predecoder doesn't care yet
-	wanted_spec.channel_count = 2;
-	wanted_spec.format = DECODER_FORMAT_F32;
+	DecoderSpec spec;
 
 	// Figure out what format this sound is
 	for (size_t i = 0; i < sizeof(decoder_function_list) / sizeof(decoder_function_list[0]); ++i)
 	{
-		void *decoder = decoder_function_list[i].Create(file_buffer, file_size, false, &wanted_spec, &spec);
+		void *decoder = decoder_function_list[i].Create(file_buffer, file_size, false, wanted_spec, &spec);
 
 		if (decoder != NULL)
 		{
@@ -185,7 +181,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 
 			if (decoder_type == DECODER_TYPE_SIMPLE && (predecode || must_predecode))
 			{
-				predecoder_data = Predecoder_DecodeData(&spec, &wanted_spec, stage);
+				predecoder_data = Predecoder_DecodeData(&spec, wanted_spec, stage);
 
 				if (predecoder_data != NULL)
 				{
