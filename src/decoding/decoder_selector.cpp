@@ -198,7 +198,7 @@ DecoderSelectorData* DecoderSelector_LoadData(const unsigned char *file_buffer, 
 		}
 	}
 
-	if (decoder_functions != NULL && (!must_predecode || predecoder_data != NULL))
+	if (decoder_functions != NULL && (!must_predecode || decoder_type == DECODER_TYPE_PREDECODER))
 	{
 		DecoderSelectorData *data = (DecoderSelectorData*)malloc(sizeof(DecoderSelectorData));
 
