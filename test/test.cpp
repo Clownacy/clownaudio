@@ -90,6 +90,10 @@ int main(int argc, char *argv[])
 						unsigned long sample_rate = 48000;	// This default value is a fallback - it will be overwritten if the backend has a preferred rate
 						ClownAudio_Stream *stream = ClownAudio_CreateStream(&sample_rate, StreamCallback);
 
+						char title_buffer[0x40];
+						sprintf(title_buffer, "clownaudio test program (%ldHz)", sample_rate);
+						glfwSetWindowTitle(window, title_buffer);
+
 						if (stream != NULL)
 						{
 							ClownAudio_Mixer *mixer = ClownAudio_CreateMixer(sample_rate);
