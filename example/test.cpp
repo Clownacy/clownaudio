@@ -50,20 +50,23 @@ int main(int argc, char *argv[])
 
 	if (ClownAudio_InitPlayback())
 	{
-		printf("Creating mixer\n");
+		printf("Creating stream\n");
 		fflush(stdout);
 
-		ClownAudio_Mixer *mixer = ClownAudio_CreateMixer(CLOWNAUDIO_STREAM_SAMPLE_RATE);
+		unsigned long sample_rate = 48000;	// This default value is a fallback - it will be overwritten if the backend has a preferred rate
+		ClownAudio_Stream *stream = ClownAudio_CreateStream(&sample_rate, StreamCallback);
 
-		if (mixer != NULL)
+		if (stream != NULL)
 		{
-			printf("Creating stream\n");
+			printf("Creating mixer\n");
 			fflush(stdout);
 
-			ClownAudio_Stream *stream = ClownAudio_CreateStream(StreamCallback, mixer);
+			ClownAudio_Mixer *mixer = ClownAudio_CreateMixer(sample_rate);
 
-			if (stream != NULL)
+			if (mixer != NULL)
 			{
+				ClownAudio_SetStreamCallbackData(stream, mixer);
+
 				ClownAudio_ResumeStream(stream);
 
 				printf("Loading sound data\n");
@@ -83,7 +86,7 @@ int main(int argc, char *argv[])
 
 				ClownAudio_SoundDataConfig config;
 				ClownAudio_InitSoundDataConfig(&config);
-				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromFiles(file_paths[0], file_paths[1], &config);
+				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromFiles(mixer, file_paths[0], file_paths[1], &config);
 
 				if (sound_data != NULL)
 				{
@@ -180,7 +183,7 @@ int main(int argc, char *argv[])
 									printf("Setting sample-rate to %uHz\n", param);
 									fflush(stdout);
 
-									ClownAudio_SetSoundSampleRate(mixer, instance, param, param);
+									ClownAudio_SetSoundSampleRate(mixer, instance, param);
 									break;
 								}
 
@@ -241,22 +244,22 @@ int main(int argc, char *argv[])
 					printf("Couldn't load sound data\n");
 				}
 
-				printf("Destroying stream\n");
+				printf("Destroying mixer\n");
 				fflush(stdout);
-				ClownAudio_DestroyStream(stream);
+				ClownAudio_DestroyMixer(mixer);
 			}
 			else
 			{
-				printf("Couldn't create stream\n");
+				printf("Couldn't create mixer\n");
 			}
 
-			printf("Destroying mixer\n");
+			printf("Destroying stream\n");
 			fflush(stdout);
-			ClownAudio_DestroyMixer(mixer);
+			ClownAudio_DestroyStream(stream);
 		}
 		else
 		{
-			printf("Couldn't create mixer\n");
+			printf("Couldn't create stream\n");
 		}
 
 		printf("Deinitialising playback backend\n");
