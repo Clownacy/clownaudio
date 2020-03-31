@@ -44,7 +44,7 @@ static int Callback(const void *input_buffer, void *output_buffer_void, unsigned
 
 	stream->user_callback(stream->user_data, output_buffer, frames_to_do);
 
-	return 0;
+	return paContinue;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
