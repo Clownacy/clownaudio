@@ -62,7 +62,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 	
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
+CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *sample_rate, void (*user_callback)(void*, float*, size_t))
 {
 	ClownAudio_Stream *stream = (ClownAudio_Stream*)malloc(sizeof(ClownAudio_Stream));
 
@@ -71,16 +71,19 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callbac
 		ma_device_config config = ma_device_config_init(ma_device_type_playback);
 		config.playback.pDeviceID = NULL;
 		config.playback.format = ma_format_f32;
-		config.playback.channels = CLOWNAUDIO_STREAM_CHANNEL_COUNT;
-		config.sampleRate = CLOWNAUDIO_STREAM_SAMPLE_RATE;
+		config.playback.channels = 2;
+		config.sampleRate = 0;	// Use native sample rate
 		config.noPreZeroedOutputBuffer = MA_TRUE;
 		config.dataCallback = Callback;
 		config.pUserData = stream;
 
 		if (ma_device_init(NULL, &config, &stream->device) == MA_SUCCESS)
 		{
+			if (sample_rate != NULL)
+				*sample_rate = stream->device.sampleRate;
+
 			stream->user_callback = user_callback;
-			stream->user_data = user_data;
+			stream->user_data = NULL;
 
 			stream->volume = 1.0f;
 
@@ -102,6 +105,12 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 	}
 
 	return true;
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_SetStreamCallbackData(ClownAudio_Stream *stream, void *user_data)
+{
+	if (stream != NULL)
+		stream->user_data = user_data;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)

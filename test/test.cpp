@@ -87,14 +87,17 @@ int main(int argc, char *argv[])
 
 					if (ClownAudio_InitPlayback())
 					{
-						ClownAudio_Mixer *mixer = ClownAudio_CreateMixer(CLOWNAUDIO_STREAM_SAMPLE_RATE);
+						unsigned long sample_rate;
+						ClownAudio_Stream *stream = ClownAudio_CreateStream(&sample_rate, StreamCallback);
 
-						if (mixer != NULL)
+						if (stream != NULL)
 						{
-							ClownAudio_Stream *stream = ClownAudio_CreateStream(StreamCallback, mixer);
+							ClownAudio_Mixer *mixer = ClownAudio_CreateMixer(sample_rate);
 
-							if (stream != NULL)
+							if (mixer != NULL)
 							{
+								ClownAudio_SetStreamCallbackData(stream, mixer);
+
 								ClownAudio_ResumeStream(stream);
 
 								ClownAudio_SoundDataConfig data_config;
@@ -386,10 +389,10 @@ int main(int argc, char *argv[])
 									glfwSwapBuffers(window);
 								}
 
-								ClownAudio_DestroyStream(stream);
+								ClownAudio_DestroyMixer(mixer);
 							}
 
-							ClownAudio_DestroyMixer(mixer);
+							ClownAudio_DestroyStream(stream);
 						}
 
 						ClownAudio_DeinitPlayback();
