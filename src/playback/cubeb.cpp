@@ -75,14 +75,18 @@ CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 #endif
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
+CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *sample_rate, void (*user_callback)(void*, float*, size_t))
 {
 	cubeb_stream_params output_params;
 	output_params.format = CUBEB_SAMPLE_FLOAT32LE;
-	output_params.rate = CLOWNAUDIO_STREAM_SAMPLE_RATE;
 	output_params.prefs = CUBEB_STREAM_PREF_NONE;
 	output_params.channels = CLOWNAUDIO_STREAM_CHANNEL_COUNT;
 	output_params.layout = CLOWNAUDIO_STREAM_CHANNEL_COUNT == 2 ? CUBEB_LAYOUT_STEREO : CUBEB_LAYOUT_MONO;
+
+	if (cubeb_get_preferred_sample_rate(cubeb_context, &output_params.rate) != CUBEB_OK)
+		output_params.rate = *sample_rate;	// If the above line somehow fails, fallback on the default
+
+	*sample_rate = output_params.rate;
 
 	uint32_t latency_frames;
 
@@ -97,7 +101,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callbac
 			if (cubeb_stream_init(cubeb_context, &cubeb_stream_pointer, "clownaudio stream", NULL, NULL, NULL, &output_params, latency_frames, DataCallback, StateCallback, stream) == CUBEB_OK)
 			{
 				stream->user_callback = user_callback;
-				stream->user_data = user_data;
+				stream->user_data = NULL;
 
 				stream->cubeb_stream_pointer = cubeb_stream_pointer;
 
@@ -129,6 +133,12 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 	}
 
 	return success;
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_SetStreamCallbackData(ClownAudio_Stream *stream, void *user_data)
+{
+	if (stream != NULL)
+		stream->user_data = user_data;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)

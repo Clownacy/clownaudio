@@ -73,8 +73,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *samp
 
 		if (ma_device_init(NULL, &config, &stream->device) == MA_SUCCESS)
 		{
-			if (sample_rate != NULL)
-				*sample_rate = stream->device.sampleRate;
+			*sample_rate = stream->device.sampleRate;
 
 			stream->user_callback = user_callback;
 			stream->user_data = NULL;

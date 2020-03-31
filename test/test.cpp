@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 
 					if (ClownAudio_InitPlayback())
 					{
-						unsigned long sample_rate;
+						unsigned long sample_rate = 48000;	// This default value is a fallback - it will be overwritten if the backend has a preferred rate
 						ClownAudio_Stream *stream = ClownAudio_CreateStream(&sample_rate, StreamCallback);
 
 						if (stream != NULL)
