@@ -57,16 +57,20 @@ CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 	Pa_Terminate();
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callback)(void*, float*, size_t), void *user_data)
+CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *sample_rate, void (*user_callback)(void*, float*, size_t))
 {
 	ClownAudio_Stream *stream = (ClownAudio_Stream*)malloc(sizeof(ClownAudio_Stream));
 
 	if (stream != NULL)
 	{
-		if (Pa_OpenDefaultStream(&stream->pa_stream, 0, CLOWNAUDIO_STREAM_CHANNEL_COUNT, paFloat32, CLOWNAUDIO_STREAM_SAMPLE_RATE, paFramesPerBufferUnspecified, Callback, stream ) == paNoError)
+		const PaDeviceInfo *device_info = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice());
+
+		*sample_rate = device_info->defaultSampleRate;
+
+		if (Pa_OpenDefaultStream(&stream->pa_stream, 0, CLOWNAUDIO_STREAM_CHANNEL_COUNT, paFloat32, device_info->defaultSampleRate, paFramesPerBufferUnspecified, Callback, stream ) == paNoError)
 		{
 			stream->user_callback = user_callback;
-			stream->user_data = user_data;
+			stream->user_data = NULL;
 
 			return stream;
 		}
@@ -88,6 +92,12 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 	}
 
 	return success;
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_SetStreamCallbackData(ClownAudio_Stream *stream, void *user_data)
+{
+	if (stream != NULL)
+		stream->user_data = user_data;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
