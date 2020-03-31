@@ -393,6 +393,10 @@ int main(int argc, char *argv[])
 									glfwSwapBuffers(window);
 								}
 
+								free(files);
+
+								ClownAudio_PauseStream(stream);
+
 								ClownAudio_DestroyMixer(mixer);
 							}
 
