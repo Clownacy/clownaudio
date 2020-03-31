@@ -32,8 +32,6 @@ struct ClownAudio_Stream
 {
 	void (*user_callback)(void*, float*, size_t);
 	void *user_data;
-
-	float volume;
 };
 
 static bool sdl_already_init;
@@ -74,7 +72,7 @@ static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_d
 			else if (sample < -1.0f)
 				sample = -1.0f;
 
-			*output_buffer_pointer++ = (short)(sample * stream->volume * 32767.0f);
+			*output_buffer_pointer++ = (short)(sample * 32767.0f);
 		}
 	}
 }
@@ -118,8 +116,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callbac
 			stream->user_callback = user_callback;
 			stream->user_data = user_data;
 
-			stream->volume = 1.0f;
-
 			return stream;
 		}
 
@@ -136,14 +132,6 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 		SDL_CloseAudio();
 		free(stream);
 	}
-
-	return true;
-}
-
-CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
-{
-	if (stream != NULL)
-		stream->volume = volume * volume;
 
 	return true;
 }

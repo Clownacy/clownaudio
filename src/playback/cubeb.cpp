@@ -131,16 +131,6 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 	return success;
 }
 
-CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
-{
-	bool success = true;
-
-	if (stream != NULL)
-		success = cubeb_stream_set_volume(stream->cubeb_stream_pointer, volume * volume) == CUBEB_OK;
-
-	return success;
-}
-
 CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
 {
 	bool success = true;

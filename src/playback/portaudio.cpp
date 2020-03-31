@@ -31,7 +31,6 @@ struct ClownAudio_Stream
 	void *user_data;
 
 	PaStream *pa_stream;
-	float volume;
 };
 
 static int Callback(const void *input_buffer, void *output_buffer_void, unsigned long frames_to_do, const PaStreamCallbackTimeInfo *time_info, PaStreamCallbackFlags status_flags, void *user_data)
@@ -44,11 +43,6 @@ static int Callback(const void *input_buffer, void *output_buffer_void, unsigned
 	float *output_buffer = (float*)output_buffer_void;
 
 	stream->user_callback(stream->user_data, output_buffer, frames_to_do);
-
-	// Handle volume in software, since PortAudio's API doesn't have volume control
-	if (stream->volume != 1.0f)
-		for (unsigned long i = 0; i < frames_to_do * CLOWNAUDIO_STREAM_CHANNEL_COUNT; ++i)
-			output_buffer[i] *= stream->volume;
 
 	return 0;
 }
@@ -74,8 +68,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callbac
 			stream->user_callback = user_callback;
 			stream->user_data = user_data;
 
-			stream->volume = 1.0f;
-
 			return stream;
 		}
 
@@ -96,14 +88,6 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 	}
 
 	return success;
-}
-
-CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
-{
-	if (stream != NULL)
-		stream->volume = volume * volume;
-
-	return true;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)

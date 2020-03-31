@@ -34,7 +34,6 @@ struct ClownAudio_Stream
 	void *user_data;
 
 	ma_device device;
-	float volume;
 };
 
 static void Callback(ma_device *device, void *output_buffer_void, const void *input_buffer, ma_uint32 frames_to_do)
@@ -45,11 +44,6 @@ static void Callback(ma_device *device, void *output_buffer_void, const void *in
 	float *output_buffer = (float*)output_buffer_void;
 
 	stream->user_callback(stream->user_data, output_buffer, frames_to_do);
-
-	// Handle volume in software, since mini_al's API doesn't have volume control
-	if (stream->volume != 1.0f)
-		for (unsigned long i = 0; i < frames_to_do * CLOWNAUDIO_STREAM_CHANNEL_COUNT; ++i)
-			output_buffer[i] *= stream->volume;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
@@ -85,8 +79,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *samp
 			stream->user_callback = user_callback;
 			stream->user_data = NULL;
 
-			stream->volume = 1.0f;
-
 			return stream;
 		}
 
@@ -111,14 +103,6 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetStreamCallbackData(ClownAudio_Stream *strea
 {
 	if (stream != NULL)
 		stream->user_data = user_data;
-}
-
-CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
-{
-	if (stream != NULL)
-		stream->volume = volume * volume;
-
-	return true;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)

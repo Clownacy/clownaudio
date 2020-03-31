@@ -32,7 +32,6 @@ struct ClownAudio_Stream
 	void *user_data;
 
 	SDL_AudioDeviceID device;
-	float volume;
 };
 
 static bool sdl_already_init;
@@ -57,11 +56,6 @@ static void Callback(void *user_data, Uint8 *output_buffer_uint8, int bytes_to_d
 	float *output_buffer = (float*)output_buffer_uint8;
 
 	stream->user_callback(stream->user_data, output_buffer, frames_to_do);
-
-	// Handle volume in software, since SDL2's API doesn't have volume control
-	if (stream->volume != 1.0f)
-		for (unsigned long i = 0; i < frames_to_do * CLOWNAUDIO_STREAM_CHANNEL_COUNT; ++i)
-			output_buffer[i] *= stream->volume;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
@@ -106,7 +100,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(void (*user_callbac
 			stream->user_data = user_data;
 
 			stream->device = device;
-			stream->volume = 1.0f;
 
 			return stream;
 		}
@@ -124,14 +117,6 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 		SDL_CloseAudioDevice(stream->device);
 		free(stream);
 	}
-
-	return true;
-}
-
-CLOWNAUDIO_EXPORT bool ClownAudio_SetStreamVolume(ClownAudio_Stream *stream, float volume)
-{
-	if (stream != NULL)
-		stream->volume = volume * volume;
 
 	return true;
 }
