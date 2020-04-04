@@ -40,7 +40,7 @@ void* Decoder_DR_MP3_Create(const unsigned char *data, size_t data_size, bool lo
 
 		if (instance != NULL)
 		{
-			if (drmp3_init_memory(instance, data, data_size, NULL, NULL))
+			if (drmp3_init_memory(instance, data, data_size, NULL))
 			{
 				spec->sample_rate = instance->sampleRate;
 				spec->channel_count = instance->channels;
