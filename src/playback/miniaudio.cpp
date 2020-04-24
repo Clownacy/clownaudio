@@ -36,6 +36,13 @@ struct ClownAudio_Stream
 	ma_device device;
 };
 
+typedef struct ClownAudio_Mutex
+{
+	ma_mutex mutex;
+} ClownAudio_Mutex;
+
+static ma_context context;
+
 static void Callback(ma_device *device, void *output_buffer_void, const void *input_buffer, ma_uint32 frames_to_do)
 {
 	(void)input_buffer;
@@ -48,12 +55,12 @@ static void Callback(ma_device *device, void *output_buffer_void, const void *in
 
 CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 {
-	return true;
+	return ma_context_init(NULL, 0, NULL, &context) == MA_SUCCESS;
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 {
-	
+    ma_context_uninit(&context);
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *sample_rate, void (*user_callback)(void*, float*, size_t))
@@ -122,4 +129,34 @@ CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
 		success = ma_device_start(&stream->device) == MA_SUCCESS;
 
 	return success;
+}
+
+CLOWNAUDIO_EXPORT ClownAudio_Mutex* ClownAudio_MutexInit(void)
+{
+	ClownAudio_Mutex *mutex = (ClownAudio_Mutex*)malloc(sizeof(ClownAudio_Mutex));
+
+	if (mutex != NULL)
+	{
+		if (ma_mutex_init(&context, &mutex->mutex) == MA_SUCCESS)
+			return mutex;
+
+		free(mutex);
+	}
+
+	return NULL;
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexDeinit(ClownAudio_Mutex *mutex)
+{
+	ma_mutex_uninit(&mutex->mutex);
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexLock(ClownAudio_Mutex *mutex)
+{
+	ma_mutex_lock(&mutex->mutex);
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexUnlock(ClownAudio_Mutex *mutex)
+{
+	ma_mutex_unlock(&mutex->mutex);
 }

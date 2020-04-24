@@ -42,11 +42,11 @@ static void StreamCallback(void *user_data, float *output_buffer, size_t frames_
 
 CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 {
-	mutex = ClownAudio_MutexInit();
-
-	if (mutex != NULL)
+	if (ClownAudio_InitPlayback())
 	{
-		if (ClownAudio_InitPlayback())
+		mutex = ClownAudio_MutexInit();
+
+		if (mutex != NULL)
 		{
 			unsigned long sample_rate = 48000;	// This default value is a fallback - it will be overwritten if the backend has a preferred rate
 			stream = ClownAudio_CreateStream(&sample_rate, StreamCallback);
@@ -67,10 +67,10 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 				ClownAudio_DestroyStream(stream);
 			}
 
-			ClownAudio_DeinitPlayback();
+			ClownAudio_MutexDeinit(mutex);
 		}
 
-		ClownAudio_MutexDeinit(mutex);
+		ClownAudio_DeinitPlayback();
 	}
 
 	return false;
@@ -80,8 +80,8 @@ CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void)
 {
 	ClownAudio_DestroyMixer(mixer);
 	ClownAudio_DestroyStream(stream);
-	ClownAudio_DeinitPlayback();
 	ClownAudio_MutexDeinit(mutex);
+	ClownAudio_DeinitPlayback();
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
