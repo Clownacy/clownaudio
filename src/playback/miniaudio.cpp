@@ -28,8 +28,6 @@
 #endif
 #include "../miniaudio.h"
 
-static ma_context context;
-
 struct ClownAudio_Stream
 {
 	void (*user_callback)(void*, float*, size_t);
@@ -39,6 +37,8 @@ struct ClownAudio_Stream
 
 	ma_mutex mutex;
 };
+
+static ma_context context;
 
 static void Callback(ma_device *device, void *output_buffer_void, const void *input_buffer, ma_uint32 frames_to_do)
 {
@@ -75,7 +75,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *samp
 		config.dataCallback = Callback;
 		config.pUserData = stream;
 
-		if (ma_device_init(NULL, &config, &stream->device) == MA_SUCCESS)
+		if (ma_device_init(&context, &config, &stream->device) == MA_SUCCESS)
 		{
 			*sample_rate = stream->device.sampleRate;
 
