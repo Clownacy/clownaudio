@@ -25,12 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <pthread.h>
-#endif
-
 #include "decoding/decoders/common.h"
 
 #include "decoding/decoder_selector.h"
@@ -43,19 +37,9 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define CLAMP(x, min, max) MIN(MAX((x), (min)), (max))
 
-typedef struct Mutex
-{
-#ifdef _WIN32
-	HANDLE handle;
-#else
-	pthread_mutex_t pthread_mutex;
-#endif
-} Mutex;
-
 struct ClownAudio_Mixer
 {
 	ClownAudio_Sound *sound_list_head;
-	Mutex mutex;
 	unsigned long sample_rate;
 	ClownAudio_SoundID sound_id_allocator;
 };
@@ -119,42 +103,6 @@ static bool LoadFileToMemory(const char *path, unsigned char **buffer, size_t *s
 	return success;
 }
 
-static void MutexInit(Mutex *mutex)
-{
-#ifdef _WIN32
-	mutex->handle = CreateEventA(NULL, FALSE, TRUE, NULL);
-#else
-	pthread_mutex_init(&mutex->pthread_mutex, NULL);
-#endif
-}
-
-static void MutexDeinit(Mutex *mutex)
-{
-#ifdef _WIN32
-	CloseHandle(mutex->handle);
-#else
-	pthread_mutex_destroy(&mutex->pthread_mutex);
-#endif
-}
-
-static void MutexLock(Mutex *mutex)
-{
-#ifdef _WIN32
-	WaitForSingleObject(mutex->handle, INFINITE);
-#else
-	pthread_mutex_lock(&mutex->pthread_mutex);
-#endif
-}
-
-static void MutexUnlock(Mutex *mutex)
-{
-#ifdef _WIN32
-	SetEvent(mutex->handle);
-#else
-	pthread_mutex_unlock(&mutex->pthread_mutex);
-#endif
-}
-
 static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	for (ClownAudio_Sound *sound = mixer->sound_list_head; sound != NULL; sound = sound->next)
@@ -189,8 +137,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Mixer* ClownAudio_CreateMixer(unsigned long sample_
 		mixer->sample_rate = sample_rate;
 
 		mixer->sound_id_allocator = 0;
-
-		MutexInit(&mixer->mutex);
 	}
 
 	return mixer;
@@ -198,12 +144,10 @@ CLOWNAUDIO_EXPORT ClownAudio_Mixer* ClownAudio_CreateMixer(unsigned long sample_
 
 CLOWNAUDIO_EXPORT void ClownAudio_DestroyMixer(ClownAudio_Mixer *mixer)
 {
-	MutexDeinit(&mixer->mutex);
-
 	free(mixer);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(ClownAudio_Mixer *mixer, const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromMemory(ClownAudio_Mixer *mixer, const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
 {
 	ClownAudio_SoundData *sound_data = (ClownAudio_SoundData*)malloc(sizeof(ClownAudio_SoundData));
 
@@ -247,7 +191,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromMemory(Clown
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(ClownAudio_Mixer *mixer, const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromFiles(ClownAudio_Mixer *mixer, const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
 {
 	if (intro_path != NULL || loop_path != NULL)
 	{
@@ -258,7 +202,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(ClownA
 		{
 			if (LoadFileToMemory(loop_path, &file_buffers[1], &file_buffer_sizes[1]))
 			{
-				ClownAudio_SoundData *sound_data = ClownAudio_LoadSoundDataFromMemory(mixer, file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config);
+				ClownAudio_SoundData *sound_data = ClownAudio_Mixer_LoadSoundDataFromMemory(mixer, file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config);
 
 				if (sound_data != NULL)
 				{
@@ -278,7 +222,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(ClownA
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound_data)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_SoundData *sound_data)
 {
 	if (sound_data != NULL)
 	{
@@ -293,7 +237,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound_da
 	}
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config)
 {
 	if (sound_data != NULL)
 	{
@@ -451,7 +395,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_CreateSound(ClownAudio_Mixer *mix
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_RegisterSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
+CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 {
 	ClownAudio_SoundID sound_id = 0;
 
@@ -464,20 +408,16 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_RegisterSound(ClownAudio_Mixer *
 
 		sound->id = sound_id;
 
-		MutexLock(&mixer->mutex);
 		sound->next = mixer->sound_list_head;
 		mixer->sound_list_head = sound;
-		MutexUnlock(&mixer->mutex);
 	}
 
 	return sound_id;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	ClownAudio_Sound *sound = NULL;
-
-	MutexLock(&mixer->mutex);
 
 	for (ClownAudio_Sound **sound_pointer = &mixer->sound_list_head; *sound_pointer != NULL; sound_pointer = &(*sound_pointer)->next)
 	{
@@ -489,8 +429,6 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAud
 		}
 	}
 
-	MutexUnlock(&mixer->mutex);
-
 	if (sound != NULL)
 	{
 		sound->pipeline.Destroy(sound->pipeline.decoder);
@@ -498,46 +436,32 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAud
 	}
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
 		sound->pipeline.Rewind(sound->pipeline.decoder);
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_PauseSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_PauseSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
 		sound->paused = true;
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
 		sound->paused = false;
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_FadeOutSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeOutSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
@@ -554,14 +478,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_FadeOutSound(ClownAudio_Mixer *mixer, ClownAud
 		sound->fade_out_counter_max = new_fade_out_counter_max;
 		sound->fade_in_counter_max = 0;
 	}
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_FadeInSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeInSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
@@ -578,14 +498,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_FadeInSound(ClownAudio_Mixer *mixer, ClownAudi
 		sound->fade_in_counter_max = new_fade_in_counter_max;
 		sound->fade_out_counter_max = 0;
 	}
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_CancelFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_CancelFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
@@ -593,27 +509,17 @@ CLOWNAUDIO_EXPORT void ClownAudio_CancelFade(ClownAudio_Mixer *mixer, ClownAudio
 		sound->fade_in_counter_max = 0;
 		sound->fade_out_counter_max = 0;
 	}
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT int ClownAudio_GetSoundStatus(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT int ClownAudio_Mixer_GetSoundStatus(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
-	int status = (sound == NULL) ? -1 : sound->paused;
-
-	MutexUnlock(&mixer->mutex);
-
-	return status;
+	return (sound == NULL) ? -1 : sound->paused;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, float volume_left, float volume_right)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, float volume_left, float volume_right)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
@@ -621,38 +527,26 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Mixer *mixer, ClownA
 		sound->volume_left = volume_left;
 		sound->volume_right = volume_right;
 	}
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, bool loop)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, bool loop)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
 		sound->pipeline.SetLoop(sound->pipeline.decoder, loop);
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long sample_rate)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long sample_rate)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
 		ResampledDecoder_SetSampleRate(sound->resampled_decoder, sample_rate);
-
-	MutexUnlock(&mixer->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_MixSamples(ClownAudio_Mixer *mixer, float *output_buffer, size_t frames_to_do)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, float *output_buffer, size_t frames_to_do)
 {
-	MutexLock(&mixer->mutex);
-
 	ClownAudio_Sound **sound_pointer = &mixer->sound_list_head;
 	while (*sound_pointer != NULL)
 	{
@@ -728,6 +622,4 @@ CLOWNAUDIO_EXPORT void ClownAudio_MixSamples(ClownAudio_Mixer *mixer, float *out
 
 		sound_pointer = &(*sound_pointer)->next;
 	}
-
-	MutexUnlock(&mixer->mutex);
 }

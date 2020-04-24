@@ -40,7 +40,9 @@ add_library(clownaudio
 
 if(NOT CLOWNAUDIO_NO_PLAYBACK)
 	target_sources(clownaudio PRIVATE
+		"include/clownaudio/clownaudio.h"
 		"include/clownaudio/playback.h"
+		"src/clownaudio.cpp"
 	)
 endif()
 
@@ -444,7 +446,7 @@ set_target_properties(clownaudio PROPERTIES C_VISIBILITY_PRESET hidden CXX_VISIB
 if(CLOWNAUDIO_NO_PLAYBACK)
 	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/mixer.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 else()
-	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/playback.h;include/clownaudio/mixer.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
+	set_target_properties(clownaudio PROPERTIES PUBLIC_HEADER "include/clownaudio/clownaudio.h;include/clownaudio/playback.h;include/clownaudio/mixer.h;${CMAKE_BINARY_DIR}/export/clownaudio_export.h")
 endif()
 
 # Set language standards

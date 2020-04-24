@@ -36,6 +36,7 @@ extern "C" {
 #endif
 
 typedef struct ClownAudio_Stream ClownAudio_Stream;
+typedef struct ClownAudio_Mutex ClownAudio_Mutex;
 
 CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void);
 CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void);
@@ -44,6 +45,12 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream);
 CLOWNAUDIO_EXPORT void ClownAudio_SetStreamCallbackData(ClownAudio_Stream *stream, void *user_data);
 CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream);
 CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream);
+
+// Mutex API
+CLOWNAUDIO_EXPORT ClownAudio_Mutex* ClownAudio_MutexInit(void);
+CLOWNAUDIO_EXPORT void ClownAudio_MutexDeinit(ClownAudio_Mutex *mutex);
+CLOWNAUDIO_EXPORT void ClownAudio_MutexLock(ClownAudio_Mutex *mutex);
+CLOWNAUDIO_EXPORT void ClownAudio_MutexUnlock(ClownAudio_Mutex *mutex);
 
 #ifdef __cplusplus
 }

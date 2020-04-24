@@ -23,6 +23,12 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
 #include "portaudio.h"
 
 struct ClownAudio_Stream
@@ -32,6 +38,15 @@ struct ClownAudio_Stream
 
 	PaStream *pa_stream;
 };
+
+typedef struct ClownAudio_Mutex
+{
+#ifdef _WIN32
+	HANDLE handle;
+#else
+	pthread_mutex_t pthread_mutex;
+#endif
+} ClownAudio_Mutex;
 
 static int Callback(const void *input_buffer, void *output_buffer_void, unsigned long frames_to_do, const PaStreamCallbackTimeInfo *time_info, PaStreamCallbackFlags status_flags, void *user_data)
 {
@@ -118,4 +133,47 @@ CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
 		success = Pa_StartStream(stream->pa_stream) == paNoError;
 
 	return success;
+}
+
+CLOWNAUDIO_EXPORT ClownAudio_Mutex* ClownAudio_MutexInit(void)
+{
+	ClownAudio_Mutex *mutex = (ClownAudio_Mutex*)malloc(sizeof(ClownAudio_Mutex));
+
+	if (mutex != NULL)
+	{
+	#ifdef _WIN32
+		mutex->handle = CreateEventA(NULL, FALSE, TRUE, NULL);
+	#else
+		pthread_mutex_init(&mutex->pthread_mutex, NULL);
+	#endif
+	}
+
+	return mutex;
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexDeinit(ClownAudio_Mutex *mutex)
+{
+#ifdef _WIN32
+	CloseHandle(mutex->handle);
+#else
+	pthread_mutex_destroy(&mutex->pthread_mutex);
+#endif
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexLock(ClownAudio_Mutex *mutex)
+{
+#ifdef _WIN32
+	WaitForSingleObject(mutex->handle, INFINITE);
+#else
+	pthread_mutex_lock(&mutex->pthread_mutex);
+#endif
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexUnlock(ClownAudio_Mutex *mutex)
+{
+#ifdef _WIN32
+	SetEvent(mutex->handle);
+#else
+	pthread_mutex_unlock(&mutex->pthread_mutex);
+#endif
 }
