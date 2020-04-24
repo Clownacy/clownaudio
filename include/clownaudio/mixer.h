@@ -35,7 +35,7 @@ extern "C" {
 
 typedef struct ClownAudio_Mixer ClownAudio_Mixer;
 typedef struct ClownAudio_SoundData ClownAudio_SoundData;
-typedef unsigned int ClownAudio_Sound;
+typedef unsigned int ClownAudio_SoundID;
 
 typedef struct ClownAudio_SoundDataConfig
 {
@@ -94,10 +94,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound_da
 ////////////////////////////////
 
 // Creates a sound from sound-data. The sound will be paused by default.
-CLOWNAUDIO_EXPORT ClownAudio_Sound ClownAudio_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config);
+CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config);
 
 // Destroys sound.
-CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound sound);
+CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
 /////////////////////////////
 // Assorted sound controls //
@@ -106,44 +106,44 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAud
 // Playback
 
 // Rewinds sound to the very beginning.
-CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_Sound sound);
+CLOWNAUDIO_EXPORT void ClownAudio_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
 // Pauses sound.
-CLOWNAUDIO_EXPORT void ClownAudio_PauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound sound);
+CLOWNAUDIO_EXPORT void ClownAudio_PauseSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
 // Unpauses sound.
-CLOWNAUDIO_EXPORT void ClownAudio_UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound sound);
+CLOWNAUDIO_EXPORT void ClownAudio_UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
 
 // Fading
 
 // Make sound fade-out over the specified duration, measured in milliseconds.
 // If the sound is currently fading-in, this function will override it, and cause the sound to fade-out from the volume is was currently at.  
-CLOWNAUDIO_EXPORT void ClownAudio_FadeOutSound(ClownAudio_Mixer *mixer, ClownAudio_Sound sound, unsigned int duration);
+CLOWNAUDIO_EXPORT void ClownAudio_FadeOutSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration);
 
 // Make sound fade-in over the specified duration, measured in milliseconds.
 // If the sound is currently fading-out, this function will override it, and cause the sound to fade-in from the volume is was currently at.  
-CLOWNAUDIO_EXPORT void ClownAudio_FadeInSound(ClownAudio_Mixer *mixer, ClownAudio_Sound sound, unsigned int duration);
+CLOWNAUDIO_EXPORT void ClownAudio_FadeInSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration);
 
 // Aborts fading, and instantly restores the sound to full volume.
 // If you want to smoothly-undo an in-progress fade, use one of the above functions instead.
-CLOWNAUDIO_EXPORT void ClownAudio_CancelFade(ClownAudio_Mixer *mixer, ClownAudio_Sound sound);
+CLOWNAUDIO_EXPORT void ClownAudio_CancelFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
 
 // Miscellaneous
 
 // Returns -1 if the sound doesn't exist, 0 if it's unpaused, or 1 if it is paused.
-CLOWNAUDIO_EXPORT int ClownAudio_GetSoundStatus(ClownAudio_Mixer *mixer, ClownAudio_Sound sound);
+CLOWNAUDIO_EXPORT int ClownAudio_GetSoundStatus(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
 // Sets stereo volume - volume is linear, ranging from 0.0f to 1.0f.
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_Sound sound, float volume_left, float volume_right);
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, float volume_left, float volume_right);
 
 // Change whether the sound should loop or not. Only certain file formats support this (for example - Ogg Vorbis does, and PxTone doesn't).
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAudio_Sound sound, bool loop);
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, bool loop);
 
 // Override the sound's sample-rate. Note - the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct,
 // otherwise this function will silently fail.
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_Sound sound, unsigned long sample_rate);
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long sample_rate);
 
 
 ////////////
