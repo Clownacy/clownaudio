@@ -150,34 +150,12 @@ CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
 	return true;
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Mutex* ClownAudio_MutexInit(void)
+CLOWNAUDIO_EXPORT void ClownAudio_LockStream(ClownAudio_Stream *stream)
 {
-	ClownAudio_Mutex *mutex = (ClownAudio_Mutex*)malloc(sizeof(ClownAudio_Mutex));
-
-	if (mutex != NULL)
-	{
-		mutex->sdl_mutex = SDL_CreateMutex();
-
-		if (mutex->sdl_mutex != NULL)
-			return mutex;
-
-		free(mutex);
-	}
-
-	return NULL;
+	SDL_LockAudioDevice(stream->device);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_MutexDeinit(ClownAudio_Mutex *mutex)
+CLOWNAUDIO_EXPORT void ClownAudio_UnlockStream(ClownAudio_Stream *stream)
 {
-	SDL_DestroyMutex(mutex->sdl_mutex);
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_MutexLock(ClownAudio_Mutex *mutex)
-{
-	SDL_LockMutex(mutex->sdl_mutex);
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_MutexUnlock(ClownAudio_Mutex *mutex)
-{
-	SDL_UnlockMutex(mutex->sdl_mutex);
+	SDL_UnlockAudioDevice(stream->device);
 }

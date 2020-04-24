@@ -158,22 +158,12 @@ CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
 	return true;
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Mutex* ClownAudio_MutexInit(void)
-{
-	return (ClownAudio_Mutex*)0xBEEFCAFE;
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_MutexDeinit(ClownAudio_Mutex *mutex)
-{
-	
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_MutexLock(ClownAudio_Mutex *mutex)
+CLOWNAUDIO_EXPORT void ClownAudio_LockStream(ClownAudio_Stream *stream)
 {
 	SDL_LockAudio();
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_MutexUnlock(ClownAudio_Mutex *mutex)
+CLOWNAUDIO_EXPORT void ClownAudio_UnlockStream(ClownAudio_Stream *stream)
 {
 	SDL_UnlockAudio();
 }
