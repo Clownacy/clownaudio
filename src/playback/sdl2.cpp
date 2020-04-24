@@ -34,6 +34,11 @@ struct ClownAudio_Stream
 	SDL_AudioDeviceID device;
 };
 
+typedef struct ClownAudio_Mutex
+{
+	SDL_mutex *sdl_mutex;
+} ClownAudio_Mutex;
+
 static bool sdl_already_init;
 
 static unsigned int NextPowerOfTwo(unsigned int value)
@@ -143,4 +148,36 @@ CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
 		SDL_PauseAudioDevice(stream->device, 0);
 
 	return true;
+}
+
+CLOWNAUDIO_EXPORT ClownAudio_Mutex* ClownAudio_MutexInit(void)
+{
+	ClownAudio_Mutex *mutex = (ClownAudio_Mutex*)malloc(sizeof(ClownAudio_Mutex));
+
+	if (mutex != NULL)
+	{
+		mutex->sdl_mutex = SDL_CreateMutex();
+
+		if (mutex->sdl_mutex != NULL)
+			return mutex;
+
+		free(mutex);
+	}
+
+	return NULL;
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexDeinit(ClownAudio_Mutex *mutex)
+{
+	SDL_DestroyMutex(mutex->sdl_mutex);
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexLock(ClownAudio_Mutex *mutex)
+{
+	SDL_LockMutex(mutex->sdl_mutex);
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_MutexUnlock(ClownAudio_Mutex *mutex)
+{
+	SDL_UnlockMutex(mutex->sdl_mutex);
 }
