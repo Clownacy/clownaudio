@@ -34,6 +34,7 @@ extern "C" {
 #endif
 
 typedef struct ClownAudio_Mixer ClownAudio_Mixer;
+typedef struct ClownAudio_Sound ClownAudio_Sound;
 typedef struct ClownAudio_SoundData ClownAudio_SoundData;
 typedef unsigned int ClownAudio_SoundID;
 
@@ -94,7 +95,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound_da
 ////////////////////////////////
 
 // Creates a sound from sound-data. The sound will be paused by default.
-CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config);
+CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_CreateSound(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config);
+
+// Used to create a sound ID from a sound. Must be done only once.
+CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_RegisterSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound);
 
 // Destroys sound.
 CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
