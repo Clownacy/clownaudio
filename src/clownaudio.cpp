@@ -30,12 +30,14 @@ static ClownAudio_Mixer *mixer;
 
 static void StreamCallback(void *user_data, float *output_buffer, size_t frames_to_do)
 {
+	(void)user_data;
+
 	// Clear buffer (`ClownAudio_MixSamples` mixes directly with the output buffer)
 	for (size_t i = 0; i < frames_to_do * CLOWNAUDIO_STREAM_CHANNEL_COUNT; ++i)
 		output_buffer[i] = 0.0f;
 
 	ClownAudio_LockStream(stream);
-	ClownAudio_Mixer_MixSamples((ClownAudio_Mixer*)user_data, output_buffer, frames_to_do);
+	ClownAudio_Mixer_MixSamples(mixer, output_buffer, frames_to_do);
 	ClownAudio_UnlockStream(stream);
 }
 
@@ -52,8 +54,6 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 
 			if (mixer != NULL)
 			{
-				ClownAudio_SetStreamCallbackData(stream, mixer);
-
 				ClownAudio_ResumeStream(stream);
 
 				return true;
