@@ -70,7 +70,7 @@ struct ClownAudio_Sound
 	float volume_right;
 	DecoderStage pipeline;
 	void *resampled_decoder;
-	ClownAudio_SoundID sound_id;
+	ClownAudio_SoundID id;
 
 	unsigned long fade_out_counter_max;
 	unsigned long fade_in_counter_max;
@@ -158,7 +158,7 @@ static void MutexUnlock(Mutex *mutex)
 static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	for (ClownAudio_Sound *sound = mixer->sound_list_head; sound != NULL; sound = sound->next)
-		if (sound->sound_id == sound_id)
+		if (sound->id == sound_id)
 			return sound;
 
 	return NULL;
@@ -462,7 +462,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_RegisterSound(ClownAudio_Mixer *
 			sound_id = ++mixer->sound_id_allocator;
 		} while (sound_id == 0);	// Do not let it allocate 0 - it is an error value
 
-		sound->sound_id = sound_id;
+		sound->id = sound_id;
 
 		MutexLock(&mixer->mutex);
 		sound->next = mixer->sound_list_head;
@@ -481,7 +481,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroySound(ClownAudio_Mixer *mixer, ClownAud
 
 	for (ClownAudio_Sound **sound_pointer = &mixer->sound_list_head; *sound_pointer != NULL; sound_pointer = &(*sound_pointer)->next)
 	{
-		if ((*sound_pointer)->sound_id == sound_id)
+		if ((*sound_pointer)->id == sound_id)
 		{
 			sound = *sound_pointer;
 			*sound_pointer = sound->next;
