@@ -22,7 +22,7 @@ typedef struct SoundDataListEntry
 
 typedef struct SoundListEntry
 {
-	ClownAudio_Sound sound;
+	ClownAudio_SoundID sound_id;
 	float master_volume;
 	float volume_left;
 	float volume_right;
@@ -209,13 +209,13 @@ int main(int argc, char *argv[])
 
 											if (ImGui::Button("Create sound"))
 											{
-												ClownAudio_Sound sound = ClownAudio_CreateSound(mixer, selected_sound_data->sound_data, &sound_config);
+												ClownAudio_SoundID sound_id = ClownAudio_RegisterSound(mixer, ClownAudio_CreateSound(mixer, selected_sound_data->sound_data, &sound_config));
 
-												if (sound != 0)
+												if (sound_id != 0)
 												{
 													SoundListEntry *new_entry = (SoundListEntry*)malloc(sizeof(SoundListEntry));
 
-													new_entry->sound = sound;
+													new_entry->sound_id = sound_id;
 													new_entry->master_volume = 1.0f;
 													new_entry->volume_left = 1.0f;
 													new_entry->volume_right = 1.0f;
@@ -269,22 +269,22 @@ int main(int argc, char *argv[])
 									ImGui::Begin("Sounds", NULL);
 										for (SoundListEntry *entry = sound_list_head; entry != NULL; entry = entry->next)
 										{
-											int status = ClownAudio_GetSoundStatus(mixer, entry->sound);
+											int status = ClownAudio_GetSoundStatus(mixer, entry->sound_id);
 
 											char name[32];
 
 											switch (status)
 											{
 												case 0:
-													sprintf(name, "Sound %u - Playing", entry->sound);
+													sprintf(name, "Sound %u - Playing", entry->sound_id);
 													break;
 
 												case 1:
-													sprintf(name, "Sound %u - Paused", entry->sound);
+													sprintf(name, "Sound %u - Paused", entry->sound_id);
 													break;
 
 												case -1:
-													sprintf(name, "Sound %u - Freed", entry->sound);
+													sprintf(name, "Sound %u - Freed", entry->sound_id);
 													break;
 
 											}
@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 
 											if (ImGui::Button("Destroy"))
 											{
-												ClownAudio_DestroySound(mixer, selected_sound->sound);
+												ClownAudio_DestroySound(mixer, selected_sound->sound_id);
 
 												for (SoundListEntry **entry = &sound_list_head; *entry != NULL; entry = &(*entry)->next)
 												{
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
 										}
 										else
 										{
-											int status = ClownAudio_GetSoundStatus(mixer, selected_sound->sound);
+											int status = ClownAudio_GetSoundStatus(mixer, selected_sound->sound_id);
 
 											if (status == -1)
 											{
@@ -335,44 +335,44 @@ int main(int argc, char *argv[])
 												if (status == 0)
 												{
 													if (ImGui::Button("Pause"))
-														ClownAudio_PauseSound(mixer, selected_sound->sound);
+														ClownAudio_PauseSound(mixer, selected_sound->sound_id);
 												}
 												else
 												{
 													if (ImGui::Button("Unpause"))
-														ClownAudio_UnpauseSound(mixer, selected_sound->sound);
+														ClownAudio_UnpauseSound(mixer, selected_sound->sound_id);
 												}
 
 												ImGui::SameLine();
 
 												if (ImGui::Button("Rewind"))
-													ClownAudio_RewindSound(mixer, selected_sound->sound);
+													ClownAudio_RewindSound(mixer, selected_sound->sound_id);
 
 												ImGui::Spacing();
 
 												if (ImGui::Button("Fade-out"))
-													ClownAudio_FadeOutSound(mixer, selected_sound->sound, 5 * 1000);
+													ClownAudio_FadeOutSound(mixer, selected_sound->sound_id, 5 * 1000);
 
 												ImGui::SameLine();
 
 												if (ImGui::Button("Fade-in"))
-													ClownAudio_FadeInSound(mixer, selected_sound->sound, 5 * 1000);
+													ClownAudio_FadeInSound(mixer, selected_sound->sound_id, 5 * 1000);
 
 												ImGui::SameLine();
 
 												if (ImGui::Button("Cancel fade"))
-													ClownAudio_CancelFade(mixer, selected_sound->sound);
+													ClownAudio_CancelFade(mixer, selected_sound->sound_id);
 
 												ImGui::Spacing();
 
 												if (ImGui::SliderFloat("Master volume", &selected_sound->master_volume, 0.0f, 1.0f, "%.3f", 2.0f))
-													ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+													ClownAudio_SetSoundVolume(mixer, selected_sound->sound_id, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
 												if (ImGui::SliderFloat("Left volume", &selected_sound->volume_left, 0.0f, 1.0f, "%.3f", 2.0f))
-													ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+													ClownAudio_SetSoundVolume(mixer, selected_sound->sound_id, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
 												if (ImGui::SliderFloat("Right volume", &selected_sound->volume_right, 0.0f, 1.0f, "%.3f", 2.0f))
-													ClownAudio_SetSoundVolume(mixer, selected_sound->sound, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
+													ClownAudio_SetSoundVolume(mixer, selected_sound->sound_id, selected_sound->master_volume * selected_sound->volume_left, selected_sound->master_volume * selected_sound->volume_right);
 
 												ImGui::Spacing();
 
@@ -380,7 +380,7 @@ int main(int argc, char *argv[])
 												ImGui::InputInt("Sample rate", &sample_rate, 0);
 
 												if (ImGui::Button("Apply sample rate"))
-													ClownAudio_SetSoundSampleRate(mixer, selected_sound->sound, sample_rate);
+													ClownAudio_SetSoundSampleRate(mixer, selected_sound->sound_id, sample_rate);
 											}
 										}
 									ImGui::End();

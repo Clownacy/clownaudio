@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 					ClownAudio_SoundConfig config2;
 					ClownAudio_InitSoundConfig(&config2);
 					config2.loop = true;
-					ClownAudio_Sound instance = ClownAudio_CreateSound(mixer, sound_data, &config2);
+					ClownAudio_SoundID instance = ClownAudio_RegisterSound(mixer, ClownAudio_CreateSound(mixer, sound_data, &config2));
 					ClownAudio_UnpauseSound(mixer, instance);
 
 					if (instance != 0)
