@@ -70,6 +70,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 
 CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void)
 {
+	ClownAudio_PauseStream(stream);
 	ClownAudio_DestroyMixer(mixer);
 	ClownAudio_DestroyStream(stream);
 	ClownAudio_DeinitPlayback();
