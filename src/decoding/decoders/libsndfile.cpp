@@ -114,7 +114,6 @@ void* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, boo
 
 				spec->sample_rate = sf_info.samplerate;
 				spec->channel_count = sf_info.channels;
-				spec->format = DECODER_FORMAT_S16;
 				spec->is_complex = false;
 
 				return decoder;

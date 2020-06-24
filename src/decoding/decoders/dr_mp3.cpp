@@ -44,7 +44,6 @@ void* Decoder_DR_MP3_Create(const unsigned char *data, size_t data_size, bool lo
 			{
 				spec->sample_rate = instance->sampleRate;
 				spec->channel_count = instance->channels;
-				spec->format = DECODER_FORMAT_S16;
 				spec->is_complex = false;
 
 				return instance;

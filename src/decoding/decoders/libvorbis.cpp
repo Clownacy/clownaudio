@@ -106,7 +106,6 @@ void* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool
 
 				spec->sample_rate = v_info->rate;
 				spec->channel_count = v_info->channels;
-				spec->format = DECODER_FORMAT_S16;
 				spec->is_complex = false;
 
 				return decoder;

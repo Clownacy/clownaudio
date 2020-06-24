@@ -21,6 +21,7 @@
 #include "clownaudio/clownaudio.h"
 
 #include <stddef.h>
+#include <string.h>
 
 #include "clownaudio/mixer.h"
 #include "clownaudio/playback.h"
@@ -28,13 +29,12 @@
 static ClownAudio_Stream *stream;
 static ClownAudio_Mixer *mixer;
 
-static void StreamCallback(void *user_data, float *output_buffer, size_t frames_to_do)
+static void StreamCallback(void *user_data, short *output_buffer, size_t frames_to_do)
 {
 	(void)user_data;
 
 	// Clear buffer (`ClownAudio_MixSamples` mixes directly with the output buffer)
-	for (size_t i = 0; i < frames_to_do * CLOWNAUDIO_STREAM_CHANNEL_COUNT; ++i)
-		output_buffer[i] = 0.0f;
+	memset(output_buffer, 0, frames_to_do * sizeof(short) * CLOWNAUDIO_STREAM_CHANNEL_COUNT);
 
 	ClownAudio_LockStream(stream);
 	ClownAudio_Mixer_MixSamples(mixer, output_buffer, frames_to_do);

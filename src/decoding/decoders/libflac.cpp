@@ -154,7 +154,6 @@ static void MetadataCallback(const FLAC__StreamDecoder *flac_stream_decoder, con
 
 	decoder->spec->sample_rate = metadata->data.stream_info.sample_rate;
 	decoder->spec->channel_count = decoder->channel_count = metadata->data.stream_info.channels;
-	decoder->spec->format = DECODER_FORMAT_S16;
 	decoder->spec->is_complex = false;
 
 	decoder->bits_per_sample = metadata->data.stream_info.bits_per_sample;

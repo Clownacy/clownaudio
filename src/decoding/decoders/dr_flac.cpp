@@ -39,7 +39,6 @@ void* Decoder_DR_FLAC_Create(const unsigned char *data, size_t data_size, bool l
 	{
 		spec->sample_rate = backend->sampleRate;
 		spec->channel_count = backend->channels;
-		spec->format = DECODER_FORMAT_S16;
 		spec->is_complex = false;
 	}
 

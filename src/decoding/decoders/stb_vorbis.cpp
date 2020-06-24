@@ -50,7 +50,6 @@ void* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, boo
 
 		spec->sample_rate = vorbis_info.sample_rate;
 		spec->channel_count = vorbis_info.channels;
-		spec->format = DECODER_FORMAT_S16;
 		spec->is_complex = false;
 	}
 

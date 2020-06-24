@@ -53,7 +53,6 @@ void* Decoder_libOpenMPT_Create(const unsigned char *data, size_t data_size, boo
 		{
 			spec->sample_rate = sample_rate;
 			spec->channel_count = CHANNEL_COUNT;
-			spec->format = DECODER_FORMAT_S16;
 			spec->is_complex = true;
 
 			if (loop)
