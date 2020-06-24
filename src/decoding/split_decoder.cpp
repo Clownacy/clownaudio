@@ -71,6 +71,9 @@ void SplitDecoder_Rewind(void *split_decoder_void)
 {
 	SplitDecoder *split_decoder = (SplitDecoder*)split_decoder_void;
 
+	split_decoder->current_decoder = 0;
+	split_decoder->last_decoder = false;
+
 	split_decoder->next_stage[0].Rewind(split_decoder->next_stage[0].decoder);
 	split_decoder->next_stage[1].Rewind(split_decoder->next_stage[1].decoder);
 }
