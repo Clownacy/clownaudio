@@ -168,9 +168,13 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mix
 // Output //
 ////////////
 
-// Output interlaced (L,R ordering) S16 PCM samples into specified buffer.
+// Mix interlaced (L,R ordering) S16 PCM samples into specified S32 buffer (not clamped).
 // Must be guarded with mutex.
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, short *output_buffer, size_t frames_to_do);
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long *output_buffer, size_t frames_to_do);
+
+// Output interlaced (L,R ordering) S16 PCM samples into specified S16 buffer (clamped).
+// Must be guarded with mutex.
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_OutputSamples(ClownAudio_Mixer *mixer, short *output_buffer, size_t frames_to_do);
 
 
 #ifdef __cplusplus

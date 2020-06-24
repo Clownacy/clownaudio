@@ -545,7 +545,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mix
 		ResampledDecoder_SetSampleRate(sound->resampled_decoder, sample_rate);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, short *output_buffer, size_t frames_to_do)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long *output_buffer, size_t frames_to_do)
 {
 	ClownAudio_Sound **sound_pointer = &mixer->sound_list_head;
 	while (*sound_pointer != NULL)
@@ -554,7 +554,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, shor
 
 		if (!sound->paused)
 		{
-			short *output_buffer_pointer = output_buffer;
+			long *output_buffer_pointer = output_buffer;
 
 			size_t frames_done = 0;
 			for (size_t sub_frames_done; frames_done < frames_to_do; frames_done += sub_frames_done)
@@ -621,5 +621,32 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, shor
 		}
 
 		sound_pointer = &(*sound_pointer)->next;
+	}
+}
+
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_OutputSamples(ClownAudio_Mixer *mixer, short *output_buffer, size_t frames_to_do)
+{
+	size_t frames_done = 0;
+	while (frames_done < frames_to_do)
+	{
+		long mix_buffer[0x1000];
+
+		const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
+
+		memset(mix_buffer, 0, sub_frames_to_do * sizeof(long) * CHANNEL_COUNT);
+		ClownAudio_Mixer_MixSamples(mixer, mix_buffer, sub_frames_to_do);
+
+		// Clamp samples to 16-bit range
+		for (size_t i = 0; i < sub_frames_to_do * CHANNEL_COUNT; ++i)
+		{
+			if (mix_buffer[i] > 0x7FFF)
+				*output_buffer++ = 0x7FFF;
+			else if (mix_buffer[i] < -0x7FFF)
+				*output_buffer++ = -0x7FFF;
+			else
+				*output_buffer++ = (short)mix_buffer[i];
+		}
+
+		frames_done += sub_frames_to_do;
 	}
 }

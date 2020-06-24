@@ -33,11 +33,8 @@ static void StreamCallback(void *user_data, short *output_buffer, size_t frames_
 {
 	(void)user_data;
 
-	// Clear buffer (`ClownAudio_MixSamples` mixes directly with the output buffer)
-	memset(output_buffer, 0, frames_to_do * sizeof(short) * CLOWNAUDIO_STREAM_CHANNEL_COUNT);
-
 	ClownAudio_LockStream(stream);
-	ClownAudio_Mixer_MixSamples(mixer, output_buffer, frames_to_do);
+	ClownAudio_Mixer_OutputSamples(mixer, output_buffer, frames_to_do);
 	ClownAudio_UnlockStream(stream);
 }
 
