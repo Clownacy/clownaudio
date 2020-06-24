@@ -50,8 +50,8 @@ struct ClownAudio_Sound
 
 	bool paused;
 	bool free_when_done;
-	float volume_left;
-	float volume_right;
+	unsigned short volume_left;
+	unsigned short volume_right;
 	DecoderStage pipeline;
 	void *resampled_decoder;
 	ClownAudio_SoundID id;
@@ -380,8 +380,8 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_CreateSound(ClownAudio_Mixe
 
 		sound->pipeline = stage;
 		sound->resampled_decoder = resampled_decoder;
-		sound->volume_left = 1.0f;
-		sound->volume_right = 1.0f;
+		sound->volume_left = 0x100;
+		sound->volume_right = 0x100;
 		sound->paused = true;
 		sound->free_when_done = !config->do_not_free_when_done;
 		sound->fade_out_counter_max = 0;
@@ -516,7 +516,7 @@ CLOWNAUDIO_EXPORT int ClownAudio_Mixer_GetSoundStatus(ClownAudio_Mixer *mixer, C
 	return (sound == NULL) ? -1 : sound->paused;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, float volume_left, float volume_right)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned short volume_left, unsigned short volume_right)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -566,14 +566,14 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, shor
 
 				for (size_t i = 0; i < sub_frames_done; ++i)
 				{
-/*					float fade_volume = 1.0f;
+					unsigned short fade_volume = 0x100;
 
 					// Apply fade-out volume
 					if (sound->fade_out_counter_max != 0)
 					{
-						const float fade_out_volume = sound->fade_counter / (float)sound->fade_out_counter_max;
+						const unsigned short fade_out_volume = (sound->fade_counter << 8) / sound->fade_out_counter_max;
 
-						fade_volume *= (fade_out_volume * fade_out_volume);	// Fade logarithmically
+						fade_volume = fade_volume * ((fade_out_volume * fade_out_volume) >> 8) >> 8;	// Fade logarithmically
 
 						if (sound->fade_counter != 0)
 							--sound->fade_counter;
@@ -582,21 +582,17 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, shor
 					// Apply fade-in volume
 					if (sound->fade_in_counter_max != 0)
 					{
-						const float fade_in_volume = (sound->fade_in_counter_max - sound->fade_counter) / (float)sound->fade_in_counter_max;
+						const unsigned short fade_in_volume = ((sound->fade_in_counter_max - sound->fade_counter) << 8) / (float)sound->fade_in_counter_max;
 
-						fade_volume *= (fade_in_volume * fade_in_volume);	// Fade logarithmically
+						fade_volume = fade_volume * ((fade_in_volume * fade_in_volume) >> 8) >> 8;	// Fade logarithmically
 
 						if (--sound->fade_counter == 0)
 							sound->fade_in_counter_max = 0;
 					}
 
 					// Mix data with output, and apply volume
-					*output_buffer_pointer++ += *read_buffer_pointer++ * sound->volume_left * fade_volume;
-					*output_buffer_pointer++ += *read_buffer_pointer++ * sound->volume_right * fade_volume;
-*/
-					// Mix data with output, and apply volume
-					*output_buffer_pointer++ += *read_buffer_pointer++;// * sound->volume_left;// * fade_volume;
-					*output_buffer_pointer++ += *read_buffer_pointer++;// * sound->volume_right;// * fade_volume;
+					*output_buffer_pointer++ += (((*read_buffer_pointer++ * sound->volume_left) >> 8) * fade_volume) >> 8;
+					*output_buffer_pointer++ += (((*read_buffer_pointer++ * sound->volume_right) >> 8) * fade_volume) >> 8;
 				}
 
 				if (sub_frames_done < sub_frames_to_do)

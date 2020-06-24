@@ -160,7 +160,7 @@ CLOWNAUDIO_EXPORT int ClownAudio_GetSoundStatus(ClownAudio_SoundID sound_id)
 	return status;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_SoundID sound_id, float volume_left, float volume_right)
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_SoundID sound_id, unsigned short volume_left, unsigned short volume_right)
 {
 	ClownAudio_LockStream(stream);
 	ClownAudio_Mixer_SetSoundVolume(mixer, sound_id, volume_left, volume_right);
