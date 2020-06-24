@@ -37,6 +37,8 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define CLAMP(x, min, max) MIN(MAX((x), (min)), (max))
 
+#define SCALE(x, scale) (((x) * (scale)) >> 8)
+
 struct ClownAudio_Mixer
 {
 	ClownAudio_Sound *sound_list_head;
@@ -573,7 +575,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, shor
 					{
 						const unsigned short fade_out_volume = (sound->fade_counter << 8) / sound->fade_out_counter_max;
 
-						fade_volume = fade_volume * ((fade_out_volume * fade_out_volume) >> 8) >> 8;	// Fade logarithmically
+						fade_volume = SCALE(fade_volume, SCALE(fade_out_volume, fade_out_volume));	// Fade logarithmically
 
 						if (sound->fade_counter != 0)
 							--sound->fade_counter;
@@ -584,15 +586,15 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, shor
 					{
 						const unsigned short fade_in_volume = ((sound->fade_in_counter_max - sound->fade_counter) << 8) / (float)sound->fade_in_counter_max;
 
-						fade_volume = fade_volume * ((fade_in_volume * fade_in_volume) >> 8) >> 8;	// Fade logarithmically
+						fade_volume = SCALE(fade_volume, SCALE(fade_in_volume, fade_in_volume));	// Fade logarithmically
 
 						if (--sound->fade_counter == 0)
 							sound->fade_in_counter_max = 0;
 					}
 
 					// Mix data with output, and apply volume
-					*output_buffer_pointer++ += (((*read_buffer_pointer++ * sound->volume_left) >> 8) * fade_volume) >> 8;
-					*output_buffer_pointer++ += (((*read_buffer_pointer++ * sound->volume_right) >> 8) * fade_volume) >> 8;
+					*output_buffer_pointer++ += SCALE(SCALE(*read_buffer_pointer++, sound->volume_left), fade_volume);
+					*output_buffer_pointer++ += SCALE(SCALE(*read_buffer_pointer++, sound->volume_right), fade_volume);
 				}
 
 				if (sub_frames_done < sub_frames_to_do)
