@@ -188,8 +188,10 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromMemory
 			sound_data->decoder_selector_data[1] = DecoderSelector_LoadData(file_buffer2, file_size2, config->predecode, config->must_predecode, &wanted_spec);
 
 			if (sound_data->decoder_selector_data[1] != NULL)
-					return sound_data;
+				return sound_data;
 		}
+
+		free(sound_data);
 	}
 
 	return NULL;
