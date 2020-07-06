@@ -131,6 +131,8 @@ void Predecoder_Destroy(void *predecoder_void)
 	Predecoder *predecoder = (Predecoder*)predecoder_void;
 
 	ROMemoryStream_Destroy(predecoder->memory_stream);
+
+	free(predecoder);
 }
 
 void Predecoder_Rewind(void *predecoder_void)
