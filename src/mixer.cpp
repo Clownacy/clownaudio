@@ -304,7 +304,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_CreateSound(ClownAudio_Mixe
 				return NULL;
 			}
 
-			split_decoder = SplitDecoder_Create(&selector_stages[0], &selector_stages[1]);
+			split_decoder = SplitDecoder_Create(&selector_stages[0], &selector_stages[1], specs[0].channel_count);
 
 			if (split_decoder == NULL)
 			{
