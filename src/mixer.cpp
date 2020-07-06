@@ -168,8 +168,11 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromMemory
 			if (sound_data->decoder_selector_data[0] != NULL && sound_data->decoder_selector_data[1] != NULL)
 				return sound_data;
 
-			DecoderSelector_UnloadData(sound_data->decoder_selector_data[1]);
-			DecoderSelector_UnloadData(sound_data->decoder_selector_data[0]);
+			if (sound_data->decoder_selector_data[0] != NULL)
+				DecoderSelector_UnloadData(sound_data->decoder_selector_data[0]);
+
+			if (sound_data->decoder_selector_data[1] != NULL)
+				DecoderSelector_UnloadData(sound_data->decoder_selector_data[1]);
 		}
 		else if (file_buffer1 != NULL)
 		{
