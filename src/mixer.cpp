@@ -238,6 +238,8 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_SoundData *so
 
 		free(sound_data->file_buffers[0]);
 		free(sound_data->file_buffers[1]);
+
+		free(sound_data);
 	}
 }
 
