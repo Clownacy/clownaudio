@@ -107,6 +107,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_M
 // Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
+
 /////////////////////////////
 // Assorted sound controls //
 /////////////////////////////
