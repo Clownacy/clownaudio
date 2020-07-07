@@ -371,19 +371,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_CreateSound(ClownAudio_Mixe
 
 		if (sound == NULL)
 		{
-			if (split_decoder != NULL)
-			{
-				SplitDecoder_Destroy(split_decoder);
-			}
-			else
-			{
-				if (decoder_selectors[0] != NULL)
-					DecoderSelector_Destroy(decoder_selectors[0]);
-
-				if (decoder_selectors[1] != NULL)
-					DecoderSelector_Destroy(decoder_selectors[1]);
-			}
-
+			ResampledDecoder_Destroy(resampled_decoder);
 			return NULL;
 		}
 
