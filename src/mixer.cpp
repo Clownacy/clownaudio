@@ -530,17 +530,17 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundLoop(ClownAudio_Mixer *mixer, Cl
 		sound->pipeline.SetLoop(sound->pipeline.decoder, loop);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long sample_rate)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long sample_rate1, unsigned long sample_rate2)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
 	{
 		if (sound->resampled_decoders[0] != NULL)
-			ResampledDecoder_SetSampleRate(sound->resampled_decoders[0], sample_rate);
+			ResampledDecoder_SetSampleRate(sound->resampled_decoders[0], sample_rate1);
 
 		if (sound->resampled_decoders[1] != NULL)
-			ResampledDecoder_SetSampleRate(sound->resampled_decoders[1], sample_rate);
+			ResampledDecoder_SetSampleRate(sound->resampled_decoders[1], sample_rate2);
 	}
 }
 
