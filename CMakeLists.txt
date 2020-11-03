@@ -450,11 +450,12 @@ else()
 endif()
 
 # Set language standards
+# Extensions may be used by dependencies (miniaudio), so enable them
 set_target_properties(clownaudio PROPERTIES
 	C_STANDARD 99
-	C_EXTENSIONS OFF
+	C_EXTENSIONS ON
 	CXX_STANDARD 11
-	CXX_EXTENSIONS OFF
+	CXX_EXTENSIONS ON
 )
 
 # Shut up those stupid MSVC warnings
