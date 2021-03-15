@@ -932,10 +932,6 @@ static void *make_block_array(void *mem, int count, int size)
    return p;
 }
 
-// sentinel buffer returned for empty setup_malloc()
-// declared const to catch illegal writes
-static const char setup_malloc_null_buffer[1] = { 0 };
-
 static void *setup_malloc(vorb *f, int sz)
 {
    sz = (sz+7) & ~7; // round up to nearest 8 for alignment of future allocs.
@@ -946,15 +942,13 @@ static void *setup_malloc(vorb *f, int sz)
       f->setup_offset += sz;
       return p;
    }
-   return sz ? malloc(sz) : (void*)setup_malloc_null_buffer;
+   return sz ? malloc(sz) : NULL;
 }
 
 static void setup_free(vorb *f, void *p)
 {
    if (f->alloc.alloc_buffer) return; // do nothing; setup mem is a stack
-   if (p != setup_malloc_null_buffer) {
-      free(p);
-   }
+   free(p);
 }
 
 static void *setup_temp_malloc(vorb *f, int sz)
@@ -3649,7 +3643,7 @@ static int start_decoder(vorb *f)
    //user comments
    f->comment_list_length = get32_packet(f);
    f->comment_list = (char**)setup_malloc(f, sizeof(char*) * (f->comment_list_length));
-   if (f->comment_list == NULL)                     return error(f, VORBIS_outofmem);
+   if (f->comment_list == NULL && f->comment_list_length != 0)                     return error(f, VORBIS_outofmem);
 
    for(i=0; i < f->comment_list_length; ++i) {
       len = get32_packet(f);
@@ -4513,6 +4507,7 @@ stb_vorbis *stb_vorbis_open_pushdata(
          *error = VORBIS_need_more_data;
       else
          *error = p.error;
+      vorbis_deinit(&p);
       return NULL;
    }
    f = vorbis_alloc(&p);
