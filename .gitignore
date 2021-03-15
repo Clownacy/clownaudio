@@ -1,9 +1,9 @@
 /build
-/example/build
-/example/obj
-/example/test
-/example/test.exe
-/test/build
-/test/obj
-/test/test
-/test/test.exe
+/examples/cli/build
+/examples/cli/obj
+/examples/cli/test
+/examples/cli/test.exe
+/examples/gui/build
+/examples/gui/obj
+/examples/gui/test
+/examples/gui/test.exe

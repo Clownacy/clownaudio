@@ -50,7 +50,7 @@ for individual formats, to allow the user a choice between standard libraries
 
 ## Playback backends
 
-In addition, clownaudio utilises one of the following libraries to provide
+In addition, clownaudio can utilise one of the following libraries to provide
 audio-playback:
 
 | Library   | Licence             | Included in-tree |
@@ -71,10 +71,10 @@ produced. Built libraries can be accessed via `pkg-config` and CMake's
 As an alternative, CMake projects can embed clownaudio directly, using
 `add_subdirectory`.
 
-Example `Makefile` and `CMakeLists.txt` files for a demo tool are provided: the
-`Makefile` demonstrates linking clownaudio with `pkg-config`, and the
-`CMakeLists.txt` file demonstrates linking with `find_package` and embedding
-with `add_subdirectory`.
+Example software using clownaudio can be found in the `examples` directory.
+The CLI example's `Makefile` demonstrates linking clownaudio with `pkg-config`,
+and its `CMakeLists.txt` file demonstrates linking with `find_package` and
+embedding with `add_subdirectory`.
 
 `PKGBUILD` files for MSYS2 and Arch Linux are provided in the `packages`
 directory.

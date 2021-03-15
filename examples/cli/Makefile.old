@@ -13,7 +13,7 @@ USE_SNES_SPC = true
 # Can be 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', or 'PortAudio'
 BACKEND = miniaudio
 
-CLOWNAUDIO_DIR = ../src
+CLOWNAUDIO_DIR = ../../src
 
 ifneq ($(RELEASE),)
   CFLAGS = -O2 -flto

@@ -7,7 +7,7 @@ project(clownaudio_test LANGUAGES CXX)
 add_executable(test "test.cpp")
 
 if(SUBDIRECTORY)
-	add_subdirectory(".." "clownaudio" EXCLUDE_FROM_ALL)
+	add_subdirectory("../.." "clownaudio" EXCLUDE_FROM_ALL)
 else()
 	find_package(clownaudio REQUIRED)
 endif()
