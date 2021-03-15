@@ -47,9 +47,9 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 endif()
 
 
-####################
-# Decoding backends
-####################
+#####################
+# Decoding backends #
+#####################
 
 if(CLOWNAUDIO_LIBVORBIS)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBVORBIS)
@@ -219,9 +219,9 @@ if(CLOWNAUDIO_SNES_SPC)
 endif()
 
 
-####################
-# Playback backends
-####################
+#####################
+# Playback backends #
+#####################
 
 if(NOT CLOWNAUDIO_MIXER_ONLY)
 	if(CLOWNAUDIO_BACKEND STREQUAL "miniaudio")
@@ -258,9 +258,9 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 endif()
 
 
-####################
-# Find dependencies
-####################
+#####################
+# Find dependencies #
+#####################
 
 # CMake
 
@@ -425,9 +425,9 @@ if(CLOWNAUDIO_LIBXMPLITE)
 endif()
 
 
-####################
-# Misc. settings
-####################
+##################
+# Misc. settings #
+##################
 
 # Include the public headers
 target_include_directories(clownaudio PUBLIC
@@ -468,9 +468,9 @@ get_target_property(CLOWNAUDIO_SOURCES clownaudio SOURCES)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES CLOWNAUDIO_SOURCES)
 
 
-####################
-# Install
-####################
+###########
+# Install #
+###########
 
 include(GNUInstallDirs)
 
