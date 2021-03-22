@@ -84,11 +84,11 @@ CLOWNAUDIO_EXPORT void ClownAudio_DestroyMixer(ClownAudio_Mixer *mixer);
 //////////////////////////////////
 
 // Loads data from up to two memory buffers - either buffer pointer can be NULL.
-// If two buffers are specified and looping is enabled, the sound will loop at the point where the first buffer ends, and the second one begins.
+// If two buffers are specified and looping is enabled, the sound will loop at the point where the first buffer ends and the second one begins.
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromMemory(ClownAudio_Mixer *mixer, const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config);
 
 // Loads data from up to two files - either file path can be NULL.
-// If two files are specified and looping is enabled, the sound will loop at the point where the first file ends, and the second one begins.
+// If two files are specified and looping is enabled, the sound will loop at the point where the first file ends and the second one begins.
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromFiles(ClownAudio_Mixer *mixer, const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config);
 
 // Unloads data. All sounds using the specified data must be destroyed manually before this function is called.
@@ -133,36 +133,36 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnpauseSound(ClownAudio_Mixer *mixer, Cl
 // Fading
 
 // Make sound fade-out over the specified duration, measured in milliseconds.
-// If the sound is currently fading-in, this function will override it, and cause the sound to fade-out from the volume is was currently at.  
+// If the sound is currently fading-in, this function will override it and cause the sound to fade-out from the volume it is currently at.  
 // Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeOutSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration);
 
 // Make sound fade-in over the specified duration, measured in milliseconds.
-// If the sound is currently fading-out, this function will override it, and cause the sound to fade-in from the volume is was currently at.  
+// If the sound is currently fading-out, this function will override it and cause the sound to fade-in from the volume it is currently at.  
 // Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeInSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration);
 
-// Aborts fading, and instantly restores the sound to full volume.
-// If you want to smoothly-undo an in-progress fade, use one of the above functions instead.
+// Aborts fading and instantly restores the sound to full volume.
+// If you want to smoothly-undo an in-progress fade, then use one of the above functions instead.
 // Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_CancelFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
 
 // Miscellaneous
 
-// Returns -1 if the sound doesn't exist, 0 if it's unpaused, or 1 if it is paused.
+// Returns -1 if the sound does not exist, 0 if it is unpaused, or 1 if it is paused.
 // Must be guarded with mutex.
 CLOWNAUDIO_EXPORT int ClownAudio_Mixer_GetSoundStatus(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
 
-// Sets stereo volume - volume is linear, ranging from 0 (silence) to 0x100 (full volume). Exceeding 0x100 will amplify the volume.
+// Sets stereo volume. Volume is linear and ranges from 0 (silence) to 0x100 (full volume). Exceeding 0x100 will amplify the volume.
 // Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundVolume(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned short volume_left, unsigned short volume_right);
 
-// Change whether the sound should loop or not. Only certain file formats support this (for example - Ogg Vorbis does, and PxTone doesn't).
+// Change whether the sound should loop or not. Only certain file formats support this (for example, Ogg Vorbis does but PxTone doesn't).
 // Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, bool loop);
 
-// Override the sound's sample-rate. Note - the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct,
+// Override the sound's sample-rate. Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct,
 // otherwise this function will silently fail.
 // Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long sample_rate1, unsigned long sample_rate2);
