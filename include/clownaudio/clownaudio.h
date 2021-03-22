@@ -36,8 +36,12 @@ extern "C" {
 #endif
 
 /* Defined elsewhere, but included here for documentation
+
 typedef struct ClownAudio_SoundDataConfig
 {
+	// To 'predecode' means to decode sound data to raw PCM when it is loaded. This removes the overhead of decoding the sound data during playback.
+	// The downside of this is that it causes sound data to take significantly longer to load. This may cause the thread you are loading the data on to stall.
+	// If you use predecoding and load sound data on the main thread, then it may be best to load your sound data during a loading screen.
 	bool predecode;             // If true, the sound *may* be predecoded if possible. If not, the sound will still be loaded, albeit not predecoded.
 	bool must_predecode;        // If true, the sound *must* be predecoded if possible. If not, the function will fail.
 	bool dynamic_sample_rate;   // If sound is predecoded, then this needs to be true for `ClownAudio_SetSoundSampleRate` to work
