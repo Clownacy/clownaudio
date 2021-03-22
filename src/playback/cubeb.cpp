@@ -84,7 +84,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 #endif
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *sample_rate, void (*user_callback)(void*, short*, size_t))
+CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *sample_rate, void (*user_callback)(void *user_data, short *output_buffer, size_t frames_to_do))
 {
 	cubeb_stream_params output_params;
 	output_params.format = CUBEB_SAMPLE_S16NE;
