@@ -35,6 +35,7 @@
 extern "C" {
 #endif
 
+
 /* Defined elsewhere, but included here for documentation
 
 typedef struct ClownAudio_SoundDataConfig
