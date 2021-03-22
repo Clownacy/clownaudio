@@ -160,6 +160,9 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromMemory
 		wanted_spec.sample_rate = config->dynamic_sample_rate ? 0 : mixer->sample_rate;	// Do not change the sample rate when dynamic resampling is enabled
 		wanted_spec.channel_count = CHANNEL_COUNT;
 
+		sound_data->file_buffers[0] = NULL;
+		sound_data->file_buffers[1] = NULL;
+
 		if (file_buffer1 != NULL && file_buffer2 != NULL)
 		{
 			sound_data->decoder_selector_data[0] = DecoderSelector_LoadData(file_buffer1, file_size1, config->predecode, config->must_predecode, &wanted_spec);
