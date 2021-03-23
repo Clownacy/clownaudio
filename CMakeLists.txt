@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+option(CLOWNAUDIO_CPP "Compile the library as C++ instead of C, for compilers that don't support C99 but do support C++98" OFF)
 option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
 option(CLOWNAUDIO_STB_VORBIS "Enable the stb_vorbis decoder backend" ON)
 option(CLOWNAUDIO_DR_MP3 "Enable the dr_mp3 decoder backend" ON)
@@ -20,29 +21,35 @@ endif()
 
 project(clownaudio VERSION 0.2 DESCRIPTION "Stereo audio engine supporting various formats" LANGUAGES C CXX)
 
-add_library(clownaudio
-	"include/clownaudio/mixer.h"
+add_library(clownaudio)
+
+list(APPEND C_AND_CPP_SOURCES
 	"src/miniaudio.c"
-	"src/miniaudio.h"
 	"src/mixer.c"
 	"src/decoding/decoder_selector.c"
-	"src/decoding/decoder_selector.h"
 	"src/decoding/predecoder.c"
-	"src/decoding/predecoder.h"
 	"src/decoding/resampled_decoder.c"
-	"src/decoding/resampled_decoder.h"
 	"src/decoding/split_decoder.c"
+	"src/decoding/decoders/memory_stream.c"
+)
+
+target_sources(clownaudio PRIVATE
+	"include/clownaudio/mixer.h"
+	"src/miniaudio.h"
+	"src/decoding/decoder_selector.h"
+	"src/decoding/predecoder.h"
+	"src/decoding/resampled_decoder.h"
 	"src/decoding/split_decoder.h"
 	"src/decoding/decoders/common.h"
-	"src/decoding/decoders/memory_stream.c"
 	"src/decoding/decoders/memory_stream.h"
 )
 
 if(NOT CLOWNAUDIO_MIXER_ONLY)
+	list(APPEND C_AND_CPP_SOURCES "src/clownaudio.c")
+
 	target_sources(clownaudio PRIVATE
 		"include/clownaudio/clownaudio.h"
 		"include/clownaudio/playback.h"
-		"src/clownaudio.c"
 	)
 endif()
 
@@ -53,18 +60,14 @@ endif()
 
 if(CLOWNAUDIO_LIBVORBIS)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBVORBIS)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/libvorbis.c"
-		"src/decoding/decoders/libvorbis.h"
-	)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libvorbis.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/libvorbis.h")
 endif()
 
 if(CLOWNAUDIO_STB_VORBIS)
 	target_compile_definitions(clownaudio PRIVATE USE_STB_VORBIS)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/stb_vorbis.c"
-		"src/decoding/decoders/stb_vorbis.h"
-	)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/stb_vorbis.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/stb_vorbis.h")
 
 	include(CheckLibraryExists)
 
@@ -77,32 +80,26 @@ endif()
 
 if(CLOWNAUDIO_DR_MP3)
 	target_compile_definitions(clownaudio PRIVATE USE_DR_MP3)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/dr_mp3.c"
-		"src/decoding/decoders/dr_mp3.h"
-	)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/dr_mp3.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/dr_mp3.h")
 endif()
 
 if(CLOWNAUDIO_LIBOPUS)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBOPUS)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/libopus.c"
-		"src/decoding/decoders/libopus.h"
-	)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libopus.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/libopus.h")
 endif()
 
 if(CLOWNAUDIO_LIBFLAC)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBFLAC)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/libflac.c"
-		"src/decoding/decoders/libflac.h"
-	)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libflac.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/libflac.h")
 endif()
 
 if(CLOWNAUDIO_DR_FLAC)
 	target_compile_definitions(clownaudio PRIVATE USE_DR_FLAC)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/dr_flac.c")
 	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/dr_flac.c"
 		"src/decoding/decoders/dr_flac.h"
 		"src/decoding/decoders/libs/dr_flac.h"
 	)
@@ -110,8 +107,8 @@ endif()
 
 if(CLOWNAUDIO_DR_WAV)
 	target_compile_definitions(clownaudio PRIVATE USE_DR_WAV)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/dr_wav.c")
 	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/dr_wav.c"
 		"src/decoding/decoders/dr_wav.h"
 		"src/decoding/decoders/libs/dr_wav.h"
 	)
@@ -119,26 +116,20 @@ endif()
 
 if(CLOWNAUDIO_LIBSNDFILE)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBSNDFILE)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/libsndfile.c"
-		"src/decoding/decoders/libsndfile.h"
-	)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libsndfile.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/libsndfile.h")
 endif()
 
 if(CLOWNAUDIO_LIBOPENMPT)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBOPENMPT)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/libopenmpt.c"
-		"src/decoding/decoders/libopenmpt.h"
-	)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libopenmpt.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/libopenmpt.h")
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
 	target_compile_definitions(clownaudio PRIVATE USE_LIBXMPLITE)
-	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/libxmp-lite.c"
-		"src/decoding/decoders/libxmp-lite.h"
-	)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libxmp-lite.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/libxmp-lite.h")
 endif()
 
 if(CLOWNAUDIO_PXTONE)
@@ -195,8 +186,8 @@ endif()
 
 if(CLOWNAUDIO_SNES_SPC)
 	target_compile_definitions(clownaudio PRIVATE USE_SNES_SPC)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/snes_spc.c")
 	target_sources(clownaudio PRIVATE
-		"src/decoding/decoders/snes_spc.c"
 		"src/decoding/decoders/snes_spc.h"
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_common.h"
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/blargg_config.h"
@@ -225,7 +216,7 @@ endif()
 
 if(NOT CLOWNAUDIO_MIXER_ONLY)
 	if(CLOWNAUDIO_BACKEND STREQUAL "miniaudio")
-		target_sources(clownaudio PRIVATE "src/playback/miniaudio.c")
+		list(APPEND C_AND_CPP_SOURCES "src/playback/miniaudio.c")
 		target_compile_definitions(clownaudio PRIVATE MINIAUDIO_ENABLE_DEVICE_IO)
 
 		include(CheckLibraryExists)
@@ -245,16 +236,26 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 		target_link_libraries(clownaudio PRIVATE ${CMAKE_DL_LIBS})
 		list(APPEND STATIC_LIBS ${CMAKE_DL_LIBS})
 	elseif(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
-		target_sources(clownaudio PRIVATE "src/playback/sdl1.c")
+		list(APPEND C_AND_CPP_SOURCES "src/playback/sdl1.c")
 	elseif(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
-		target_sources(clownaudio PRIVATE "src/playback/sdl2.c")
+		list(APPEND C_AND_CPP_SOURCES "src/playback/sdl2.c")
 	elseif(CLOWNAUDIO_BACKEND STREQUAL "Cubeb")
-		target_sources(clownaudio PRIVATE "src/playback/cubeb.c")
+		list(APPEND C_AND_CPP_SOURCES "src/playback/cubeb.c")
 	elseif(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
-		target_sources(clownaudio PRIVATE "src/playback/portaudio.c")
+		list(APPEND C_AND_CPP_SOURCES "src/playback/portaudio.c")
 	else()
 		message(FATAL_ERROR "Invalid BACKEND selected")
 	endif()
+endif()
+
+
+##########################################################
+# Handle sources that can compile as either C99 or C++98 #
+##########################################################
+
+target_sources(clownaudio PRIVATE ${C_AND_CPP_SOURCES})
+if(CLOWNAUDIO_CPP)
+	set_source_files_properties(${C_AND_CPP_SOURCES} PROPERTIES LANGUAGE CXX)
 endif()
 
 
