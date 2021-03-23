@@ -8,7 +8,7 @@ license=('zlib', 'MIT', 'LGPL2', 'custom')
 depends=(
   'libvorbis'
   'flac'
-  'opus'
+  'opusfile'
 )
 makedepends=('cmake')
 source=("git+https://github.com/Clownacy/clownaudio.git")
