@@ -20,6 +20,9 @@
 
 #include "snes_spc.h"
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 #include <stddef.h>
 #include <stdlib.h>
 

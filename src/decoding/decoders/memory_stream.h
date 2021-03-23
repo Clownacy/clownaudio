@@ -20,6 +20,9 @@
 
 #pragma once 
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 #include <stddef.h>
 
 typedef struct MemoryStream MemoryStream;
@@ -31,6 +34,10 @@ enum MemoryStream_Origin
 	MEMORYSTREAM_CURRENT,
 	MEMORYSTREAM_END
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 MemoryStream* MemoryStream_Create(bool free_buffer_when_destroyed);
 void MemoryStream_Destroy(MemoryStream *memory_stream);
@@ -48,3 +55,7 @@ size_t ROMemoryStream_Read(ROMemoryStream *memory_stream, void *output, size_t s
 size_t ROMemoryStream_GetPosition(ROMemoryStream *memory_stream);
 bool ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
 void ROMemoryStream_Rewind(ROMemoryStream *memory_stream);
+
+#ifdef __cplusplus
+}
+#endif

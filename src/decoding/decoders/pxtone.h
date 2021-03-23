@@ -20,11 +20,22 @@
 
 #pragma once
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 #include <stddef.h>
 
 #include "common.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void* Decoder_PxTone_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
 void Decoder_PxTone_Destroy(void *decoder);
 void Decoder_PxTone_Rewind(void *decoder);
 size_t Decoder_PxTone_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
+
+#ifdef __cplusplus
+}
+#endif

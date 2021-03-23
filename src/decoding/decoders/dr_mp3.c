@@ -20,6 +20,9 @@
 
 #include "dr_mp3.h"
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 #include <stddef.h>
 #include <stdlib.h>
 

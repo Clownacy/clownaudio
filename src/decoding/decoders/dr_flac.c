@@ -20,6 +20,9 @@
 
 #include "dr_flac.h"
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 #include <stddef.h>
 
 #define DR_FLAC_IMPLEMENTATION

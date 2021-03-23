@@ -20,6 +20,9 @@
 
 #include "stb_vorbis.h"
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 #include <stddef.h>
 
 #define STB_VORBIS_IMPLEMENTATION

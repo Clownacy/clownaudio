@@ -20,6 +20,9 @@
 
 #include "clownaudio/clownaudio.h"
 
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
 #include <stddef.h>
 #include <string.h>
 
