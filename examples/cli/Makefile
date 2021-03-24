@@ -1,13 +1,13 @@
-ALL_CXXFLAGS = $(CXXFLAGS)
+ALL_CFLAGS = $(CFLAGS)
 ALL_LIBS = $(LIBS)
 
 ifeq ($(STATIC), 1)
-  ALL_CXXFLAGS += $(shell pkg-config clownaudio --cflags --static) -static -DCLOWNAUDIO_STATIC_DEFINE
+  ALL_CFLAGS += $(shell pkg-config clownaudio --cflags --static) -static -DCLOWNAUDIO_STATIC_DEFINE
   ALL_LIBS += $(shell pkg-config clownaudio --libs --static)
 else
-  ALL_CXXFLAGS += $(shell pkg-config clownaudio --cflags)
+  ALL_CFLAGS += $(shell pkg-config clownaudio --cflags)
   ALL_LIBS += $(shell pkg-config clownaudio --libs)
 endif
 
-test: test.cpp
-	$(CXX) $(ALL_CXXFLAGS) -o $@ $^ $(LDFLAGS) $(ALL_LIBS)
+test: test.c
+	$(CC) $(ALL_CFLAGS) -o $@ $^ $(LDFLAGS) $(ALL_LIBS)
