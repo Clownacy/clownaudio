@@ -19,7 +19,22 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 	set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
 endif()
 
-project(clownaudio VERSION 0.2 DESCRIPTION "Stereo audio engine supporting various formats" LANGUAGES C CXX)
+# Figure out if we need a C compiler, a C++ compiler, or both
+if(CLOWNAUDIO_CPP)
+	if(CLOWNAUDIO_LIBXMPLITE)
+		set(LANGUAGES "C CXX")
+	else()
+		set(LANGUAGES "CXX")
+	endif()
+else()
+	if(CLOWNAUDIO_PXTONE OR CLOWNAUDIO_SNES_SPC)
+		set(LANGUAGES "C CXX")
+	else()
+		set(LANGUAGES "C")
+	endif()
+endif()
+
+project(clownaudio VERSION 0.2 DESCRIPTION "Stereo audio engine supporting various formats" LANGUAGES ${LANGUAGES})
 
 add_library(clownaudio)
 
