@@ -4,9 +4,9 @@ option(COMPILE_AS_CPP "Compile the program as C++ instead of C, for compilers th
 option(SUBDIRECTORY "Use clownaudio as a subdirectory, instead of an external package" OFF)
 
 if(COMPILE_AS_CPP)
-	set(LANGUAGES "CXX")
+	set(LANGUAGES CXX)
 else()
-	set(LANGUAGES "C")
+	set(LANGUAGES C)
 endif()
 
 project(clownaudio_test LANGUAGES ${LANGUAGES})
