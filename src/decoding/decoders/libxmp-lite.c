@@ -41,7 +41,7 @@ typedef struct Decoder_libXMPLite
 {
 	xmp_context context;
 	bool loop;
-	xmp_frame_info frame_info;
+	struct xmp_frame_info frame_info;
 	size_t buffer_done;
 	size_t buffer_size;
 } Decoder_libXMPLite;
