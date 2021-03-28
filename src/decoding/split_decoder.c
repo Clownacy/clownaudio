@@ -28,8 +28,6 @@
 
 #include "decoders/common.h"
 
-#include "resampled_decoder.h"
-
 typedef struct SplitDecoder
 {
 	DecoderStage next_stage[2];
