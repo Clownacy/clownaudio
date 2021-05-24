@@ -22,7 +22,7 @@ pxtoneNoise::~pxtoneNoise()
 bool pxtoneNoise::init()
 {
 	pxtnPulse_NoiseBuilder *bldr = new pxtnPulse_NoiseBuilder();	
-	if( !bldr->Init() ){ free( bldr ); return false; }	
+	if( !bldr->Init() ){ delete( bldr ); return false; }
 	_bldr = bldr;
 	return true;
 }
