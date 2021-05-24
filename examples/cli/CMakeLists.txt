@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 option(COMPILE_AS_CPP "Compile the program as C++ instead of C, for compilers that don't support C99 but do support C++98" OFF)
-option(SUBDIRECTORY "Use clownaudio as a subdirectory, instead of an external package" OFF)
+option(SUBDIRECTORY "Use clownaudio as a subdirectory, instead of an external package" ON)
 
 if(COMPILE_AS_CPP)
 	set(LANGUAGES CXX)

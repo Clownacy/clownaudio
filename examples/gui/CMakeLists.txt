@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-option(SUBDIRECTORY "Use clownaudio as a subdirectory, instead of an external package" OFF)
+option(SUBDIRECTORY "Use clownaudio as a subdirectory, instead of an external package" ON)
 
 project(clownaudio_test LANGUAGES C CXX)
 
