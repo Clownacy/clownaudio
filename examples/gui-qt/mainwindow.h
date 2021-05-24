@@ -34,7 +34,9 @@ private slots:
 
 	void on_pushButton_DestroySound_clicked();
 
-	void on_pushButton_PauseUnpause_clicked();
+	void on_pushButton_Pause_clicked();
+
+	void on_pushButton_Unpause_clicked();
 
 	void on_pushButton_Rewind_clicked();
 

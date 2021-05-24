@@ -226,7 +226,8 @@ void MainWindow::on_listWidget_Sounds_itemSelectionChanged()
 	// Enable or disable parts of the interface
 	ui->pushButton_DestroySound->setEnabled(sound_instance_selected);
 
-	ui->pushButton_PauseUnpause->setEnabled(sound_instance_selected);
+	ui->pushButton_Pause->setEnabled(sound_instance_selected);
+	ui->pushButton_Unpause->setEnabled(sound_instance_selected);
 	ui->pushButton_Rewind->setEnabled(sound_instance_selected);
 
 	ui->pushButton_FadeIn->setEnabled(sound_instance_selected);
@@ -251,29 +252,24 @@ void MainWindow::on_listWidget_Sounds_itemSelectionChanged()
 		ui->horizontalSlider_MasterVolume->setValue(sound_metadata->master_volume);
 		ui->horizontalSlider_LeftVolume->setValue(sound_metadata->left_volume);
 		ui->horizontalSlider_RightVolume->setValue(sound_metadata->right_volume);
-
-		ui->pushButton_PauseUnpause->setText(sound_metadata->paused ? "Unpause" : "Pause");
 	}
 }
 
-void MainWindow::on_pushButton_PauseUnpause_clicked()
+void MainWindow::on_pushButton_Pause_clicked()
 {
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	// Toggle pausing/unpausing
-	if (sound_metadata->paused)
-	{
-		ui->pushButton_PauseUnpause->setText("Pause");
-		ClownAudio_UnpauseSound(sound_metadata->id);
-	}
-	else
-	{
-		ui->pushButton_PauseUnpause->setText("Unpause");
-		ClownAudio_PauseSound(sound_metadata->id);
-	}
+	ClownAudio_PauseSound(sound_metadata->id);
+}
 
-	sound_metadata->paused = !sound_metadata->paused;
+
+void MainWindow::on_pushButton_Unpause_clicked()
+{
+	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
+	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
+
+	ClownAudio_UnpauseSound(sound_metadata->id);
 }
 
 
