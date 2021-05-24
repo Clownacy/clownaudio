@@ -76,7 +76,7 @@ static bool LoadFileToMemory(const char *path, unsigned char **buffer, size_t *s
 {
 	bool success = false;
 
-	if (path == NULL)
+	if (path == NULL || path[0] == '\0')
 	{
 		*buffer = NULL;
 		*size = 0;
@@ -205,7 +205,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromMemory
 
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromFiles(ClownAudio_Mixer *mixer, const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
 {
-	if (intro_path != NULL || loop_path != NULL)
+	if ((intro_path != NULL && intro_path[0] != '\0') || (loop_path != NULL && loop_path[0] != '\0'))
 	{
 		unsigned char *file_buffers[2];
 		size_t file_buffer_sizes[2];
