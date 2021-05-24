@@ -145,6 +145,7 @@ void MainWindow::on_pushButton_UnloadSoundData_clicked()
 			ClownAudio_DestroySound(sound_metadata->id);
 			delete sound_metadata;
 			delete item;
+			--i;
 		}
 	}
 
