@@ -133,8 +133,8 @@ void MainWindow::on_pushButton_UnloadSoundData_clicked()
 	QListWidgetItem *item = ui->listWidget_SoundData->currentItem();
 	ClownAudio_SoundData *sound_data = static_cast<ClownAudio_SoundData*>(item->data(Qt::UserRole).value<void*>());
 
-	// Find any sounds that are using this data, and stop them
-	// (if we unload sound data while sounds are using it, the program will crash)
+	// Remove the widgets of any sounds that use this sound data,
+	// as unloading this sound data will destroy these sounds
 	for(int i = 0; i < ui->listWidget_Sounds->count(); ++i)
 	{
 		QListWidgetItem *item = ui->listWidget_Sounds->item(i);
@@ -142,7 +142,6 @@ void MainWindow::on_pushButton_UnloadSoundData_clicked()
 
 		if (sound_metadata->data == sound_data)
 		{
-			ClownAudio_DestroySound(sound_metadata->id);
 			delete sound_metadata;
 			delete item;
 			--i;
