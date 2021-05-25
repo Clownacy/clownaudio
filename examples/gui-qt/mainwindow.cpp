@@ -86,14 +86,14 @@ void MainWindow::UpdateSoundVolume(SoundMetadata *sound_metadata)
 	ClownAudio_SetSoundVolume(sound_metadata->id, final_left_volume, final_right_volume);
 }
 
-void MainWindow::on_pushButton_File1Find_clicked() // Needs renaming at some point
+void MainWindow::on_pushButton_File1Open_clicked()
 {
 	QString song_intro_filename = QFileDialog::getOpenFileName(this, "Select sound intro file");
 
 	ui->lineEdit_File1->setText(song_intro_filename);
 }
 
-void MainWindow::on_pushButton_File2Find_clicked() // Needs renaming at some point
+void MainWindow::on_pushButton_File2Open_clicked()
 {
 	QString song_intro_filename = QFileDialog::getOpenFileName(this, "Select sound loop file");
 

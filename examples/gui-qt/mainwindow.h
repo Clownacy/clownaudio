@@ -18,9 +18,9 @@ public:
 	~MainWindow();
 
 private slots:
-	void on_pushButton_File1Find_clicked();
+	void on_pushButton_File1Open_clicked();
 
-	void on_pushButton_File2Find_clicked();
+	void on_pushButton_File2Open_clicked();
 
 	void on_pushButton_LoadSoundData_clicked();
 
