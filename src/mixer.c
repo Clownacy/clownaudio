@@ -51,6 +51,7 @@ struct ClownAudio_Mixer
 
 struct ClownAudio_Sound
 {
+	struct ClownAudio_Sound *prev;
 	struct ClownAudio_Sound *next;
 
 	bool paused;
@@ -116,6 +117,22 @@ static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID s
 
 	return NULL;
 }
+
+static void DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
+{
+	// Detach sound from doubly-linked list
+	if (sound->prev != NULL)
+		sound->prev->next = sound->next;
+	else
+		mixer->sound_list_head = sound->next;
+
+	if (sound->next != NULL)
+		sound->next->prev = sound->prev;
+
+	sound->pipeline.Destroy(sound->pipeline.decoder);
+	free(sound);
+}
+
 
 CLOWNAUDIO_EXPORT void ClownAudio_InitSoundDataConfig(ClownAudio_SoundDataConfig *config)
 {
@@ -407,7 +424,12 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_M
 
 		sound->id = sound_id;
 
+		sound->prev = NULL;
 		sound->next = mixer->sound_list_head;
+
+		if (mixer->sound_list_head != NULL)
+			mixer->sound_list_head->prev = sound;
+
 		mixer->sound_list_head = sound;
 	}
 
@@ -416,23 +438,10 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_M
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_DestroySound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
-	ClownAudio_Sound *sound = NULL;
-
-	for (ClownAudio_Sound **sound_pointer = &mixer->sound_list_head; *sound_pointer != NULL; sound_pointer = &(*sound_pointer)->next)
-	{
-		if ((*sound_pointer)->id == sound_id)
-		{
-			sound = *sound_pointer;
-			*sound_pointer = sound->next;
-			break;
-		}
-	}
+	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
-	{
-		sound->pipeline.Destroy(sound->pipeline.decoder);
-		free(sound);
-	}
+		DestroySound(mixer, sound);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
@@ -552,10 +561,11 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mix
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long *output_buffer, size_t frames_to_do)
 {
-	ClownAudio_Sound **sound_pointer = &mixer->sound_list_head;
-	while (*sound_pointer != NULL)
+	ClownAudio_Sound *sound = mixer->sound_list_head;
+
+	while (sound != NULL)
 	{
-		ClownAudio_Sound *sound = *sound_pointer;
+		ClownAudio_Sound *next_sound = sound->next;
 
 		if (!sound->paused)
 		{
@@ -612,20 +622,13 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 			if (frames_done < frames_to_do)	// Sound finished
 			{
 				if (sound->free_when_done)
-				{
-					sound->pipeline.Destroy(sound->pipeline.decoder);
-					*sound_pointer = sound->next;
-					free(sound);
-					continue;
-				}
+					DestroySound(mixer, sound);
 				else
-				{
 					sound->paused = true;
-				}
 			}
 		}
 
-		sound_pointer = &(*sound_pointer)->next;
+		sound = next_sound;
 	}
 }
 
