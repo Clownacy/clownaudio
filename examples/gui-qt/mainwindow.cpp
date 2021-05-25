@@ -1,8 +1,11 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
+#include <cerrno>
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <string>
 
 #include <QString>
@@ -347,18 +350,11 @@ void MainWindow::on_pushButton_SetSampleRate_clicked()
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	ClownAudio_SoundID sound_id = item->data(Qt::UserRole).value<SoundMetadata*>()->id;
 
-	try
-	{
-		unsigned long sample_rate = std::stoul(ui->lineEdit_SampleRate->text().toStdString(), nullptr, 0);
+	const std::string cpp_string = ui->lineEdit_SampleRate->text().toStdString();
+	const char *c_string = cpp_string.c_str();
+	char *end;
+	unsigned long sample_rate = std::strtoul(c_string, &end, 0);
 
+	if (end - c_string == strlen(c_string) && errno != ERANGE)
 		ClownAudio_SetSoundSampleRate (sound_id, sample_rate, sample_rate);
-	}
-	catch (const std::invalid_argument &e)
-	{
-		Q_UNUSED(e);
-	}
-	catch (const std::out_of_range &e)
-	{
-		Q_UNUSED(e);
-	}
 }
