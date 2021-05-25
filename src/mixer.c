@@ -54,9 +54,11 @@ struct ClownAudio_Mixer
 
 struct ClownAudio_Sound
 {
-	struct ClownAudio_Sound *prev;
-	struct ClownAudio_Sound *next;
+	// List of sounds in bucket
+	struct ClownAudio_Sound *prev_in_bucket;
+	struct ClownAudio_Sound *next_in_bucket;
 
+	// List of all currently-playing sounds
 	struct ClownAudio_Sound *prev_playing;
 	struct ClownAudio_Sound *next_playing;
 
@@ -117,7 +119,7 @@ static bool LoadFileToMemory(const char *path, unsigned char **buffer, size_t *s
 
 static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
-	for (ClownAudio_Sound *sound = mixer->sound_hash_table[sound_id % COUNT_OF(mixer->sound_hash_table)]; sound != NULL; sound = sound->next)
+	for (ClownAudio_Sound *sound = mixer->sound_hash_table[sound_id % COUNT_OF(mixer->sound_hash_table)]; sound != NULL; sound = sound->next_in_bucket)
 		if (sound->id == sound_id)
 			return sound;
 
@@ -127,13 +129,13 @@ static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID s
 static void DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 {
 	// Detach sound from sound list
-	if (sound->prev != NULL)
-		sound->prev->next = sound->next;
+	if (sound->prev_in_bucket != NULL)
+		sound->prev_in_bucket->next_in_bucket = sound->next_in_bucket;
 	else
-		mixer->sound_hash_table[sound->id % COUNT_OF(mixer->sound_hash_table)] = sound->next;
+		mixer->sound_hash_table[sound->id % COUNT_OF(mixer->sound_hash_table)] = sound->next_in_bucket;
 
-	if (sound->next != NULL)
-		sound->next->prev = sound->prev;
+	if (sound->next_in_bucket != NULL)
+		sound->next_in_bucket->prev_in_bucket = sound->prev_in_bucket;
 
 	sound->pipeline.Destroy(sound->pipeline.decoder);
 	free(sound);
@@ -469,11 +471,11 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_M
 		ClownAudio_Sound **sound_list_head_pointer = &mixer->sound_hash_table[sound_id % COUNT_OF(mixer->sound_hash_table)];
 		ClownAudio_Sound *sound_list_head = *sound_list_head_pointer;
 
-		sound->prev = NULL;
-		sound->next = sound_list_head;
+		sound->prev_in_bucket = NULL;
+		sound->next_in_bucket = sound_list_head;
 
 		if (sound_list_head != NULL)
-			sound_list_head->prev = sound;
+			sound_list_head->prev_in_bucket = sound;
 
 		*sound_list_head_pointer = sound;
 	}
