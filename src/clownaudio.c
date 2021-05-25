@@ -88,7 +88,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_LoadSoundDataFromFiles(const 
 
 CLOWNAUDIO_EXPORT void ClownAudio_UnloadSoundData(ClownAudio_SoundData *sound_data)
 {
-	ClownAudio_Mixer_UnloadSoundData(sound_data);
+	ClownAudio_Mixer_UnloadSoundData(mixer, sound_data);
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_CreateSound(ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config)
@@ -96,7 +96,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_CreateSound(ClownAudio_SoundData
 	ClownAudio_Sound *sound = ClownAudio_Mixer_CreateSound(mixer, sound_data, config);
 
 	ClownAudio_LockStream(stream);
-	ClownAudio_SoundID sound_id = ClownAudio_Mixer_RegisterSound(mixer, sound);
+	ClownAudio_SoundID sound_id = ClownAudio_Mixer_RegisterSound(mixer, sound, sound_data);
 	ClownAudio_UnlockStream(stream);
 
 	return sound_id;

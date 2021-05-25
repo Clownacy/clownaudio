@@ -62,6 +62,10 @@ struct ClownAudio_Sound
 	struct ClownAudio_Sound *prev_playing;
 	struct ClownAudio_Sound *next_playing;
 
+	// List of sounds created from a single sound data
+	struct ClownAudio_Sound *prev_sibling;
+	struct ClownAudio_Sound *next_sibling;
+
 	bool paused;
 	bool free_when_done;
 	unsigned short volume_left;
@@ -77,6 +81,8 @@ struct ClownAudio_Sound
 
 struct ClownAudio_SoundData
 {
+	ClownAudio_Sound sound_list_sentinel;
+
 	DecoderSelectorData *decoder_selector_data[2];
 	unsigned char *file_buffers[2];
 };
@@ -136,6 +142,12 @@ static void DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 
 	if (sound->next_in_bucket != NULL)
 		sound->next_in_bucket->prev_in_bucket = sound->prev_in_bucket;
+
+	// Detach sound from list of sounds derived from the same sound data
+	sound->prev_sibling->next_sibling = sound->next_sibling;
+
+	if (sound->next_sibling != NULL)
+		sound->next_sibling->prev_sibling = sound->prev_sibling;
 
 	sound->pipeline.Destroy(sound->pipeline.decoder);
 	free(sound);
@@ -224,6 +236,8 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromMemory
 		wanted_spec.sample_rate = config->dynamic_sample_rate ? 0 : mixer->sample_rate;	// Do not change the sample rate when dynamic resampling is enabled
 		wanted_spec.channel_count = CHANNEL_COUNT;
 
+		sound_data->sound_list_sentinel.next_sibling = NULL;
+
 		sound_data->file_buffers[0] = NULL;
 		sound_data->file_buffers[1] = NULL;
 
@@ -295,10 +309,17 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromFiles(
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_SoundData *sound_data)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data)
 {
 	if (sound_data != NULL)
 	{
+		// Destroy any sounds that use this sound data
+		for (ClownAudio_Sound *sound = sound_data->sound_list_sentinel.next_sibling; sound != NULL; sound = sound->next_sibling)
+		{
+			PauseSound(mixer, sound);
+			DestroySound(mixer, sound);
+		}
+
 		if (sound_data->decoder_selector_data[0] != NULL)
 			DecoderSelector_UnloadData(sound_data->decoder_selector_data[0]);
 
@@ -455,7 +476,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_CreateSound(ClownAudio_Mixe
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
+CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound, ClownAudio_SoundData *sound_data)
 {
 	ClownAudio_SoundID sound_id = 0;
 
@@ -468,6 +489,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_M
 
 		sound->id = sound_id;
 
+		// Add sound to hash table of all sound
 		ClownAudio_Sound **sound_list_head_pointer = &mixer->sound_hash_table[sound_id % COUNT_OF(mixer->sound_hash_table)];
 		ClownAudio_Sound *sound_list_head = *sound_list_head_pointer;
 
@@ -478,6 +500,15 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_M
 			sound_list_head->prev_in_bucket = sound;
 
 		*sound_list_head_pointer = sound;
+
+		// Add sound to list of sounds derived from the same sound data
+		sound->prev_sibling = &sound_data->sound_list_sentinel;
+		sound->next_sibling = sound_data->sound_list_sentinel.next_sibling;
+
+		if (sound_data->sound_list_sentinel.next_sibling != NULL)
+			sound_data->sound_list_sentinel.next_sibling->prev_sibling = sound;
+
+		sound_data->sound_list_sentinel.next_sibling = sound;
 	}
 
 	return sound_id;

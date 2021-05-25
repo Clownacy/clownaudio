@@ -98,7 +98,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromMemory
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_LoadSoundDataFromFiles(ClownAudio_Mixer *mixer, const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config);
 
 /// Unloads data. All sounds using the specified data must be destroyed manually before this function is called.
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_SoundData *sound_data);
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data);
 
 
 ////////////////////////////////
@@ -110,7 +110,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_CreateSound(ClownAudio_Mixe
 
 /// Used to create a sound ID from a sound. Must be done only once.
 /// Must be guarded with mutex.
-CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound);
+CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound, ClownAudio_SoundData *sound_data);
 
 /// Destroys sound.
 /// Must be guarded with mutex.
