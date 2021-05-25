@@ -45,6 +45,7 @@
 struct ClownAudio_Mixer
 {
 	ClownAudio_Sound *sound_list_head;
+	ClownAudio_Sound *playing_list_head;
 	unsigned long sample_rate;
 	ClownAudio_SoundID sound_id_allocator;
 };
@@ -53,6 +54,9 @@ struct ClownAudio_Sound
 {
 	struct ClownAudio_Sound *prev;
 	struct ClownAudio_Sound *next;
+
+	struct ClownAudio_Sound *prev_playing;
+	struct ClownAudio_Sound *next_playing;
 
 	bool paused;
 	bool free_when_done;
@@ -120,7 +124,7 @@ static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID s
 
 static void DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 {
-	// Detach sound from doubly-linked list
+	// Detach sound from sound list
 	if (sound->prev != NULL)
 		sound->prev->next = sound->next;
 	else
@@ -133,6 +137,39 @@ static void DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 	free(sound);
 }
 
+static void PauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
+{
+	if (!sound->paused)
+	{
+		// Detach sound from playing list
+		if (sound->prev_playing != NULL)
+			sound->prev_playing->next_playing = sound->next_playing;
+		else
+			mixer->playing_list_head = sound->next_playing;
+
+		if (sound->next_playing != NULL)
+			sound->next_playing->prev_playing = sound->prev_playing;
+
+		sound->paused = true;
+	}
+}
+
+static void UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
+{
+	if (sound->paused)
+	{
+		// Attach sound to playing list
+		sound->prev_playing = NULL;
+		sound->next_playing = mixer->playing_list_head;
+
+		if (mixer->playing_list_head != NULL)
+			mixer->playing_list_head->prev_playing = sound;
+
+		mixer->playing_list_head = sound;
+
+		sound->paused = false;
+	}
+}
 
 CLOWNAUDIO_EXPORT void ClownAudio_InitSoundDataConfig(ClownAudio_SoundDataConfig *config)
 {
@@ -155,6 +192,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Mixer* ClownAudio_CreateMixer(unsigned long sample_
 	if (mixer != NULL)
 	{
 		mixer->sound_list_head = NULL;
+		mixer->playing_list_head = NULL;
 
 		mixer->sample_rate = sample_rate;
 
@@ -441,7 +479,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_DestroySound(ClownAudio_Mixer *mixer, Cl
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
+	{
+		PauseSound(mixer, sound);
 		DestroySound(mixer, sound);
+	}
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
@@ -457,7 +498,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_PauseSound(ClownAudio_Mixer *mixer, Clow
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
-		sound->paused = true;
+		PauseSound(mixer, sound);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
@@ -465,7 +506,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnpauseSound(ClownAudio_Mixer *mixer, Cl
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
-		sound->paused = false;
+		UnpauseSound(mixer, sound);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_FadeOutSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
@@ -561,71 +602,68 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mix
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long *output_buffer, size_t frames_to_do)
 {
-	ClownAudio_Sound *sound = mixer->sound_list_head;
+	ClownAudio_Sound *sound = mixer->playing_list_head;
 
 	while (sound != NULL)
 	{
-		ClownAudio_Sound *next_sound = sound->next;
+		ClownAudio_Sound *next_sound = sound->next_playing;
 
-		if (!sound->paused)
+		long *output_buffer_pointer = output_buffer;
+
+		size_t frames_done = 0;
+		for (size_t sub_frames_done; frames_done < frames_to_do; frames_done += sub_frames_done)
 		{
-			long *output_buffer_pointer = output_buffer;
+			short read_buffer[0x1000];
 
-			size_t frames_done = 0;
-			for (size_t sub_frames_done; frames_done < frames_to_do; frames_done += sub_frames_done)
+			const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
+			sub_frames_done = sound->pipeline.GetSamples(sound->pipeline.decoder, read_buffer, sub_frames_to_do);
+
+			short *read_buffer_pointer = read_buffer;
+
+			for (size_t i = 0; i < sub_frames_done; ++i)
 			{
-				short read_buffer[0x1000];
+				unsigned short fade_volume = 0x100;
 
-				const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
-				sub_frames_done = sound->pipeline.GetSamples(sound->pipeline.decoder, read_buffer, sub_frames_to_do);
-
-				short *read_buffer_pointer = read_buffer;
-
-				for (size_t i = 0; i < sub_frames_done; ++i)
+				// Apply fade-out volume
+				if (sound->fade_out_counter_max != 0)
 				{
-					unsigned short fade_volume = 0x100;
+					const unsigned short fade_out_volume = (sound->fade_counter << 8) / sound->fade_out_counter_max;
 
-					// Apply fade-out volume
-					if (sound->fade_out_counter_max != 0)
-					{
-						const unsigned short fade_out_volume = (sound->fade_counter << 8) / sound->fade_out_counter_max;
+					fade_volume = SCALE(fade_volume, SCALE(fade_out_volume, fade_out_volume));	// Fade logarithmically
 
-						fade_volume = SCALE(fade_volume, SCALE(fade_out_volume, fade_out_volume));	// Fade logarithmically
-
-						if (sound->fade_counter != 0)
-							--sound->fade_counter;
-					}
-
-					// Apply fade-in volume
-					if (sound->fade_in_counter_max != 0)
-					{
-						const unsigned short fade_in_volume = ((sound->fade_in_counter_max - sound->fade_counter) << 8) / (float)sound->fade_in_counter_max;
-
-						fade_volume = SCALE(fade_volume, SCALE(fade_in_volume, fade_in_volume));	// Fade logarithmically
-
-						if (--sound->fade_counter == 0)
-							sound->fade_in_counter_max = 0;
-					}
-
-					// Mix data with output, and apply volume
-					*output_buffer_pointer++ += SCALE(SCALE(*read_buffer_pointer++, sound->volume_left), fade_volume);
-					*output_buffer_pointer++ += SCALE(SCALE(*read_buffer_pointer++, sound->volume_right), fade_volume);
+					if (sound->fade_counter != 0)
+						--sound->fade_counter;
 				}
 
-				if (sub_frames_done < sub_frames_to_do)
+				// Apply fade-in volume
+				if (sound->fade_in_counter_max != 0)
 				{
-					frames_done += sub_frames_done;
-					break;
+					const unsigned short fade_in_volume = ((sound->fade_in_counter_max - sound->fade_counter) << 8) / (float)sound->fade_in_counter_max;
+
+					fade_volume = SCALE(fade_volume, SCALE(fade_in_volume, fade_in_volume));	// Fade logarithmically
+
+					if (--sound->fade_counter == 0)
+						sound->fade_in_counter_max = 0;
 				}
+
+				// Mix data with output, and apply volume
+				*output_buffer_pointer++ += SCALE(SCALE(*read_buffer_pointer++, sound->volume_left), fade_volume);
+				*output_buffer_pointer++ += SCALE(SCALE(*read_buffer_pointer++, sound->volume_right), fade_volume);
 			}
 
-			if (frames_done < frames_to_do)	// Sound finished
+			if (sub_frames_done < sub_frames_to_do)
 			{
-				if (sound->free_when_done)
-					DestroySound(mixer, sound);
-				else
-					sound->paused = true;
+				frames_done += sub_frames_done;
+				break;
 			}
+		}
+
+		if (frames_done < frames_to_do)	// Sound finished
+		{
+			PauseSound(mixer, sound);
+
+			if (sound->free_when_done)
+				DestroySound(mixer, sound);
 		}
 
 		sound = next_sound;
