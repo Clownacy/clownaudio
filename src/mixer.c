@@ -42,9 +42,11 @@
 
 #define SCALE(x, scale) (((x) * (scale)) >> 8)
 
+#define COUNT_OF(array) (sizeof(array) / sizeof(*array))
+
 struct ClownAudio_Mixer
 {
-	ClownAudio_Sound *sound_list_head;
+	ClownAudio_Sound *sound_hash_table[0x100];
 	ClownAudio_Sound *playing_list_head;
 	unsigned long sample_rate;
 	ClownAudio_SoundID sound_id_allocator;
@@ -115,7 +117,7 @@ static bool LoadFileToMemory(const char *path, unsigned char **buffer, size_t *s
 
 static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
-	for (ClownAudio_Sound *sound = mixer->sound_list_head; sound != NULL; sound = sound->next)
+	for (ClownAudio_Sound *sound = mixer->sound_hash_table[sound_id % COUNT_OF(mixer->sound_hash_table)]; sound != NULL; sound = sound->next)
 		if (sound->id == sound_id)
 			return sound;
 
@@ -128,7 +130,7 @@ static void DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 	if (sound->prev != NULL)
 		sound->prev->next = sound->next;
 	else
-		mixer->sound_list_head = sound->next;
+		mixer->sound_hash_table[sound->id % COUNT_OF(mixer->sound_hash_table)] = sound->next;
 
 	if (sound->next != NULL)
 		sound->next->prev = sound->prev;
@@ -191,7 +193,9 @@ CLOWNAUDIO_EXPORT ClownAudio_Mixer* ClownAudio_CreateMixer(unsigned long sample_
 
 	if (mixer != NULL)
 	{
-		mixer->sound_list_head = NULL;
+		for (size_t i = 0; i < COUNT_OF(mixer->sound_hash_table); ++i)
+			mixer->sound_hash_table[i] = NULL;
+
 		mixer->playing_list_head = NULL;
 
 		mixer->sample_rate = sample_rate;
@@ -462,13 +466,16 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_RegisterSound(ClownAudio_M
 
 		sound->id = sound_id;
 
+		ClownAudio_Sound **sound_list_head_pointer = &mixer->sound_hash_table[sound_id % COUNT_OF(mixer->sound_hash_table)];
+		ClownAudio_Sound *sound_list_head = *sound_list_head_pointer;
+
 		sound->prev = NULL;
-		sound->next = mixer->sound_list_head;
+		sound->next = sound_list_head;
 
-		if (mixer->sound_list_head != NULL)
-			mixer->sound_list_head->prev = sound;
+		if (sound_list_head != NULL)
+			sound_list_head->prev = sound;
 
-		mixer->sound_list_head = sound;
+		*sound_list_head_pointer = sound;
 	}
 
 	return sound_id;
