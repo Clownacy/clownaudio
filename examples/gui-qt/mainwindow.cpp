@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 
-	this->setFixedSize(QSize(730, 325));
+	//this->setFixedSize(QSize(730, 325));
 
 	ClownAudio_Init();
 }

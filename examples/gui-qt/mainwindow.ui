@@ -17,406 +17,396 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="layoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>1</x>
-      <y>3</y>
-      <width>728</width>
-      <height>321</height>
-     </rect>
-    </property>
-    <layout class="QVBoxLayout" name="verticalLayout_4">
-     <item>
-      <widget class="QSplitter" name="splitter_SoundData">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="childrenCollapsible">
-        <bool>false</bool>
-       </property>
-       <widget class="QWidget" name="verticalLayoutWidget_2">
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QListWidget" name="listWidget_SoundData"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_UnloadSoundData">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Unload sound data</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="Line" name="line_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-       <widget class="QWidget" name="verticalLayoutWidget">
-        <layout class="QVBoxLayout" name="verticalLayout_SoundDataCreation">
-         <item>
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="1" column="0">
-            <widget class="QLineEdit" name="lineEdit_File1">
-             <property name="placeholderText">
-              <string>Sound intro filename</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QPushButton" name="pushButton_File1Open">
-             <property name="text">
-              <string>Open file</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLineEdit" name="lineEdit_File2">
-             <property name="placeholderText">
-              <string>Sound loop filename</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QPushButton" name="pushButton_File2Open">
-             <property name="text">
-              <string>Open file</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <property name="spacing">
-            <number>6</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QCheckBox" name="checkBox_Predecode">
-             <property name="text">
-              <string>Predecode</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="checkBox_MustPredecode">
-             <property name="text">
-              <string>Must predecode</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QCheckBox" name="checkBox_DataDynamicSampleRate">
-             <property name="text">
-              <string>Dynamic sample rate</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_LoadSoundData">
-           <property name="text">
-            <string>Load sound data</string>
-           </property>
-           <property name="flat">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QSplitter" name="splitter_SoundData">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="verticalLayoutWidget_2">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QListWidget" name="listWidget_SoundData"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_UnloadSoundData">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Unload sound data</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
-     </item>
-     <item>
-      <widget class="Line" name="line">
+      <widget class="Line" name="line_2">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Vertical</enum>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QSplitter" name="splitter_SoundInstances">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <widget class="QWidget" name="layoutWidget_2">
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QListWidget" name="listWidget_Sounds"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_DestroySound">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Destroy sound</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="Line" name="line_3">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-       </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_SoundInstanceCreation">
-           <item>
-            <layout class="QVBoxLayout" name="verticalLayout_7">
-             <item>
-              <widget class="QCheckBox" name="checkBox_Loop">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Loop</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBox_DoNotFreeWhenDone">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Do not free when done</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBox_InstanceDynamicSampleRate">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Dynamic sample rate</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_CreateSound">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Create sound</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="Line" name="line_5">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_PlaybackControl">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_4">
-             <item>
-              <widget class="QPushButton" name="pushButton_Pause">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Pause</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_Unpause">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Unpause</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_Rewind">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Rewind</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QPushButton" name="pushButton_FadeOut">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Fade out</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_FadeIn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Fade in</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_CancelFade">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Cancel fade</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QFormLayout" name="formLayout">
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_MasterVolume">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Master volume</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QSlider" name="horizontalSlider_MasterVolume">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="maximum">
-                <number>512</number>
-               </property>
-               <property name="value">
-                <number>256</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="invertedAppearance">
-                <bool>false</bool>
-               </property>
-               <property name="tickPosition">
-                <enum>QSlider::NoTicks</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QSlider" name="horizontalSlider_LeftVolume">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="maximum">
-                <number>512</number>
-               </property>
-               <property name="value">
-                <number>256</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_LeftVolume">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Left volume</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_RightVolume">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Right volume</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="1">
-              <widget class="QSlider" name="horizontalSlider_RightVolume">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="maximum">
-                <number>512</number>
-               </property>
-               <property name="value">
-                <number>256</number>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QLineEdit" name="lineEdit_SampleRate">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="placeholderText">
-                <string>Sample rate</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButton_SetSampleRate">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Set sample rate</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
+      <widget class="QWidget" name="verticalLayoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_SoundDataCreation">
+        <item>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="1" column="0">
+           <widget class="QLineEdit" name="lineEdit_File1">
+            <property name="placeholderText">
+             <string>Sound intro filename</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="pushButton_File1Open">
+            <property name="text">
+             <string>Open file</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLineEdit" name="lineEdit_File2">
+            <property name="placeholderText">
+             <string>Sound loop filename</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QPushButton" name="pushButton_File2Open">
+            <property name="text">
+             <string>Open file</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="checkBox_Predecode">
+            <property name="text">
+             <string>Predecode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_MustPredecode">
+            <property name="text">
+             <string>Must predecode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_DataDynamicSampleRate">
+            <property name="text">
+             <string>Dynamic sample rate</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_LoadSoundData">
+          <property name="text">
+           <string>Load sound data</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
-     </item>
-    </layout>
-   </widget>
+     </widget>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSplitter" name="splitter_SoundInstances">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QWidget" name="layoutWidget_2">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QListWidget" name="listWidget_Sounds"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton_DestroySound">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Destroy sound</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+      <widget class="QWidget" name="horizontalLayoutWidget">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_SoundInstanceCreation">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <widget class="QCheckBox" name="checkBox_Loop">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Loop</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_DoNotFreeWhenDone">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Do not free when done</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_InstanceDynamicSampleRate">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Dynamic sample rate</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_CreateSound">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Create sound</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_5">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_PlaybackControl">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QPushButton" name="pushButton_Pause">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Pause</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_Unpause">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Unpause</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_Rewind">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Rewind</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QPushButton" name="pushButton_FadeOut">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Fade out</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_FadeIn">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Fade in</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_CancelFade">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Cancel fade</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QFormLayout" name="formLayout">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_MasterVolume">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Master volume</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSlider" name="horizontalSlider_MasterVolume">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="maximum">
+               <number>512</number>
+              </property>
+              <property name="value">
+               <number>256</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="invertedAppearance">
+               <bool>false</bool>
+              </property>
+              <property name="tickPosition">
+               <enum>QSlider::NoTicks</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QSlider" name="horizontalSlider_LeftVolume">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="maximum">
+               <number>512</number>
+              </property>
+              <property name="value">
+               <number>256</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_LeftVolume">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Left volume</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_RightVolume">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Right volume</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QSlider" name="horizontalSlider_RightVolume">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="maximum">
+               <number>512</number>
+              </property>
+              <property name="value">
+               <number>256</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLineEdit" name="lineEdit_SampleRate">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="placeholderText">
+               <string>Sample rate</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_SetSampleRate">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Set sample rate</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <action name="actionOpenddd">
    <property name="text">
