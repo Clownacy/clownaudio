@@ -72,7 +72,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 	Pa_Terminate();
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *sample_rate, void (*user_callback)(void *user_data, short *output_buffer, size_t frames_to_do))
+CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_Stream_Create(unsigned long *sample_rate, void (*user_callback)(void *user_data, short *output_buffer, size_t frames_to_do))
 {
 	ClownAudio_Stream *stream = (ClownAudio_Stream*)malloc(sizeof(ClownAudio_Stream));
 
@@ -102,7 +102,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_CreateStream(unsigned long *samp
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Destroy(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -115,13 +115,13 @@ CLOWNAUDIO_EXPORT bool ClownAudio_DestroyStream(ClownAudio_Stream *stream)
 	return success;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SetStreamCallbackData(ClownAudio_Stream *stream, void *user_data)
+CLOWNAUDIO_EXPORT void ClownAudio_Stream_SetCallbackData(ClownAudio_Stream *stream, void *user_data)
 {
 	if (stream != NULL)
 		stream->user_data = user_data;
 }
 
-CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Pause(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -131,7 +131,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_PauseStream(ClownAudio_Stream *stream)
 	return success;
 }
 
-CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Resume(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -141,7 +141,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_ResumeStream(ClownAudio_Stream *stream)
 	return success;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_LockStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT void ClownAudio_Stream_Lock(ClownAudio_Stream *stream)
 {
 	if (stream != NULL)
 	{
@@ -153,7 +153,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_LockStream(ClownAudio_Stream *stream)
 	}
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_UnlockStream(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT void ClownAudio_Stream_Unlock(ClownAudio_Stream *stream)
 {
 	if (stream != NULL)
 	{
