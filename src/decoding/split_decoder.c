@@ -20,6 +20,7 @@
 
 #include "split_decoder.h"
 
+#include <assert.h>
 #ifndef __cplusplus
 #include <stdbool.h>
 #endif
@@ -38,24 +39,21 @@ typedef struct SplitDecoder
 
 void* SplitDecoder_Create(DecoderStage *next_stage_intro, DecoderStage *next_stage_loop, unsigned int channel_count)
 {
-	if (next_stage_intro != NULL || next_stage_loop != NULL)
+	assert(next_stage_intro != NULL && next_stage_loop != NULL);
+
+	SplitDecoder *split_decoder = (SplitDecoder*)malloc(sizeof(SplitDecoder));
+
+	if (split_decoder != NULL)
 	{
-		SplitDecoder *split_decoder = (SplitDecoder*)malloc(sizeof(SplitDecoder));
+		split_decoder->current_decoder = 0;
+		split_decoder->last_decoder = false;
 
-		if (split_decoder != NULL)
-		{
-			split_decoder->current_decoder = 0;
-			split_decoder->last_decoder = false;
-
-			split_decoder->next_stage[0] = *next_stage_intro;
-			split_decoder->next_stage[1] = *next_stage_loop;
-			split_decoder->channel_count = channel_count;
-
-			return split_decoder;
-		}
+		split_decoder->next_stage[0] = *next_stage_intro;
+		split_decoder->next_stage[1] = *next_stage_loop;
+		split_decoder->channel_count = channel_count;
 	}
 
-	return NULL;
+	return split_decoder;
 }
 
 void SplitDecoder_Destroy(void *split_decoder_void)
