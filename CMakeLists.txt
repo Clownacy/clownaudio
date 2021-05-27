@@ -34,7 +34,7 @@ else()
 	endif()
 endif()
 
-project(clownaudio VERSION 0.2 DESCRIPTION "Stereo audio engine supporting various formats" LANGUAGES ${LANGUAGES})
+project(clownaudio VERSION 0.4 DESCRIPTION "Stereo audio engine supporting various formats" LANGUAGES ${LANGUAGES})
 
 add_library(clownaudio)
 
