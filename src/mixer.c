@@ -123,6 +123,28 @@ static bool LoadFileToMemory(const char *path, unsigned char **buffer, size_t *s
 	return success;
 }
 
+static void AddSoundToPlayingList(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
+{
+	sound->prev_playing = NULL;
+	sound->next_playing = mixer->playing_list_head;
+
+	if (mixer->playing_list_head != NULL)
+		mixer->playing_list_head->prev_playing = sound;
+
+	mixer->playing_list_head = sound;
+}
+
+static void RemoveSoundFromPlayingList(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
+{
+	if (sound->prev_playing != NULL)
+		sound->prev_playing->next_playing = sound->next_playing;
+	else
+		mixer->playing_list_head = sound->next_playing;
+
+	if (sound->next_playing != NULL)
+		sound->next_playing->prev_playing = sound->prev_playing;
+}
+
 static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	for (ClownAudio_Sound *sound = mixer->sound_hash_table[sound_id % COUNT_OF(mixer->sound_hash_table)]; sound != NULL; sound = sound->next_in_bucket)
@@ -134,6 +156,9 @@ static ClownAudio_Sound* FindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID s
 
 static void DestroySound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 {
+	if (!sound->paused)
+		RemoveSoundFromPlayingList(mixer, sound);
+
 	// Detach sound from sound list
 	if (sound->prev_in_bucket != NULL)
 		sound->prev_in_bucket->next_in_bucket = sound->next_in_bucket;
@@ -157,15 +182,7 @@ static void PauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 {
 	if (!sound->paused)
 	{
-		// Detach sound from playing list
-		if (sound->prev_playing != NULL)
-			sound->prev_playing->next_playing = sound->next_playing;
-		else
-			mixer->playing_list_head = sound->next_playing;
-
-		if (sound->next_playing != NULL)
-			sound->next_playing->prev_playing = sound->prev_playing;
-
+		RemoveSoundFromPlayingList(mixer, sound);
 		sound->paused = true;
 	}
 }
@@ -174,15 +191,7 @@ static void UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 {
 	if (sound->paused)
 	{
-		// Attach sound to playing list
-		sound->prev_playing = NULL;
-		sound->next_playing = mixer->playing_list_head;
-
-		if (mixer->playing_list_head != NULL)
-			mixer->playing_list_head->prev_playing = sound;
-
-		mixer->playing_list_head = sound;
-
+		AddSoundToPlayingList(mixer, sound);
 		sound->paused = false;
 	}
 }
@@ -315,10 +324,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_UnloadSoundData(ClownAudio_Mixer *mixer,
 	{
 		// Destroy any sounds that use this sound data
 		for (ClownAudio_Sound *sound = sound_data->sound_list_sentinel.next_sibling; sound != NULL; sound = sound->next_sibling)
-		{
-			PauseSound(mixer, sound);
 			DestroySound(mixer, sound);
-		}
 
 		if (sound_data->decoder_selector_data[0] != NULL)
 			DecoderSelector_UnloadData(sound_data->decoder_selector_data[0]);
@@ -519,10 +525,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_DestroySound(ClownAudio_Mixer *mixer, Cl
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
-	{
-		PauseSound(mixer, sound);
 		DestroySound(mixer, sound);
-	}
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_RewindSound(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
@@ -700,10 +703,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 
 		if (frames_done < frames_to_do)	// Sound finished
 		{
-			PauseSound(mixer, sound);
-
 			if (sound->free_when_done)
 				DestroySound(mixer, sound);
+			else
+				PauseSound(mixer, sound);
 		}
 
 		sound = next_sound;
