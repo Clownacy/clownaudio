@@ -153,9 +153,9 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetSoundVolume(ClownAudio_SoundID sound_id, un
 /// Change whether the sound should loop or not. Only certain file formats support this (for example, Ogg Vorbis does but PxTone doesn't).
 CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_SoundID sound_id, bool loop);
 
-/// Override the sound's sample-rate. Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct,
-/// otherwise this function will silently fail.
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_SoundID sound_id, unsigned long sample_rate1, unsigned long sample_rate2);
+/// Sets the sound's speed. Full speed is 0x10000, half-speed is 0x8000, and double-speed is 0x20000.
+/// Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct, otherwise this function will silently fail.
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSpeed(ClownAudio_SoundID sound_id, unsigned long speed);
 
 
 #ifdef __cplusplus

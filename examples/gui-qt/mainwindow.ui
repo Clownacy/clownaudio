@@ -386,7 +386,7 @@
          </layout>
         </item>
         <item>
-         <layout class="QFormLayout" name="formLayout">
+         <layout class="QGridLayout" name="gridLayout_3">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
@@ -472,7 +472,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
+          <item row="2" column="0" rowspan="2">
            <widget class="QLabel" name="label_RightVolume">
             <property name="enabled">
              <bool>true</bool>
@@ -510,39 +510,23 @@
             </property>
            </widget>
           </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QLineEdit" name="lineEdit_SampleRate">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="placeholderText">
-             <string>Sample rate</string>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Speed</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QPushButton" name="pushButton_SetSampleRate">
-            <property name="enabled">
-             <bool>true</bool>
+          <item row="4" column="1">
+           <widget class="QSlider" name="horizontalSlider_Speed">
+            <property name="maximum">
+             <number>131072</number>
             </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+            <property name="value">
+             <number>65536</number>
             </property>
-            <property name="text">
-             <string>Set sample rate</string>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
            </widget>
           </item>

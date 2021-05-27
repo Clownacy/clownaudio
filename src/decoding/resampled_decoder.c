@@ -48,7 +48,8 @@ typedef struct ResampledDecoder
 {
 	DecoderStage next_stage;
 	ma_data_converter converter;
-	unsigned long sample_rate;
+	unsigned long in_sample_rate;
+	unsigned long out_sample_rate;
 	size_t in_channel_count;
 	size_t out_channel_count;
 	short buffer[RESAMPLE_BUFFER_SIZE];
@@ -76,11 +77,12 @@ void* ResampledDecoder_Create(DecoderStage *next_stage, bool dynamic_sample_rate
 
 			if (ma_data_converter_init(&config, &resampled_decoder->converter) == MA_SUCCESS)
 			{
+				resampled_decoder->in_sample_rate = child_spec->sample_rate;
+				resampled_decoder->out_sample_rate = wanted_spec->sample_rate;
 				resampled_decoder->in_channel_count = child_spec->channel_count;
 				resampled_decoder->out_channel_count = wanted_spec->channel_count;
 				resampled_decoder->buffer_end = 0;
 				resampled_decoder->buffer_done = 0;
-				resampled_decoder->sample_rate = wanted_spec->sample_rate;
 
 				return resampled_decoder;
 			}
@@ -146,9 +148,9 @@ void ResampledDecoder_SetLoop(void *resampled_decoder_void, bool loop)
 	resampled_decoder->next_stage.SetLoop(resampled_decoder->next_stage.decoder, loop);
 }
 
-void ResampledDecoder_SetSampleRate(void *resampled_decoder_void, unsigned long sample_rate)
+void ResampledDecoder_SetSpeed(void *resampled_decoder_void, unsigned long speed)
 {
 	ResampledDecoder *resampled_decoder = (ResampledDecoder*)resampled_decoder_void;
 
-	ma_data_converter_set_rate(&resampled_decoder->converter, sample_rate, resampled_decoder->sample_rate);
+	ma_data_converter_set_rate(&resampled_decoder->converter, (resampled_decoder->in_sample_rate * speed) >> 16, resampled_decoder->out_sample_rate);
 }

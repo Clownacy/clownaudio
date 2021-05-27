@@ -168,10 +168,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundVolume(ClownAudio_Mixer *mixer, 
 /// Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundLoop(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, bool loop);
 
-/// Override the sound's sample-rate. Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct,
-/// otherwise this function will silently fail.
+/// Sets the sound's speed. Full speed is 0x10000, half-speed is 0x8000, and double-speed is 0x20000.
+/// Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct, otherwise this function will silently fail.
 /// Must be guarded with mutex.
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSampleRate(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long sample_rate1, unsigned long sample_rate2);
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SetSoundSpeed(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long speed);
 
 
 ////////////

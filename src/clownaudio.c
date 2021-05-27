@@ -174,9 +174,9 @@ CLOWNAUDIO_EXPORT void ClownAudio_SetSoundLoop(ClownAudio_SoundID sound_id, bool
 	ClownAudio_UnlockStream(stream);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSampleRate(ClownAudio_SoundID sound_id, unsigned long sample_rate1, unsigned long sample_rate2)
+CLOWNAUDIO_EXPORT void ClownAudio_SetSoundSpeed(ClownAudio_SoundID sound_id, unsigned long speed)
 {
 	ClownAudio_LockStream(stream);
-	ClownAudio_Mixer_SetSoundSampleRate(mixer, sound_id, sample_rate1, sample_rate2);
+	ClownAudio_Mixer_SetSoundSpeed(mixer, sound_id, speed);
 	ClownAudio_UnlockStream(stream);
 }

@@ -52,7 +52,7 @@ private slots:
 
 	void on_horizontalSlider_RightVolume_valueChanged(int value);
 
-	void on_pushButton_SetSampleRate_clicked();
+	void on_horizontalSlider_Speed_valueChanged(int value);
 
 private:
 	struct SoundMetadata
@@ -62,6 +62,7 @@ private:
 		unsigned short master_volume;
 		unsigned short left_volume;
 		unsigned short right_volume;
+		unsigned long speed;
 		bool paused;
 	};
 

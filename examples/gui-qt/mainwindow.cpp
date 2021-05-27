@@ -188,6 +188,7 @@ void MainWindow::on_pushButton_CreateSound_clicked()
 		sound_metadata->master_volume = 0x100;
 		sound_metadata->left_volume = 0x100;
 		sound_metadata->right_volume = 0x100;
+		sound_metadata->speed = 0x10000;
 		sound_metadata->paused = true;
 
 		// Add sound (and metadata) to list widget
@@ -238,6 +239,7 @@ void MainWindow::on_listWidget_Sounds_itemSelectionChanged()
 		ui->horizontalSlider_MasterVolume->setValue(sound_metadata->master_volume);
 		ui->horizontalSlider_LeftVolume->setValue(sound_metadata->left_volume);
 		ui->horizontalSlider_RightVolume->setValue(sound_metadata->right_volume);
+		ui->horizontalSlider_Speed->setValue(sound_metadata->speed);
 	}
 }
 
@@ -328,16 +330,13 @@ void MainWindow::on_horizontalSlider_RightVolume_valueChanged(int value)
 }
 
 
-void MainWindow::on_pushButton_SetSampleRate_clicked()
+void MainWindow::on_horizontalSlider_Speed_valueChanged(int value)
 {
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
-	ClownAudio_SoundID sound_id = item->data(Qt::UserRole).value<SoundMetadata*>()->id;
+	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	const std::string cpp_string = ui->lineEdit_SampleRate->text().toStdString();
-	const char *c_string = cpp_string.c_str();
-	char *end;
-	unsigned long sample_rate = std::strtoul(c_string, &end, 0);
+	sound_metadata->speed = value;
 
-	if (end - c_string == strlen(c_string) && errno != ERANGE)
-		ClownAudio_SetSoundSampleRate (sound_id, sample_rate, sample_rate);
+	ClownAudio_SetSoundSpeed(sound_metadata->id, value);
 }
+
