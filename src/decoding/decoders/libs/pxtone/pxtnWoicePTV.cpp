@@ -123,7 +123,7 @@ static pxtnERR _Read_Wave( pxtnDescriptor *p_doc, pxtnVOICEUNIT *p_vc )
 			if( !p_doc->r( &sc, 1, 1 ) ) return pxtnERR_desc_r;
 			p_vc->wave.points[ i ].y = sc;
 		}
-		num = p_vc->wave.num;
+		//num = p_vc->wave.num; // Unused
 		break;
 	// overtone (2)
 	case pxtnVOICE_Overtone:

@@ -741,7 +741,7 @@ bool pxtnEvelist::io_Write( pxtnDescriptor *p_doc, int32_t rough ) const
 
 	for( const EVERECORD* p = get_Records(); p; p = p->next )
 	{
-		clock    = p->clock - absolute;
+		//clock    = p->clock - absolute; // Unused
 
 		ralatived_size += pxtnDescriptor_v_chk( p->clock );
 		ralatived_size += 1;
