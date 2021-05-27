@@ -34,7 +34,7 @@
         <item>
          <widget class="QPushButton" name="pushButton_UnloadSoundData">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Unload sound data</string>
@@ -141,7 +141,7 @@
         <item>
          <widget class="QPushButton" name="pushButton_DestroySound">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Destroy sound</string>
@@ -151,6 +151,9 @@
        </layout>
       </widget>
       <widget class="QGroupBox" name="groupBox_SoundCreation">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="title">
         <string>Sound creation</string>
        </property>
@@ -158,7 +161,7 @@
         <item>
          <widget class="QCheckBox" name="checkBox_Loop">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Loop</string>
@@ -168,7 +171,7 @@
         <item>
          <widget class="QCheckBox" name="checkBox_DoNotFreeWhenDone">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Do not free when done</string>
@@ -178,7 +181,7 @@
         <item>
          <widget class="QCheckBox" name="checkBox_InstanceDynamicSampleRate">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Dynamic sample rate</string>
@@ -188,7 +191,7 @@
         <item>
          <widget class="QPushButton" name="pushButton_CreateSound">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Create sound</string>
@@ -198,6 +201,9 @@
        </layout>
       </widget>
       <widget class="QGroupBox" name="groupBox_PlaybackControls">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="title">
         <string>Playback controls</string>
        </property>
@@ -207,7 +213,7 @@
           <item>
            <widget class="QPushButton" name="pushButton_Pause">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Pause</string>
@@ -217,7 +223,7 @@
           <item>
            <widget class="QPushButton" name="pushButton_Unpause">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Unpause</string>
@@ -227,7 +233,7 @@
           <item>
            <widget class="QPushButton" name="pushButton_Rewind">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Rewind</string>
@@ -241,7 +247,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="label_MasterVolume">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Master volume</string>
@@ -251,7 +257,7 @@
           <item row="0" column="1">
            <widget class="QSlider" name="horizontalSlider_MasterVolume">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="maximum">
              <number>512</number>
@@ -273,7 +279,7 @@
           <item row="1" column="1">
            <widget class="QSlider" name="horizontalSlider_LeftVolume">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="maximum">
              <number>512</number>
@@ -289,7 +295,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="label_LeftVolume">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Left volume</string>
@@ -299,7 +305,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_RightVolume">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Right volume</string>
@@ -309,7 +315,7 @@
           <item row="2" column="1">
            <widget class="QSlider" name="horizontalSlider_RightVolume">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="maximum">
              <number>512</number>
@@ -329,7 +335,7 @@
           <item>
            <widget class="QPushButton" name="pushButton_FadeOut">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Fade out</string>
@@ -339,7 +345,7 @@
           <item>
            <widget class="QPushButton" name="pushButton_FadeIn">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Fade in</string>
@@ -349,7 +355,7 @@
           <item>
            <widget class="QPushButton" name="pushButton_CancelFade">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Cancel fade</string>
@@ -363,7 +369,7 @@
           <item>
            <widget class="QLineEdit" name="lineEdit_SampleRate">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="placeholderText">
              <string>Sample rate</string>
@@ -373,7 +379,7 @@
           <item>
            <widget class="QPushButton" name="pushButton_SetSampleRate">
             <property name="enabled">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
             <property name="text">
              <string>Set sample rate</string>

@@ -47,7 +47,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 
-	//this->setFixedSize(QSize(730, 325));
+	// Disable parts of the interface by default
+	ui->pushButton_UnloadSoundData->setEnabled(false);
+	ui->pushButton_DestroySound->setEnabled(false);
+	ui->groupBox_SoundCreation->setEnabled(false);
+	ui->groupBox_PlaybackControls->setEnabled(false);
 
 	ClownAudio_Init();
 }
@@ -213,11 +217,7 @@ void MainWindow::on_listWidget_SoundData_itemSelectionChanged()
 
 	// Enable or disable parts of the interface
 	ui->pushButton_UnloadSoundData->setEnabled(sound_data_selected);
-
-	ui->checkBox_Loop->setEnabled(sound_data_selected);
-	ui->checkBox_DoNotFreeWhenDone->setEnabled(sound_data_selected);
-	ui->checkBox_InstanceDynamicSampleRate->setEnabled(sound_data_selected);
-	ui->pushButton_CreateSound->setEnabled(sound_data_selected);
+	ui->groupBox_SoundCreation->setEnabled(sound_data_selected);
 }
 
 void MainWindow::on_listWidget_Sounds_itemSelectionChanged()
@@ -228,24 +228,7 @@ void MainWindow::on_listWidget_Sounds_itemSelectionChanged()
 
 	// Enable or disable parts of the interface
 	ui->pushButton_DestroySound->setEnabled(sound_instance_selected);
-
-	ui->pushButton_Pause->setEnabled(sound_instance_selected);
-	ui->pushButton_Unpause->setEnabled(sound_instance_selected);
-	ui->pushButton_Rewind->setEnabled(sound_instance_selected);
-
-	ui->pushButton_FadeIn->setEnabled(sound_instance_selected);
-	ui->pushButton_FadeOut->setEnabled(sound_instance_selected);
-	ui->pushButton_CancelFade->setEnabled(sound_instance_selected);
-
-	ui->label_MasterVolume->setEnabled(sound_instance_selected);
-	ui->horizontalSlider_MasterVolume->setEnabled(sound_instance_selected);
-	ui->label_LeftVolume->setEnabled(sound_instance_selected);
-	ui->horizontalSlider_LeftVolume->setEnabled(sound_instance_selected);
-	ui->label_RightVolume->setEnabled(sound_instance_selected);
-	ui->horizontalSlider_RightVolume->setEnabled(sound_instance_selected);
-
-	ui->lineEdit_SampleRate->setEnabled(sound_instance_selected);
-	ui->pushButton_SetSampleRate->setEnabled(sound_instance_selected);
+	ui->groupBox_PlaybackControls->setEnabled(sound_instance_selected);
 
 	if (item != nullptr)
 	{
