@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef DECODER_PXTONE_H
+#define DECODER_PXTONE_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -39,3 +40,5 @@ size_t Decoder_PxTone_GetSamples(void *decoder, short *buffer, size_t frames_to_
 #ifdef __cplusplus
 }
 #endif
+
+#endif // DECODER_PXTONE_H

@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef RESAMPLED_DECODER_H
+#define RESAMPLED_DECODER_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -33,3 +34,5 @@ void ResampledDecoder_Rewind(void *resampled_decoder);
 size_t ResampledDecoder_GetSamples(void *resampled_decoder, short *buffer, size_t frames_to_do);
 void ResampledDecoder_SetLoop(void *resampled_decoder, bool loop);
 void ResampledDecoder_SetSpeed(void *resampled_decoder, unsigned long speed);
+
+#endif

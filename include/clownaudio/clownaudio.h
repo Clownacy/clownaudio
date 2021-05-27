@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef CLOWNAUDIO_H
+#define CLOWNAUDIO_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -161,3 +162,5 @@ CLOWNAUDIO_EXPORT void ClownAudio_Sound_SetSpeed(ClownAudio_SoundID sound_id, un
 #ifdef __cplusplus
 }
 #endif
+
+#endif // CLOWNAUDIO_H

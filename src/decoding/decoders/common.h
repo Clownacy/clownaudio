@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef COMMON_H
+#define COMMON_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -41,3 +42,5 @@ typedef struct DecoderStage
 	size_t (*GetSamples)(void *decoder, short *buffer, size_t frames_to_do);
 	void (*SetLoop)(void *decoder, bool loop);
 } DecoderStage;
+
+#endif // COMMON_H

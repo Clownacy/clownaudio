@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef SPLIT_DECODER_H
+#define SPLIT_DECODER_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -33,3 +34,5 @@ void SplitDecoder_Rewind(void *split_decoder);
 size_t SplitDecoder_GetSamples(void *split_decoder, short *buffer, size_t frames_to_do);
 void SplitDecoder_SetLoop(void *split_decoder, bool loop);
 void SplitDecoder_SetSampleRate(void *split_decoder, unsigned long sample_rate);
+
+#endif // SPLIT_DECODER_H

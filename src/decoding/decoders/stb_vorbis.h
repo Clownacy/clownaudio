@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef DECODER_STB_VORBIS_H
+#define DECODER_STB_VORBIS_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -31,3 +32,5 @@ void* Decoder_STB_Vorbis_Create(const unsigned char *data, size_t data_size, boo
 void Decoder_STB_Vorbis_Destroy(void *decoder);
 void Decoder_STB_Vorbis_Rewind(void *decoder);
 size_t Decoder_STB_Vorbis_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
+
+#endif // DECODER_STB_VORBIS_H

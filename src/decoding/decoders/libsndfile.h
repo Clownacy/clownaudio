@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef DECODER_LIBSNDFILE_H
+#define DECODER_LIBSNDFILE_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -31,3 +32,5 @@ void* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, boo
 void Decoder_libSndfile_Destroy(void *decoder);
 void Decoder_libSndfile_Rewind(void *decoder);
 size_t Decoder_libSndfile_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
+
+#endif

@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef PREDECODER_H
+#define PREDECODER_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -36,3 +37,5 @@ void Predecoder_Destroy(void *predecoder);
 void Predecoder_Rewind(void *predecoder);
 size_t Predecoder_GetSamples(void *predecoder, short *buffer, size_t frames_to_do);
 void Predecoder_SetLoop(void *predecoder, bool loop);
+
+#endif // PREDECODER_H

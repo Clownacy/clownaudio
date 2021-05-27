@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef CLOWNAUDIO_MIXER_H
+#define CLOWNAUDIO_MIXER_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -190,3 +191,5 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_OutputSamples(ClownAudio_Mixer *mixer, s
 #ifdef __cplusplus
 }
 #endif
+
+#endif // CLOWNAUDIO_MIXER_H

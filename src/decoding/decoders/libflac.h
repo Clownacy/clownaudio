@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef DECODER_LIBFLAC_H
+#define DECODER_LIBFLAC_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -31,3 +32,5 @@ void* Decoder_libFLAC_Create(const unsigned char *data, size_t data_size, bool l
 void Decoder_libFLAC_Destroy(void *decoder);
 void Decoder_libFLAC_Rewind(void *decoder);
 size_t Decoder_libFLAC_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
+
+#endif // DECODER_LIBFLAC_H

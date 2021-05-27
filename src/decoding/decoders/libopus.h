@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef DECODER_LIBOPUS_H
+#define DECODER_LIBOPUS_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -31,3 +32,5 @@ void* Decoder_libOpus_Create(const unsigned char *data, size_t data_size, bool l
 void Decoder_libOpus_Destroy(void *decoder);
 void Decoder_libOpus_Rewind(void *decoder);
 size_t Decoder_libOpus_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
+
+#endif // DECODER_LIBOPUS_H

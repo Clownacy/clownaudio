@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once 
+#ifndef MEMORY_STREAM_H
+#define MEMORY_STREAM_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -59,3 +60,5 @@ void ROMemoryStream_Rewind(ROMemoryStream *memory_stream);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // MEMORY_STREAM_H

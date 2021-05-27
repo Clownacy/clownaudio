@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef DECODER_SELECTOR_H
+#define DECODER_SELECTOR_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -36,3 +37,5 @@ void DecoderSelector_Destroy(void *selector);
 void DecoderSelector_Rewind(void *selector);
 size_t DecoderSelector_GetSamples(void *selector, short *buffer, size_t frames_to_do);
 void DecoderSelector_SetLoop(void *selector, bool loop);
+
+#endif // DECODER_SELECTOR_H

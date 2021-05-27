@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef DECODER_LIBOPENMPT_H
+#define DECODER_LIBOPENMPT_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -31,3 +32,5 @@ void* Decoder_libOpenMPT_Create(const unsigned char *data, size_t data_size, boo
 void Decoder_libOpenMPT_Destroy(void *decoder);
 void Decoder_libOpenMPT_Rewind(void *decoder);
 size_t Decoder_libOpenMPT_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
+
+#endif // DECODER_LIBOPENMPT_H

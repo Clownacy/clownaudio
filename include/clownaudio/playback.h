@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef CLOWNAUDIO_PLAYBACK_H
+#define CLOWNAUDIO_PLAYBACK_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -50,3 +51,5 @@ CLOWNAUDIO_EXPORT void ClownAudio_Stream_Unlock(ClownAudio_Stream *stream);
 #ifdef __cplusplus
 }
 #endif
+
+#endif // CLOWNAUDIO_PLAYBACK_H

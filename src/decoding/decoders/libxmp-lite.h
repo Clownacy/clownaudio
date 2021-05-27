@@ -18,7 +18,8 @@
  *  3. This notice may not be removed or altered from any source distribution.
  */
 
-#pragma once
+#ifndef DECODER_LIBXMPLITE_H
+#define DECODER_LIBXMPLITE_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -31,3 +32,5 @@ void* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, boo
 void Decoder_libXMPLite_Destroy(void *decoder);
 void Decoder_libXMPLite_Rewind(void *decoder);
 size_t Decoder_libXMPLite_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
+
+#endif // DECODER_LIBXMPLITE_H
