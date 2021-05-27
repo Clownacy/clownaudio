@@ -748,14 +748,14 @@ bool pxtnEvelist::io_Write( pxtnDescriptor *p_doc, int32_t rough ) const
 		ralatived_size += 1;
 		ralatived_size += pxtnDescriptor_v_chk( p->value );
 
-		absolute = p->clock;
+		//absolute = p->clock; // Unused
 	}
 
 	int32_t size = sizeof(int32_t) + ralatived_size;
 	if( !p_doc->w_asfile( &size   , sizeof(int32_t), 1 ) ) return false;
 	if( !p_doc->w_asfile( &eve_num, sizeof(int32_t), 1 ) ) return false;
 
-	absolute = 0;
+	// absolute = 0; // Redundant
 
 	for( const EVERECORD* p = get_Records(); p; p = p->next )
 	{
