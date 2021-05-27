@@ -168,7 +168,7 @@ void MainWindow::on_pushButton_CreateSound_clicked()
 	ClownAudio_SoundConfig config;
 	ClownAudio_InitSoundConfig(&config);
 	config.loop = ui->checkBox_Loop->isChecked();
-	config.do_not_free_when_done = ui->checkBox_DoNotFreeWhenDone->isChecked();
+	config.do_not_destroy_when_done = ui->checkBox_DoNotDestroyWhenDone->isChecked();
 	config.dynamic_sample_rate = ui->checkBox_InstanceDynamicSampleRate->isChecked();
 
 	ClownAudio_SoundData *sound_data = static_cast<ClownAudio_SoundData*>(item->data(Qt::UserRole).value<void*>());

@@ -67,7 +67,7 @@ struct ClownAudio_Sound
 	struct ClownAudio_Sound *next_sibling;
 
 	bool paused;
-	bool free_when_done;
+	bool destroy_when_done;
 	unsigned short volume_left;
 	unsigned short volume_right;
 	DecoderStage pipeline;
@@ -206,7 +206,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_InitSoundDataConfig(ClownAudio_SoundDataConfig
 CLOWNAUDIO_EXPORT void ClownAudio_InitSoundConfig(ClownAudio_SoundConfig *config)
 {
 	config->loop = false;
-	config->do_not_free_when_done = false;
+	config->do_not_destroy_when_done = false;
 	config->dynamic_sample_rate = false;
 }
 
@@ -478,7 +478,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_CreateSound(ClownAudio_Mixe
 		sound->volume_left = 0x100;
 		sound->volume_right = 0x100;
 		sound->paused = true;
-		sound->free_when_done = !config->do_not_free_when_done;
+		sound->destroy_when_done = !config->do_not_destroy_when_done;
 		sound->fade_out_counter_max = 0;
 		sound->fade_in_counter_max = 0;
 
@@ -709,7 +709,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 
 		if (frames_done < frames_to_do)	// Sound finished
 		{
-			if (sound->free_when_done)
+			if (sound->destroy_when_done)
 				DestroySound(mixer, sound);
 			else
 				PauseSound(mixer, sound);

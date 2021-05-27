@@ -17,6 +17,12 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QSplitter" name="splitter_SoundData">
@@ -202,12 +208,18 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkBox_DoNotFreeWhenDone">
+         <widget class="QCheckBox" name="checkBox_DoNotDestroyWhenDone">
           <property name="enabled">
            <bool>true</bool>
           </property>
           <property name="text">
-           <string>Do not free when done</string>
+           <string>Do not destroy when done</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <property name="tristate">
+           <bool>false</bool>
           </property>
          </widget>
         </item>

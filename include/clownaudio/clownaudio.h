@@ -56,7 +56,7 @@ typedef struct ClownAudio_SoundConfig
 	/// If true, the sound will loop indefinitely
 	bool loop;
 	/// If true, the sound will not be automatically destroyed once it finishes playing
-	bool do_not_free_when_done;
+	bool do_not_destroy_when_done;
 	/// If sound is not predecoded, then this needs to be true for `ClownAudio_SetSoundSampleRate` to work
 	bool dynamic_sample_rate;
 } ClownAudio_SoundConfig;
