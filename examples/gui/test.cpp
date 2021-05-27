@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
 								else
 								{
 									ImGui::Checkbox("Loop", &sound_config.loop);
-									ImGui::Checkbox("Do not free when done", &sound_config.do_not_free_when_done);
+									ImGui::Checkbox("Do not destroy when done", &sound_config.do_not_destroy_when_done);
 									ImGui::Checkbox("Dynamic sample rate", &sound_config.dynamic_sample_rate);
 
 									ImGui::Spacing();
