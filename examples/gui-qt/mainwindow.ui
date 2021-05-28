@@ -511,7 +511,7 @@
            </widget>
           </item>
           <item row="4" column="0">
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="label_Speed">
             <property name="text">
              <string>Speed</string>
             </property>
@@ -519,6 +519,12 @@
           </item>
           <item row="4" column="1">
            <widget class="QSlider" name="horizontalSlider_Speed">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="maximum">
              <number>131072</number>
             </property>

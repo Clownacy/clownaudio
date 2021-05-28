@@ -249,7 +249,7 @@ void MainWindow::on_listWidget_Sounds_itemSelectionChanged()
 	ui->pushButton_DestroySound->setEnabled(sound_instance_selected);
 	ui->groupBox_PlaybackControls->setEnabled(sound_instance_selected);
 
-	if (item != nullptr)
+	if (sound_instance_selected)
 	{
 		// Update the playback controls to match the selected sound
 		SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
