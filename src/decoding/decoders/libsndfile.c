@@ -110,6 +110,8 @@ void* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, boo
 
 			if (decoder != NULL)
 			{
+				sf_command(sndfile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE); // Prevent popping caused by the float->integer conversion
+
 				decoder->sndfile = sndfile;
 				decoder->memory_stream = memory_stream;
 
