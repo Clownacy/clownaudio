@@ -699,7 +699,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_OutputSamples(ClownAudio_Mixer *mixer, s
 		{
 			const long mix_sample = mix_buffer[i];
 
-			*output_buffer++ = CLAMP(mix_sample, -0x7FFF, 0x7FFF);
+			*output_buffer++ = (short)CLAMP(mix_sample, -0x7FFF, 0x7FFF);
 		}
 
 		frames_done += sub_frames_to_do;
