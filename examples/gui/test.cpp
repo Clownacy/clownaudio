@@ -343,17 +343,12 @@ int main(int argc, char *argv[])
 										ImGui::Spacing();
 
 										if (ImGui::Button("Fade-out"))
-											ClownAudio_SoundFadeOut(selected_sound->sound_id, 5 * 1000);
+											ClownAudio_SoundFade(selected_sound->sound_id, 0, 5 * 1000);
 
 										ImGui::SameLine();
 
 										if (ImGui::Button("Fade-in"))
-											ClownAudio_SoundFadeIn(selected_sound->sound_id, 5 * 1000);
-
-										ImGui::SameLine();
-
-										if (ImGui::Button("Cancel fade"))
-											ClownAudio_SoundCancelFade(selected_sound->sound_id);
+											ClownAudio_SoundFade(selected_sound->sound_id, 0x100, 5 * 1000);
 
 										ImGui::Spacing();
 

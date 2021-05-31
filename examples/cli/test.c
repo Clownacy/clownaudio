@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
 					   " r                - Rewind sound\n"
 					   " o [duration]     - Fade-out sound (milliseconds)\n"
 					   " i [duration]     - Fade-in sound (milliseconds)\n"
-					   " c                - Cancel fade\n"
 					   " u [rate]         - Set sound speed (1.0 = 1x, 2.0 = 2x, etc.)\n"
 					   " p                - Pause/unpause sound\n"
 					   " v [left] [right] - Set sound volume (0.0 = silence, 1.0 = full volume, etc.)\n"
@@ -116,7 +115,7 @@ int main(int argc, char *argv[])
 							printf("Fading-out sound over %u milliseconds\n", param);
 							fflush(stdout);
 
-							ClownAudio_SoundFadeOut(instance, param);
+							ClownAudio_SoundFade(instance, 0, param);
 							break;
 						}
 
@@ -129,16 +128,9 @@ int main(int argc, char *argv[])
 							printf("Fading-in sound over %u milliseconds\n", param);
 							fflush(stdout);
 
-							ClownAudio_SoundFadeIn(instance, param);
+							ClownAudio_SoundFade(instance, 0x100, param);
 							break;
 						}
-
-						case 'c':
-							printf("Cancelling fade\n");
-							fflush(stdout);
-
-							ClownAudio_SoundCancelFade(instance);
-							break;
 
 						case 'u':
 						{
