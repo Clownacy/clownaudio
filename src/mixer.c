@@ -619,11 +619,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFade(ClownAudio_Mixer *mixer, Clown
 
 	if (sound != NULL)
 	{
-		if (duration == 0)
-			sound->fade_countdown = 1;
-		else
-			sound->fade_countdown = (mixer->sample_rate * duration) / 1000; // Convert duration from milliseconds to audio frames
-
+		sound->fade_countdown = MAX(1, (mixer->sample_rate * duration) / 1000); // Convert duration from milliseconds to audio frames
 		sound->fade_volume_delta = (((long)volume << 16) - (long)sound->fade_volume_accumulator) / (long)sound->fade_countdown;
 	}
 }
