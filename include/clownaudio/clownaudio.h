@@ -46,7 +46,7 @@ typedef struct ClownAudio_SoundDataConfig
 	bool predecode;
 	/// If true, the sound *must* be predecoded if possible. If not, the function will fail.
 	bool must_predecode;
-	/// If sound is predecoded, then this needs to be true for `ClownAudio_SetSoundSampleRate` to work
+	/// If sound is predecoded, then this needs to be true for `ClownAudio_SoundSetSampleRate` to work
 	bool dynamic_sample_rate;
 } ClownAudio_SoundDataConfig;
 
@@ -56,7 +56,7 @@ typedef struct ClownAudio_SoundConfig
 	bool loop;
 	/// If true, the sound will not be automatically destroyed once it finishes playing
 	bool do_not_destroy_when_done;
-	/// If sound is not predecoded, then this needs to be true for `ClownAudio_SetSoundSampleRate` to work
+	/// If sound is not predecoded, then this needs to be true for `ClownAudio_SoundSetSampleRate` to work
 	bool dynamic_sample_rate;
 } ClownAudio_SoundConfig;
 
@@ -66,10 +66,10 @@ typedef struct ClownAudio_SoundConfig
 //////////////////////////////////
 
 /// Initialises a `ClownAudio_SoundDataConfig` struct with sane default values
-CLOWNAUDIO_EXPORT void ClownAudio_InitSoundDataConfig(ClownAudio_SoundDataConfig *config);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundDataConfigInit(ClownAudio_SoundDataConfig *config);
 
 /// Initialises a `ClownAudio_SoundConfig` struct with sane default values
-CLOWNAUDIO_EXPORT void ClownAudio_InitSoundConfig(ClownAudio_SoundConfig *config);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundConfigInit(ClownAudio_SoundConfig *config);
 */
 
 ////////////////////
@@ -89,14 +89,14 @@ CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void);
 
 /// Loads data from up to two memory buffers - either buffer pointer can be NULL.
 /// If two buffers are specified and looping is enabled, the sound will loop at the point where the first buffer ends and the second one begins.
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_SoundData_LoadFromMemory(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config);
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_SoundDataLoadFromMemory(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config);
 
 /// Loads data from up to two files - either file path can be NULL.
 /// If two files are specified and looping is enabled, the sound will loop at the point where the first file ends and the second one begins.
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_SoundData_LoadFromFiles(const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config);
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_SoundDataLoadFromFiles(const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config);
 
 /// Unloads data. All sounds using the specified data must be destroyed manually before this function is called.
-CLOWNAUDIO_EXPORT void ClownAudio_SoundData_Unload(ClownAudio_SoundData *sound_data);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundDataUnload(ClownAudio_SoundData *sound_data);
 
 
 ////////////////////////////////
@@ -104,10 +104,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_SoundData_Unload(ClownAudio_SoundData *sound_d
 ////////////////////////////////
 
 /// Creates a sound from sound-data. The sound will be paused by default.
-CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Sound_Create(ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config);
+CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_SoundCreate(ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config);
 
 /// Destroys sound.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_Destroy(ClownAudio_SoundID sound_id);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundDestroy(ClownAudio_SoundID sound_id);
 
 
 /////////////////////////////
@@ -117,44 +117,44 @@ CLOWNAUDIO_EXPORT void ClownAudio_Sound_Destroy(ClownAudio_SoundID sound_id);
 // Playback
 
 /// Rewinds sound to the very beginning.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_Rewind(ClownAudio_SoundID sound_id);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundRewind(ClownAudio_SoundID sound_id);
 
 /// Pauses sound.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_Pause(ClownAudio_SoundID sound_id);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundPause(ClownAudio_SoundID sound_id);
 
 /// Unpauses sound.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_Unpause(ClownAudio_SoundID sound_id);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundUnpause(ClownAudio_SoundID sound_id);
 
 
 // Fading
 
 /// Make sound fade-out over the specified duration, measured in milliseconds.
 /// If the sound is currently fading-in, then this function will override it and cause the sound to fade-out from the volume it is currently at.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_FadeOut(ClownAudio_SoundID sound_id, unsigned int duration);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundFadeOut(ClownAudio_SoundID sound_id, unsigned int duration);
 
 /// Make sound fade-in over the specified duration, measured in milliseconds.
 /// If the sound is currently fading-out, then this function will override it and cause the sound to fade-in from the volume it is currently at.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_FadeIn(ClownAudio_SoundID sound_id, unsigned int duration);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundFadeIn(ClownAudio_SoundID sound_id, unsigned int duration);
 
 /// Aborts fading and instantly restores the sound to full volume.
 /// If you want to smoothly-undo an in-progress fade, then use one of the above functions instead.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_CancelFade(ClownAudio_SoundID sound_id);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundCancelFade(ClownAudio_SoundID sound_id);
 
 
 // Miscellaneous
 
 /// Returns -1 if the sound does not exist, 0 if it is unpaused, or 1 if it is paused.
-CLOWNAUDIO_EXPORT int ClownAudio_Sound_GetStatus(ClownAudio_SoundID sound_id);
+CLOWNAUDIO_EXPORT int ClownAudio_SoundGetStatus(ClownAudio_SoundID sound_id);
 
 /// Sets stereo volume. Volume is linear and ranges from 0 (silence) to 0x100 (full volume). Exceeding 0x100 will amplify the volume.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_SetVolume(ClownAudio_SoundID sound_id, unsigned short volume_left, unsigned short volume_right);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundSetVolume(ClownAudio_SoundID sound_id, unsigned short volume_left, unsigned short volume_right);
 
 /// Change whether the sound should loop or not. Only certain file formats support this (for example, Ogg Vorbis does but PxTone doesn't).
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_SetLoop(ClownAudio_SoundID sound_id, bool loop);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundSetLoop(ClownAudio_SoundID sound_id, bool loop);
 
 /// Sets the sound's speed. Full speed is 0x10000, half-speed is 0x8000, and double-speed is 0x20000.
 /// Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct, otherwise this function will silently fail.
-CLOWNAUDIO_EXPORT void ClownAudio_Sound_SetSpeed(ClownAudio_SoundID sound_id, unsigned long speed);
+CLOWNAUDIO_EXPORT void ClownAudio_SoundSetSpeed(ClownAudio_SoundID sound_id, unsigned long speed);
 
 
 #ifdef __cplusplus

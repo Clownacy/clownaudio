@@ -58,7 +58,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
     ma_context_uninit(&context);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_Stream_Create(unsigned long *sample_rate, void (*user_callback)(void *user_data, short *output_buffer, size_t frames_to_do))
+CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *sample_rate, void (*user_callback)(void *user_data, short *output_buffer, size_t frames_to_do))
 {
 	ClownAudio_Stream *stream = (ClownAudio_Stream*)malloc(sizeof(ClownAudio_Stream));
 
@@ -93,7 +93,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_Stream_Create(unsigned long *sam
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Destroy(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_StreamDestroy(ClownAudio_Stream *stream)
 {
 	if (stream != NULL)
 	{
@@ -104,13 +104,13 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Destroy(ClownAudio_Stream *stream)
 	return true;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Stream_SetCallbackData(ClownAudio_Stream *stream, void *user_data)
+CLOWNAUDIO_EXPORT void ClownAudio_StreamSetCallbackData(ClownAudio_Stream *stream, void *user_data)
 {
 	if (stream != NULL)
 		stream->user_data = user_data;
 }
 
-CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Pause(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_StreamPause(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -120,7 +120,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Pause(ClownAudio_Stream *stream)
 	return success;
 }
 
-CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Resume(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT bool ClownAudio_StreamResume(ClownAudio_Stream *stream)
 {
 	bool success = true;
 
@@ -130,12 +130,12 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Stream_Resume(ClownAudio_Stream *stream)
 	return success;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Stream_Lock(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT void ClownAudio_StreamLock(ClownAudio_Stream *stream)
 {
 	ma_mutex_lock(&stream->mutex);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Stream_Unlock(ClownAudio_Stream *stream)
+CLOWNAUDIO_EXPORT void ClownAudio_StreamUnlock(ClownAudio_Stream *stream)
 {
 	ma_mutex_unlock(&stream->mutex);
 }

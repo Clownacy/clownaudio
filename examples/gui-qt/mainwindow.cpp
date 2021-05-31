@@ -82,7 +82,7 @@ MainWindow::~MainWindow()
 		QListWidgetItem *item = ui->listWidget_Sounds->item(i);
 		SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-		ClownAudio_Sound_Destroy(sound_metadata->id);
+		ClownAudio_SoundDestroy(sound_metadata->id);
 		delete sound_metadata;
 	}
 
@@ -92,7 +92,7 @@ MainWindow::~MainWindow()
 		QListWidgetItem *item = ui->listWidget_SoundData->item(i);
 		ClownAudio_SoundData *sound_data = static_cast<ClownAudio_SoundData*>(item->data(Qt::UserRole).value<void*>());
 
-		ClownAudio_SoundData_Unload(sound_data);
+		ClownAudio_SoundDataUnload(sound_data);
 	}
 
 	ClownAudio_Deinit();
@@ -108,7 +108,7 @@ void MainWindow::UpdateSoundVolume(SoundMetadata *sound_metadata)
 
 	unsigned short final_left_volume = (left_volume_nonlinear * master_volume_nonlinear) >> 8;
 	unsigned short final_right_volume = (right_volume_nonlinear * master_volume_nonlinear) >> 8;
-	ClownAudio_Sound_SetVolume(sound_metadata->id, final_left_volume, final_right_volume);
+	ClownAudio_SoundSetVolume(sound_metadata->id, final_left_volume, final_right_volume);
 }
 
 void MainWindow::on_pushButton_File1Open_clicked()
@@ -129,13 +129,13 @@ void MainWindow::on_pushButton_LoadSoundData_clicked()
 {
 	// Set up sound data configuration
 	ClownAudio_SoundDataConfig config;
-	ClownAudio_InitSoundDataConfig(&config);
+	ClownAudio_SoundDataConfigInit(&config);
 	config.predecode = ui->checkBox_Predecode->isChecked();
 	config.must_predecode = ui->checkBox_MustPredecode->isChecked();
 	config.dynamic_sample_rate = ui->checkBox_DataDynamicSampleRate->isChecked();
 
 	// Create sound data
-	ClownAudio_SoundData *sound_data = ClownAudio_SoundData_LoadFromFiles(ui->lineEdit_File1->text().toStdString().c_str(), ui->lineEdit_File2->text().toStdString().c_str(), &config);
+	ClownAudio_SoundData *sound_data = ClownAudio_SoundDataLoadFromFiles(ui->lineEdit_File1->text().toStdString().c_str(), ui->lineEdit_File2->text().toStdString().c_str(), &config);
 
 	if (sound_data == nullptr)
 	{
@@ -173,7 +173,7 @@ void MainWindow::on_pushButton_UnloadSoundData_clicked()
 		}
 	}
 
-	ClownAudio_SoundData_Unload(sound_data);
+	ClownAudio_SoundDataUnload(sound_data);
 
 	delete item;
 }
@@ -184,14 +184,14 @@ void MainWindow::on_pushButton_CreateSound_clicked()
 
 	// Set up sound configuration
 	ClownAudio_SoundConfig config;
-	ClownAudio_InitSoundConfig(&config);
+	ClownAudio_SoundConfigInit(&config);
 	config.loop = ui->checkBox_Loop->isChecked();
 	config.do_not_destroy_when_done = ui->checkBox_DoNotDestroyWhenDone->isChecked();
 	config.dynamic_sample_rate = ui->checkBox_InstanceDynamicSampleRate->isChecked();
 
 	ClownAudio_SoundData *sound_data = static_cast<ClownAudio_SoundData*>(item->data(Qt::UserRole).value<void*>());
 
-	ClownAudio_SoundID sound_id = ClownAudio_Sound_Create(sound_data, &config);
+	ClownAudio_SoundID sound_id = ClownAudio_SoundCreate(sound_data, &config);
 
 	if (sound_id == 0)
 	{
@@ -224,7 +224,7 @@ void MainWindow::on_pushButton_DestroySound_clicked()
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	ClownAudio_Sound_Destroy(sound_metadata->id);
+	ClownAudio_SoundDestroy(sound_metadata->id);
 
 	delete sound_metadata;
 	delete item;
@@ -266,7 +266,7 @@ void MainWindow::on_pushButton_Pause_clicked()
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	ClownAudio_Sound_Pause(sound_metadata->id);
+	ClownAudio_SoundPause(sound_metadata->id);
 }
 
 
@@ -275,7 +275,7 @@ void MainWindow::on_pushButton_Unpause_clicked()
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	ClownAudio_Sound_Unpause(sound_metadata->id);
+	ClownAudio_SoundUnpause(sound_metadata->id);
 }
 
 
@@ -284,7 +284,7 @@ void MainWindow::on_pushButton_Rewind_clicked()
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	ClownAudio_Sound_Rewind(sound_metadata->id);
+	ClownAudio_SoundRewind(sound_metadata->id);
 }
 
 
@@ -293,7 +293,7 @@ void MainWindow::on_pushButton_FadeIn_clicked()
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	ClownAudio_Sound_FadeIn(sound_metadata->id, 1000 * 5); // Fade over the span of five seconds
+	ClownAudio_SoundFadeIn(sound_metadata->id, 1000 * 5); // Fade over the span of five seconds
 }
 
 
@@ -302,7 +302,7 @@ void MainWindow::on_pushButton_FadeOut_clicked()
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	ClownAudio_Sound_FadeOut(sound_metadata->id, 1000 * 5); // Fade over the span of five seconds
+	ClownAudio_SoundFadeOut(sound_metadata->id, 1000 * 5); // Fade over the span of five seconds
 }
 
 
@@ -311,7 +311,7 @@ void MainWindow::on_pushButton_CancelFade_clicked()
 	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
 	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
 
-	ClownAudio_Sound_CancelFade(sound_metadata->id);
+	ClownAudio_SoundCancelFade(sound_metadata->id);
 }
 
 
@@ -355,6 +355,6 @@ void MainWindow::on_horizontalSlider_Speed_valueChanged(int value)
 
 	sound_metadata->speed = value;
 
-	ClownAudio_Sound_SetSpeed(sound_metadata->id, value);
+	ClownAudio_SoundSetSpeed(sound_metadata->id, value);
 }
 

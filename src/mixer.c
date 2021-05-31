@@ -194,14 +194,14 @@ static void UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 	}
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_InitSoundDataConfig(ClownAudio_SoundDataConfig *config)
+CLOWNAUDIO_EXPORT void ClownAudio_SoundDataConfigInit(ClownAudio_SoundDataConfig *config)
 {
 	config->predecode = false;
 	config->must_predecode = false;
 	config->dynamic_sample_rate = false;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_InitSoundConfig(ClownAudio_SoundConfig *config)
+CLOWNAUDIO_EXPORT void ClownAudio_SoundConfigInit(ClownAudio_SoundConfig *config)
 {
 	config->loop = false;
 	config->do_not_destroy_when_done = false;
@@ -232,7 +232,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Destroy(ClownAudio_Mixer *mixer)
 	free(mixer);
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_SoundData_LoadFromMemory(ClownAudio_Mixer *mixer, const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_SoundDataLoadFromMemory(ClownAudio_Mixer *mixer, const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)
 {
 	ClownAudio_SoundData *sound_data = (ClownAudio_SoundData*)malloc(sizeof(ClownAudio_SoundData));
 
@@ -285,7 +285,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_SoundData_LoadFromMemor
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_SoundData_LoadFromFiles(ClownAudio_Mixer *mixer, const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_SoundDataLoadFromFiles(ClownAudio_Mixer *mixer, const char *intro_path, const char *loop_path, ClownAudio_SoundDataConfig *config)
 {
 	if ((intro_path != NULL && intro_path[0] != '\0') || (loop_path != NULL && loop_path[0] != '\0'))
 	{
@@ -296,7 +296,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_SoundData_LoadFromFiles
 		{
 			if (LoadFileToMemory(loop_path, &file_buffers[1], &file_buffer_sizes[1]))
 			{
-				ClownAudio_SoundData *sound_data = ClownAudio_Mixer_SoundData_LoadFromMemory(mixer, file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config);
+				ClownAudio_SoundData *sound_data = ClownAudio_Mixer_SoundDataLoadFromMemory(mixer, file_buffers[0], file_buffer_sizes[0], file_buffers[1], file_buffer_sizes[1], config);
 
 				if (sound_data != NULL)
 				{
@@ -316,7 +316,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_Mixer_SoundData_LoadFromFiles
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundData_Unload(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundDataUnload(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data)
 {
 	if (sound_data != NULL)
 	{
@@ -343,7 +343,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundData_Unload(ClownAudio_Mixer *mixer
 	}
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_Sound_Create(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config)
+CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_SoundCreate(ClownAudio_Mixer *mixer, ClownAudio_SoundData *sound_data, ClownAudio_SoundConfig *config)
 {
 	if (sound_data != NULL)
 	{
@@ -486,7 +486,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_Sound_Create(ClownAudio_Mix
 	return NULL;
 }
 
-CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_Sound_Register(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound, ClownAudio_SoundData *sound_data)
+CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_SoundRegister(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound, ClownAudio_SoundData *sound_data)
 {
 	ClownAudio_SoundID sound_id = 0;
 
@@ -524,7 +524,7 @@ CLOWNAUDIO_EXPORT ClownAudio_SoundID ClownAudio_Mixer_Sound_Register(ClownAudio_
 	return sound_id;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_Destroy(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundDestroy(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -532,7 +532,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_Destroy(ClownAudio_Mixer *mixer, C
 		DestroySound(mixer, sound);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_Rewind(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundRewind(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -540,7 +540,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_Rewind(ClownAudio_Mixer *mixer, Cl
 		sound->pipeline.Rewind(sound->pipeline.decoder);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_Pause(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundPause(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -548,7 +548,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_Pause(ClownAudio_Mixer *mixer, Clo
 		PauseSound(mixer, sound);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_Unpause(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundUnpause(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -556,7 +556,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_Unpause(ClownAudio_Mixer *mixer, C
 		UnpauseSound(mixer, sound);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_FadeOut(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFadeOut(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -576,7 +576,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_FadeOut(ClownAudio_Mixer *mixer, C
 	}
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_FadeIn(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFadeIn(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -596,7 +596,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_FadeIn(ClownAudio_Mixer *mixer, Cl
 	}
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_CancelFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundCancelFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -607,14 +607,14 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_CancelFade(ClownAudio_Mixer *mixer
 	}
 }
 
-CLOWNAUDIO_EXPORT int ClownAudio_Mixer_Sound_GetStatus(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
+CLOWNAUDIO_EXPORT int ClownAudio_Mixer_SoundGetStatus(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	return (sound == NULL) ? -1 : sound->paused;
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_SetVolume(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned short volume_left, unsigned short volume_right)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundSetVolume(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned short volume_left, unsigned short volume_right)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -625,7 +625,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_SetVolume(ClownAudio_Mixer *mixer,
 	}
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_SetLoop(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, bool loop)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundSetLoop(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, bool loop)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
@@ -633,7 +633,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_SetLoop(ClownAudio_Mixer *mixer, C
 		sound->pipeline.SetLoop(sound->pipeline.decoder, loop);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_Sound_SetSpeed(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long speed)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundSetSpeed(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long speed)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
