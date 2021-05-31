@@ -96,10 +96,10 @@ int main(int argc, char *argv[])
 					if (ClownAudio_Init())
 					{
 						ClownAudio_SoundDataConfig data_config;
-						ClownAudio_InitSoundDataConfig(&data_config);
+						ClownAudio_SoundDataConfigInit(&data_config);
 
 						ClownAudio_SoundConfig sound_config;
-						ClownAudio_InitSoundConfig(&sound_config);
+						ClownAudio_SoundConfigInit(&sound_config);
 
 						SoundDataListEntry *selected_sound_data = NULL;
 						SoundListEntry *selected_sound = NULL;
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 
 								if (ImGui::Button("Load sound data"))
 								{
-									ClownAudio_SoundData *sound_data = ClownAudio_SoundData_LoadFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
+									ClownAudio_SoundData *sound_data = ClownAudio_SoundDataLoadFromFiles(intro_file == 0 ? NULL : files[intro_file - 1].path, loop_file == 0 ? NULL : files[loop_file - 1].path, &data_config);
 
 									if (sound_data != NULL)
 									{
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 
 									if (ImGui::Button("Create sound"))
 									{
-										ClownAudio_SoundID sound_id = ClownAudio_Sound_Create(selected_sound_data->sound_data, &sound_config);
+										ClownAudio_SoundID sound_id = ClownAudio_SoundCreate(selected_sound_data->sound_data, &sound_config);
 
 										if (sound_id != 0)
 										{
@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 
 									if (ImGui::Button("Destroy"))
 									{
-										ClownAudio_SoundData_Unload(selected_sound_data->sound_data);
+										ClownAudio_SoundDataUnload(selected_sound_data->sound_data);
 
 										for (SoundDataListEntry **entry = &sound_data_list_head; *entry != NULL; entry = &(*entry)->next)
 										{
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 							ImGui::Begin("Sounds", NULL);
 								for (SoundListEntry *entry = sound_list_head; entry != NULL; entry = entry->next)
 								{
-									int status = ClownAudio_Sound_GetStatus(entry->sound_id);
+									int status = ClownAudio_SoundGetStatus(entry->sound_id);
 
 									char name[32];
 
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
 
 									if (ImGui::Button("Destroy"))
 									{
-										ClownAudio_Sound_Destroy(selected_sound->sound_id);
+										ClownAudio_SoundDestroy(selected_sound->sound_id);
 
 										for (SoundListEntry **entry = &sound_list_head; *entry != NULL; entry = &(*entry)->next)
 										{
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
 								}
 								else
 								{
-									int status = ClownAudio_Sound_GetStatus(selected_sound->sound_id);
+									int status = ClownAudio_SoundGetStatus(selected_sound->sound_id);
 
 									if (status == -1)
 									{
@@ -327,49 +327,49 @@ int main(int argc, char *argv[])
 										if (status == 0)
 										{
 											if (ImGui::Button("Pause"))
-												ClownAudio_Sound_Pause(selected_sound->sound_id);
+												ClownAudio_SoundPause(selected_sound->sound_id);
 										}
 										else
 										{
 											if (ImGui::Button("Unpause"))
-												ClownAudio_Sound_Unpause(selected_sound->sound_id);
+												ClownAudio_SoundUnpause(selected_sound->sound_id);
 										}
 
 										ImGui::SameLine();
 
 										if (ImGui::Button("Rewind"))
-											ClownAudio_Sound_Rewind(selected_sound->sound_id);
+											ClownAudio_SoundRewind(selected_sound->sound_id);
 
 										ImGui::Spacing();
 
 										if (ImGui::Button("Fade-out"))
-											ClownAudio_Sound_FadeOut(selected_sound->sound_id, 5 * 1000);
+											ClownAudio_SoundFadeOut(selected_sound->sound_id, 5 * 1000);
 
 										ImGui::SameLine();
 
 										if (ImGui::Button("Fade-in"))
-											ClownAudio_Sound_FadeIn(selected_sound->sound_id, 5 * 1000);
+											ClownAudio_SoundFadeIn(selected_sound->sound_id, 5 * 1000);
 
 										ImGui::SameLine();
 
 										if (ImGui::Button("Cancel fade"))
-											ClownAudio_Sound_CancelFade(selected_sound->sound_id);
+											ClownAudio_SoundCancelFade(selected_sound->sound_id);
 
 										ImGui::Spacing();
 
 										if (ImGui::SliderFloat("Master volume", &selected_sound->master_volume, 0.0f, 2.0f))
-											ClownAudio_Sound_SetVolume(selected_sound->sound_id, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_left * selected_sound->volume_left) * 0x100, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_right * selected_sound->volume_right) * 0x100);
+											ClownAudio_SoundSetVolume(selected_sound->sound_id, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_left * selected_sound->volume_left) * 0x100, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_right * selected_sound->volume_right) * 0x100);
 
 										if (ImGui::SliderFloat("Left volume", &selected_sound->volume_left, 0.0f, 2.0f))
-											ClownAudio_Sound_SetVolume(selected_sound->sound_id, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_left * selected_sound->volume_left) * 0x100, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_right * selected_sound->volume_right) * 0x100);
+											ClownAudio_SoundSetVolume(selected_sound->sound_id, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_left * selected_sound->volume_left) * 0x100, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_right * selected_sound->volume_right) * 0x100);
 
 										if (ImGui::SliderFloat("Right volume", &selected_sound->volume_right, 0.0f, 2.0f))
-											ClownAudio_Sound_SetVolume(selected_sound->sound_id, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_left * selected_sound->volume_left) * 0x100, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_right * selected_sound->volume_right) * 0x100);
+											ClownAudio_SoundSetVolume(selected_sound->sound_id, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_left * selected_sound->volume_left) * 0x100, (selected_sound->master_volume * selected_sound->master_volume) * (selected_sound->volume_right * selected_sound->volume_right) * 0x100);
 
 										ImGui::Spacing();
 
 										if (ImGui::SliderFloat("Speed", &selected_sound->speed, 0.0f, 2.0f))
-											ClownAudio_Sound_SetSpeed(selected_sound->sound_id, selected_sound->speed * 0x10000);
+											ClownAudio_SoundSetSpeed(selected_sound->sound_id, selected_sound->speed * 0x10000);
 									}
 								}
 							ImGui::End();

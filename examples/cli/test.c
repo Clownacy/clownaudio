@@ -50,20 +50,20 @@ int main(int argc, char *argv[])
 			file_paths[1] = NULL;
 		}
 
-		ClownAudio_SoundDataConfig config;
-		ClownAudio_InitSoundDataConfig(&config);
-		ClownAudio_SoundData *sound_data = ClownAudio_SoundData_LoadFromFiles(file_paths[0], file_paths[1], &config);
+		ClownAudio_SoundDataConfig sound_data_config;
+		ClownAudio_SoundDataConfigInit(&sound_data_config);
+		ClownAudio_SoundData *sound_data = ClownAudio_SoundDataLoadFromFiles(file_paths[0], file_paths[1], &sound_data_config);
 
 		if (sound_data != NULL)
 		{
 			printf("Creating sound\n");
 			fflush(stdout);
 
-			ClownAudio_SoundConfig config2;
-			ClownAudio_InitSoundConfig(&config2);
-			config2.loop = true;
-			ClownAudio_SoundID instance = ClownAudio_Sound_Create(sound_data, &config2);
-			ClownAudio_Sound_Unpause(instance);
+			ClownAudio_SoundConfig sound_config;
+			ClownAudio_SoundConfigInit(&sound_config);
+			sound_config.loop = true;
+			ClownAudio_SoundID instance = ClownAudio_SoundCreate(sound_data, &sound_config);
+			ClownAudio_SoundUnpause(instance);
 
 			if (instance != 0)
 			{
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 							printf("Rewinding sound\n");
 							fflush(stdout);
 
-							ClownAudio_Sound_Rewind(instance);
+							ClownAudio_SoundRewind(instance);
 							break;
 
 						case 'o':
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 							printf("Fading-out sound over %u milliseconds\n", param);
 							fflush(stdout);
 
-							ClownAudio_Sound_FadeOut(instance, param);
+							ClownAudio_SoundFadeOut(instance, param);
 							break;
 						}
 
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 							printf("Fading-in sound over %u milliseconds\n", param);
 							fflush(stdout);
 
-							ClownAudio_Sound_FadeIn(instance, param);
+							ClownAudio_SoundFadeIn(instance, param);
 							break;
 						}
 
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 							printf("Cancelling fade\n");
 							fflush(stdout);
 
-							ClownAudio_Sound_CancelFade(instance);
+							ClownAudio_SoundCancelFade(instance);
 							break;
 
 						case 'u':
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 							printf("Setting speed to %f\n", param);
 							fflush(stdout);
 
-							ClownAudio_Sound_SetSpeed(instance, param * 0x10000);
+							ClownAudio_SoundSetSpeed(instance, param * 0x10000);
 							break;
 						}
 
@@ -159,14 +159,14 @@ int main(int argc, char *argv[])
 								printf("Unpausing sound\n");
 								fflush(stdout);
 
-								ClownAudio_Sound_Unpause(instance);
+								ClownAudio_SoundUnpause(instance);
 							}
 							else
 							{
 								printf("Pausing sound\n");
 								fflush(stdout);
 
-								ClownAudio_Sound_Pause(instance);
+								ClownAudio_SoundPause(instance);
 							}
 
 							pause = !pause;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 							printf("Setting volume to %f left, %f right\n", volume_left, volume_right);
 							fflush(stdout);
 
-							ClownAudio_Sound_SetVolume(instance, volume_left * 0x100, volume_right * 0x100);
+							ClownAudio_SoundSetVolume(instance, volume_left * 0x100, volume_right * 0x100);
 							break;
 						}
 					}
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 
 				printf("Destroying sound\n");
 				fflush(stdout);
-				ClownAudio_Sound_Destroy(instance);
+				ClownAudio_SoundDestroy(instance);
 			}
 			else
 			{
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 
 			printf("Unloading sound data\n");
 			fflush(stdout);
-			ClownAudio_SoundData_Unload(sound_data);
+			ClownAudio_SoundDataUnload(sound_data);
 		}
 		else
 		{
