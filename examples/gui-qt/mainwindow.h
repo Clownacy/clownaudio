@@ -44,8 +44,6 @@ private slots:
 
 	void on_pushButton_FadeOut_clicked();
 
-	void on_pushButton_CancelFade_clicked();
-
 	void on_horizontalSlider_MasterVolume_valueChanged(int value);
 
 	void on_horizontalSlider_LeftVolume_valueChanged(int value);

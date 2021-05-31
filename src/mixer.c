@@ -72,9 +72,12 @@ struct ClownAudio_Sound
 	void *resampled_decoders[2];
 	ClownAudio_SoundID id;
 
-	unsigned long fade_out_counter_max;
-	unsigned long fade_in_counter_max;
-	unsigned long fade_counter;
+	unsigned long fade_countdown;
+	unsigned long fade_volume_accumulator; // 16.16
+	long fade_volume_delta;
+
+	unsigned short final_volume_left;
+	unsigned short final_volume_right;
 };
 
 struct ClownAudio_SoundData
@@ -192,6 +195,15 @@ static void UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 		AddSoundToPlayingList(mixer, sound);
 		sound->paused = false;
 	}
+}
+
+static void UpdateSoundVolume(ClownAudio_Sound *sound)
+{
+	const unsigned short fade_volume_linear = sound->fade_volume_accumulator >> 16;
+	const unsigned short fade_volume = SCALE(fade_volume_linear, fade_volume_linear);
+
+	sound->final_volume_left = SCALE(sound->volume_left, fade_volume);
+	sound->final_volume_right = SCALE(sound->volume_right, fade_volume);
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_SoundDataConfigInit(ClownAudio_SoundDataConfig *config)
@@ -477,8 +489,10 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_SoundCreate(ClownAudio_Mixe
 		sound->volume_right = 0x100;
 		sound->paused = true;
 		sound->destroy_when_done = !config->do_not_destroy_when_done;
-		sound->fade_out_counter_max = 0;
-		sound->fade_in_counter_max = 0;
+		sound->fade_countdown = 0;
+		sound->fade_volume_accumulator = 0x100 << 16;
+		//sound->fade_delta = 0; // Doesn't need to be initialised to zero
+		UpdateSoundVolume(sound);
 
 		return sound;
 	}
@@ -556,54 +570,14 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundUnpause(ClownAudio_Mixer *mixer, Cl
 		UnpauseSound(mixer, sound);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFadeOut(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned short volume, unsigned int duration)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
 
 	if (sound != NULL)
 	{
-		unsigned long new_fade_out_counter_max = (mixer->sample_rate * duration) / 1000;
-
-		if (sound->fade_in_counter_max != 0)
-			sound->fade_counter = (unsigned long)((sound->fade_in_counter_max - sound->fade_counter) * ((float)new_fade_out_counter_max / (float)sound->fade_in_counter_max));
-		else if (sound->fade_out_counter_max != 0)
-			sound->fade_counter = (unsigned long)(sound->fade_counter * ((float)new_fade_out_counter_max / (float)sound->fade_out_counter_max));
-		else
-			sound->fade_counter = new_fade_out_counter_max;
-
-		sound->fade_out_counter_max = new_fade_out_counter_max;
-		sound->fade_in_counter_max = 0;
-	}
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFadeIn(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration)
-{
-	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
-
-	if (sound != NULL)
-	{
-		unsigned long new_fade_in_counter_max = (mixer->sample_rate * duration) / 1000;
-
-		if (sound->fade_out_counter_max != 0)
-			sound->fade_counter = (unsigned long)((sound->fade_out_counter_max - sound->fade_counter) * ((float)new_fade_in_counter_max / (float)sound->fade_out_counter_max));
-		else if (sound->fade_in_counter_max != 0)
-			sound->fade_counter = (unsigned long)(sound->fade_counter * ((float)new_fade_in_counter_max / (float)sound->fade_in_counter_max));
-		else
-			sound->fade_counter = new_fade_in_counter_max;
-
-		sound->fade_in_counter_max = new_fade_in_counter_max;
-		sound->fade_out_counter_max = 0;
-	}
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundCancelFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id)
-{
-	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
-
-	if (sound != NULL)
-	{
-		sound->fade_in_counter_max = 0;
-		sound->fade_out_counter_max = 0;
+		sound->fade_countdown = (mixer->sample_rate * duration) / 1000; // Convert duration from milliseconds to audio frames
+		sound->fade_volume_delta = (((long)volume << 16) - (long)sound->fade_volume_accumulator) / (long)sound->fade_countdown;
 	}
 }
 
@@ -622,6 +596,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundSetVolume(ClownAudio_Mixer *mixer, 
 	{
 		sound->volume_left = volume_left;
 		sound->volume_right = volume_right;
+		UpdateSoundVolume(sound);
 	}
 }
 
@@ -669,33 +644,17 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 
 			for (size_t i = 0; i < sub_frames_done; ++i)
 			{
-				unsigned short fade_volume = 0x100;
-
-				// Apply fade-out volume
-				if (sound->fade_out_counter_max != 0)
+				// Update fade volume if needed
+				if (sound->fade_countdown != 0)
 				{
-					const unsigned short fade_out_volume = (sound->fade_counter << 8) / sound->fade_out_counter_max;
-
-					fade_volume = SCALE(fade_volume, SCALE(fade_out_volume, fade_out_volume));	// Fade logarithmically
-
-					if (sound->fade_counter != 0)
-						--sound->fade_counter;
-				}
-
-				// Apply fade-in volume
-				if (sound->fade_in_counter_max != 0)
-				{
-					const unsigned short fade_in_volume = ((sound->fade_in_counter_max - sound->fade_counter) << 8) / (float)sound->fade_in_counter_max;
-
-					fade_volume = SCALE(fade_volume, SCALE(fade_in_volume, fade_in_volume));	// Fade logarithmically
-
-					if (--sound->fade_counter == 0)
-						sound->fade_in_counter_max = 0;
+					--sound->fade_countdown;
+					sound->fade_volume_accumulator += sound->fade_volume_delta;
+					UpdateSoundVolume(sound);
 				}
 
 				// Mix data with output, and apply volume
-				*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, SCALE(sound->volume_left, fade_volume));
-				*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, SCALE(sound->volume_right, fade_volume));
+				*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_left);
+				*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_right);
 			}
 
 			if (sub_frames_done < sub_frames_to_do)

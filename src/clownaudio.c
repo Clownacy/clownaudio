@@ -128,24 +128,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_SoundUnpause(ClownAudio_SoundID sound_id)
 	ClownAudio_StreamUnlock(stream);
 }
 
-CLOWNAUDIO_EXPORT void ClownAudio_SoundFadeOut(ClownAudio_SoundID sound_id, unsigned int duration)
+CLOWNAUDIO_EXPORT void ClownAudio_SoundFade(ClownAudio_SoundID sound_id, unsigned short volume, unsigned int duration)
 {
 	ClownAudio_StreamLock(stream);
-	ClownAudio_Mixer_SoundFadeOut(mixer, sound_id, duration);
-	ClownAudio_StreamUnlock(stream);
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_SoundFadeIn(ClownAudio_SoundID sound_id, unsigned int duration)
-{
-	ClownAudio_StreamLock(stream);
-	ClownAudio_Mixer_SoundFadeIn(mixer, sound_id, duration);
-	ClownAudio_StreamUnlock(stream);
-}
-
-CLOWNAUDIO_EXPORT void ClownAudio_SoundCancelFade(ClownAudio_SoundID sound_id)
-{
-	ClownAudio_StreamLock(stream);
-	ClownAudio_Mixer_SoundCancelFade(mixer, sound_id);
+	ClownAudio_Mixer_SoundFade(mixer, sound_id, volume, duration);
 	ClownAudio_StreamUnlock(stream);
 }
 

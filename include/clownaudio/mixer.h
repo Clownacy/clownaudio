@@ -120,8 +120,6 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundDestroy(ClownAudio_Mixer *mixer, Cl
 // Assorted sound controls //
 /////////////////////////////
 
-// Playback
-
 /// Rewinds sound to the very beginning.
 /// Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundRewind(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
@@ -133,27 +131,6 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundPause(ClownAudio_Mixer *mixer, Clow
 /// Unpauses sound.
 /// Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundUnpause(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
-
-
-// Fading
-
-/// Make sound fade-out over the specified duration, measured in milliseconds.
-/// If the sound is currently fading-in, this function will override it and cause the sound to fade-out from the volume it is currently at.
-/// Must be guarded with mutex.
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFadeOut(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration);
-
-/// Make sound fade-in over the specified duration, measured in milliseconds.
-/// If the sound is currently fading-out, this function will override it and cause the sound to fade-in from the volume it is currently at.
-/// Must be guarded with mutex.
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFadeIn(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned int duration);
-
-/// Aborts fading and instantly restores the sound to full volume.
-/// If you want to smoothly-undo an in-progress fade, then use one of the above functions instead.
-/// Must be guarded with mutex.
-CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundCancelFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id);
-
-
-// Miscellaneous
 
 /// Returns -1 if the sound does not exist, 0 if it is unpaused, or 1 if it is paused.
 /// Must be guarded with mutex.
@@ -171,6 +148,12 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundSetLoop(ClownAudio_Mixer *mixer, Cl
 /// Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct, otherwise this function will silently fail.
 /// Must be guarded with mutex.
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundSetSpeed(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long speed);
+
+/// Make sound fade to the specified volume over the specified duration, measured in milliseconds.
+/// Volume is linear and ranges from 0 (silence) to 0x100 (full volume). Exceeding 0x100 will amplify the volume.
+/// Note that this volume is separate from the one set with ClownAudio_SetSoundVolume, and in fact stacks with it.
+/// Must be guarded with mutex.
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned short volume, unsigned int duration);
 
 
 ////////////
