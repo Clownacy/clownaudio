@@ -38,7 +38,7 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define CLAMP(x, min, max) MIN(MAX((x), (min)), (max))
 
-#define SCALE(x, scale) (((x) * (scale)) >> 8)
+#define SCALE(x, scale) (((x) * (scale)) / 0x100)
 
 #define COUNT_OF(array) (sizeof(array) / sizeof(*array))
 
@@ -694,8 +694,8 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 				}
 
 				// Mix data with output, and apply volume
-				*output_buffer_pointer++ += SCALE(SCALE(*read_buffer_pointer++, sound->volume_left), fade_volume);
-				*output_buffer_pointer++ += SCALE(SCALE(*read_buffer_pointer++, sound->volume_right), fade_volume);
+				*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, SCALE(sound->volume_left, fade_volume));
+				*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, SCALE(sound->volume_right, fade_volume));
 			}
 
 			if (sub_frames_done < sub_frames_to_do)
