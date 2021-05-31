@@ -484,16 +484,20 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_SoundCreate(ClownAudio_Mixe
 			return NULL;
 		}
 
+		sound->paused = true;
+		sound->destroy_when_done = !config->do_not_destroy_when_done;
+
 		sound->pipeline = stage;
 		sound->resampled_decoders[0] = resampled_decoders[0];
 		sound->resampled_decoders[1] = resampled_decoders[1];
-		sound->volume_left = 0x100;
-		sound->volume_right = 0x100;
-		sound->paused = true;
-		sound->destroy_when_done = !config->do_not_destroy_when_done;
+
 		sound->fade_countdown = 0;
 		sound->fade_volume_accumulator = 0x100 << 16;
 		//sound->fade_delta = 0; // Doesn't need to be initialised to zero
+
+		sound->volume_left = 0x100;
+		sound->volume_right = 0x100;
+
 		UpdateSoundVolume(sound);
 
 		return sound;
