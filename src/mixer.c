@@ -226,8 +226,8 @@ CLOWNAUDIO_EXPORT ClownAudio_Mixer* ClownAudio_Mixer_Create(unsigned long sample
 
 	if (mixer != NULL)
 	{
-		for (size_t i = 0; i < COUNT_OF(mixer->sound_hash_table); ++i)
-			mixer->sound_hash_table[i] = NULL;
+		// Set all bucket pointers to NULL
+		memset(mixer->sound_hash_table, 0, sizeof(mixer->sound_hash_table));
 
 		mixer->playing_list_head = NULL;
 
