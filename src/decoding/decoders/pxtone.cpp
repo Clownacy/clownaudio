@@ -112,9 +112,9 @@ size_t Decoder_PxTone_GetSamples(void *decoder_void, short *buffer, size_t frame
 {
 	Decoder_PxTone *decoder = (Decoder_PxTone*)decoder_void;
 
-	const size_t size_of_frame = sizeof(int16_t) * CHANNEL_COUNT;
+	const size_t bytes_to_do = frames_to_do * sizeof(int16_t) * CHANNEL_COUNT;
 
-	memset(buffer, 0, frames_to_do * size_of_frame);
+	memset(buffer, 0, bytes_to_do);
 
-	return decoder->pxtn->Moo(buffer, frames_to_do * size_of_frame);
+	return decoder->pxtn->Moo(buffer, bytes_to_do);
 }
