@@ -56,8 +56,8 @@ void* Decoder_PxTone_Create(const unsigned char *data, size_t data_size, bool lo
 				pxtnVOMITPREPARATION prep = pxtnVOMITPREPARATION();
 				if (loop)
 					prep.flags |= pxtnVOMITPREPFLAG_loop;
-				prep.start_pos_float = 0;
-				prep.master_volume = 0.80f;
+				prep.start_pos_float = 0.0f;
+				prep.master_volume = 0.8f; // PxTone's example code does this, and I'm not sure why
 
 				if (pxtn->moo_preparation(&prep))
 				{
@@ -102,8 +102,8 @@ void Decoder_PxTone_Rewind(void *decoder_void)
 	pxtnVOMITPREPARATION prep = pxtnVOMITPREPARATION();
 	if (decoder->loop)
 		prep.flags |= pxtnVOMITPREPFLAG_loop;
-	prep.start_pos_float = 0;
-	prep.master_volume = 0.80f;
+	prep.start_pos_float = 0.0f;
+	prep.master_volume = 0.8f; // PxTone's example code does this, and I'm not sure why
 
 	decoder->pxtn->moo_preparation(&prep);
 }
