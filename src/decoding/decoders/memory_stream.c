@@ -25,15 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct MemoryStream
-{
-	unsigned char *buffer;
-	size_t position;
-	size_t end;
-	size_t size;
-	bool free_buffer_when_destroyed;
-};
-
 static bool ResizeIfNeeded(MemoryStream *memory_stream, size_t minimum_needed_size)
 {
 	if (minimum_needed_size > memory_stream->size)
@@ -156,41 +147,41 @@ void MemoryStream_Rewind(MemoryStream *memory_stream)
 
 ROMemoryStream* ROMemoryStream_Create(const void *data, size_t size)
 {
-	MemoryStream *memory_stream = (MemoryStream*)malloc(sizeof(MemoryStream));
+	ROMemoryStream *ro_memory_stream = (ROMemoryStream*)malloc(sizeof(ROMemoryStream));
 
-	if (memory_stream != NULL)
+	if (ro_memory_stream != NULL)
 	{
-		memory_stream->buffer = (unsigned char*)data;
-		memory_stream->position = 0;
-		memory_stream->end = size;
-		memory_stream->size = size;
-		memory_stream->free_buffer_when_destroyed = false;
+		ro_memory_stream->memory_stream.buffer = (unsigned char*)data;
+		ro_memory_stream->memory_stream.position = 0;
+		ro_memory_stream->memory_stream.end = size;
+		ro_memory_stream->memory_stream.size = size;
+		ro_memory_stream->memory_stream.free_buffer_when_destroyed = false;
 	}
 
-	return (ROMemoryStream*)memory_stream;
+	return ro_memory_stream;
 }
 
-void ROMemoryStream_Destroy(ROMemoryStream *memory_stream)
+void ROMemoryStream_Destroy(ROMemoryStream *ro_memory_stream)
 {
-	MemoryStream_Destroy((MemoryStream*)memory_stream);
+	MemoryStream_Destroy(&ro_memory_stream->memory_stream);
 }
 
-size_t ROMemoryStream_Read(ROMemoryStream *memory_stream, void *output, size_t size, size_t count)
+size_t ROMemoryStream_Read(ROMemoryStream *ro_memory_stream, void *output, size_t size, size_t count)
 {
-	return MemoryStream_Read((MemoryStream*)memory_stream, output, size, count);
+	return MemoryStream_Read(&ro_memory_stream->memory_stream, output, size, count);
 }
 
-size_t ROMemoryStream_GetPosition(ROMemoryStream *memory_stream)
+size_t ROMemoryStream_GetPosition(ROMemoryStream *ro_memory_stream)
 {
-	return MemoryStream_GetPosition((MemoryStream*)memory_stream);
+	return MemoryStream_GetPosition(&ro_memory_stream->memory_stream);
 }
 
-bool ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
+bool ROMemoryStream_SetPosition(ROMemoryStream *ro_memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin)
 {
-	return MemoryStream_SetPosition((MemoryStream*)memory_stream, offset, origin);
+	return MemoryStream_SetPosition(&ro_memory_stream->memory_stream, offset, origin);
 }
 
-void ROMemoryStream_Rewind(ROMemoryStream *memory_stream)
+void ROMemoryStream_Rewind(ROMemoryStream *ro_memory_stream)
 {
-	MemoryStream_Rewind((MemoryStream*)memory_stream);
+	MemoryStream_Rewind(&ro_memory_stream->memory_stream);
 }

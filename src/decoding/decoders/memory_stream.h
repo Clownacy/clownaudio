@@ -24,8 +24,19 @@
 #endif
 #include <stddef.h>
 
-typedef struct MemoryStream MemoryStream;
-typedef struct ROMemoryStream ROMemoryStream;
+typedef struct MemoryStream
+{
+	unsigned char *buffer;
+	size_t position;
+	size_t end;
+	size_t size;
+	bool free_buffer_when_destroyed;
+} MemoryStream;
+
+typedef struct ROMemoryStream
+{
+	MemoryStream memory_stream;
+} ROMemoryStream;
 
 enum MemoryStream_Origin
 {
@@ -49,11 +60,11 @@ bool MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enu
 void MemoryStream_Rewind(MemoryStream *memory_stream);
 
 ROMemoryStream* ROMemoryStream_Create(const void *data, size_t size);
-void ROMemoryStream_Destroy(ROMemoryStream *memory_stream);
-size_t ROMemoryStream_Read(ROMemoryStream *memory_stream, void *output, size_t size, size_t count);
-size_t ROMemoryStream_GetPosition(ROMemoryStream *memory_stream);
-bool ROMemoryStream_SetPosition(ROMemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
-void ROMemoryStream_Rewind(ROMemoryStream *memory_stream);
+void ROMemoryStream_Destroy(ROMemoryStream *ro_memory_stream);
+size_t ROMemoryStream_Read(ROMemoryStream *ro_memory_stream, void *output, size_t size, size_t count);
+size_t ROMemoryStream_GetPosition(ROMemoryStream *ro_memory_stream);
+bool ROMemoryStream_SetPosition(ROMemoryStream *ro_memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
+void ROMemoryStream_Rewind(ROMemoryStream *ro_memory_stream);
 
 #ifdef __cplusplus
 }
