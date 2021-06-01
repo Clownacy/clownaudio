@@ -32,7 +32,7 @@
 
 typedef struct Decoder_libSndfile
 {
-	ROMemoryStream *memory_stream;
+	ROMemoryStream memory_stream;
 	SNDFILE *sndfile;
 } Decoder_libSndfile;
 
@@ -95,37 +95,31 @@ void* Decoder_libSndfile_Create(const unsigned char *data, size_t data_size, boo
 	(void)loop;	// This is ignored in simple decoders
 	(void)wanted_spec;
 
-	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
+	Decoder_libSndfile *decoder = (Decoder_libSndfile*)malloc(sizeof(Decoder_libSndfile));
 
-	if (memory_stream != NULL)
+	if (decoder != NULL)
 	{
+		ROMemoryStream_Create(&decoder->memory_stream, data, data_size);
+
 		SF_INFO sf_info;
 		memset(&sf_info, 0, sizeof(SF_INFO));
 
-		SNDFILE *sndfile = sf_open_virtual(&sfvirtual, SFM_READ, &sf_info, memory_stream);
+		SNDFILE *sndfile = sf_open_virtual(&sfvirtual, SFM_READ, &sf_info, &decoder->memory_stream);
 
 		if (sndfile != NULL)
 		{
-			Decoder_libSndfile *decoder = (Decoder_libSndfile*)malloc(sizeof(Decoder_libSndfile));
+			sf_command(sndfile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE); // Prevent popping caused by the float->integer conversion
 
-			if (decoder != NULL)
-			{
-				sf_command(sndfile, SFC_SET_SCALE_FLOAT_INT_READ, NULL, SF_TRUE); // Prevent popping caused by the float->integer conversion
+			decoder->sndfile = sndfile;
 
-				decoder->sndfile = sndfile;
-				decoder->memory_stream = memory_stream;
+			spec->sample_rate = sf_info.samplerate;
+			spec->channel_count = sf_info.channels;
+			spec->is_complex = false;
 
-				spec->sample_rate = sf_info.samplerate;
-				spec->channel_count = sf_info.channels;
-				spec->is_complex = false;
-
-				return decoder;
-			}
-
-			sf_close(sndfile);
+			return decoder;
 		}
 
-		ROMemoryStream_Destroy(memory_stream);
+		free(decoder);
 	}
 
 	return NULL;
@@ -136,7 +130,7 @@ void Decoder_libSndfile_Destroy(void *decoder_void)
 	Decoder_libSndfile *decoder = (Decoder_libSndfile*)decoder_void;
 
 	sf_close(decoder->sndfile);
-	ROMemoryStream_Destroy(decoder->memory_stream);
+	ROMemoryStream_Destroy(&decoder->memory_stream);
 	free(decoder);
 }
 

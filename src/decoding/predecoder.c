@@ -40,7 +40,7 @@
 
 typedef struct Predecoder
 {
-	ROMemoryStream *memory_stream;
+	ROMemoryStream ro_memory_stream;
 	bool loop;
 } Predecoder;
 
@@ -53,46 +53,42 @@ struct PredecoderData
 
 PredecoderData* Predecoder_DecodeData(const DecoderSpec *in_spec, const DecoderSpec *out_spec, DecoderStage *stage)
 {
-	MemoryStream *memory_stream = MemoryStream_Create(false);
+	PredecoderData *predecoder_data = (PredecoderData*)malloc(sizeof(PredecoderData));
 
-	if (memory_stream != NULL)
+	if (predecoder_data != NULL)
 	{
-		PredecoderData *predecoder_data = (PredecoderData*)malloc(sizeof(PredecoderData));
+		void *resampled_decoder = ResampledDecoder_Create(stage, false, out_spec, in_spec);
 
-		if (predecoder_data != NULL)
+		if (resampled_decoder != NULL)
 		{
-			void *resampled_decoder = ResampledDecoder_Create(stage, false, out_spec, in_spec);
+			MemoryStream memory_stream;
+			MemoryStream_Create(&memory_stream, false);
 
-			if (resampled_decoder != NULL)
+			size_t size_of_frame = sizeof(short) * out_spec->channel_count;
+
+			for (;;)
 			{
-				size_t size_of_frame = sizeof(short) * out_spec->channel_count;
+				short buffer[0x1000];
 
-				for (;;)
-				{
-					short buffer[0x1000];
+				size_t frames_done = ResampledDecoder_GetSamples(resampled_decoder, buffer, sizeof(buffer) / size_of_frame);
 
-					size_t frames_done = ResampledDecoder_GetSamples(resampled_decoder, buffer, sizeof(buffer) / size_of_frame);
+				if (frames_done == 0)
+					break;
 
-					if (frames_done == 0)
-						break;
-
-					MemoryStream_Write(memory_stream, buffer, size_of_frame, frames_done);
-				}
-
-				predecoder_data->decoded_data = MemoryStream_GetBuffer(memory_stream);
-				predecoder_data->decoded_data_size = MemoryStream_GetPosition(memory_stream);
-				predecoder_data->sample_rate = out_spec->sample_rate == 0 ? in_spec->sample_rate : out_spec->sample_rate;
-
-				MemoryStream_Destroy(memory_stream);
-				ResampledDecoder_Destroy(resampled_decoder);
-
-				return predecoder_data;
+				MemoryStream_Write(&memory_stream, buffer, size_of_frame, frames_done);
 			}
 
-			free(predecoder_data);
+			predecoder_data->decoded_data = MemoryStream_GetBuffer(&memory_stream);
+			predecoder_data->decoded_data_size = MemoryStream_GetPosition(&memory_stream);
+			predecoder_data->sample_rate = out_spec->sample_rate == 0 ? in_spec->sample_rate : out_spec->sample_rate;
+
+			MemoryStream_Destroy(&memory_stream);
+			ResampledDecoder_Destroy(resampled_decoder);
+
+			return predecoder_data;
 		}
 
-		MemoryStream_Destroy(memory_stream);
+		free(predecoder_data);
 	}
 
 	return NULL;
@@ -112,29 +108,22 @@ void* Predecoder_Create(PredecoderData *data, bool loop, const DecoderSpec *want
 
 	if (predecoder != NULL)
 	{
-		predecoder->memory_stream = ROMemoryStream_Create(data->decoded_data, data->decoded_data_size);
+		ROMemoryStream_Create(&predecoder->ro_memory_stream, data->decoded_data, data->decoded_data_size);
 
-		if (predecoder->memory_stream != NULL)
-		{
-			predecoder->loop = loop;
+		predecoder->loop = loop;
 
-			spec->sample_rate = data->sample_rate;
-			spec->channel_count = CHANNEL_COUNT;
-
-			return predecoder;
-		}
-
-		free(predecoder);
+		spec->sample_rate = data->sample_rate;
+		spec->channel_count = CHANNEL_COUNT;
 	}
 
-	return NULL;
+	return predecoder;
 }
 
 void Predecoder_Destroy(void *predecoder_void)
 {
 	Predecoder *predecoder = (Predecoder*)predecoder_void;
 
-	ROMemoryStream_Destroy(predecoder->memory_stream);
+	ROMemoryStream_Destroy(&predecoder->ro_memory_stream);
 
 	free(predecoder);
 }
@@ -143,7 +132,7 @@ void Predecoder_Rewind(void *predecoder_void)
 {
 	Predecoder *predecoder = (Predecoder*)predecoder_void;
 
-	ROMemoryStream_Rewind(predecoder->memory_stream);
+	ROMemoryStream_Rewind(&predecoder->ro_memory_stream);
 }
 
 size_t Predecoder_GetSamples(void *predecoder_void, short *buffer, size_t frames_to_do)
@@ -154,7 +143,7 @@ size_t Predecoder_GetSamples(void *predecoder_void, short *buffer, size_t frames
 
 	for (;;)
 	{
-		frames_done += ROMemoryStream_Read(predecoder->memory_stream, &buffer[frames_done * CHANNEL_COUNT], sizeof(short) * CHANNEL_COUNT, frames_to_do - frames_done);
+		frames_done += ROMemoryStream_Read(&predecoder->ro_memory_stream, &buffer[frames_done * CHANNEL_COUNT], sizeof(short) * CHANNEL_COUNT, frames_to_do - frames_done);
 
 		if (frames_done != frames_to_do && predecoder->loop)
 			Predecoder_Rewind(predecoder);

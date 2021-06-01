@@ -49,28 +49,19 @@ static bool ResizeIfNeeded(MemoryStream *memory_stream, size_t minimum_needed_si
 	return true;
 }
 
-MemoryStream* MemoryStream_Create(bool free_buffer_when_destroyed)
+void MemoryStream_Create(MemoryStream *memory_stream, bool free_buffer_when_destroyed)
 {
-	MemoryStream *memory_stream = (MemoryStream*)malloc(sizeof(MemoryStream));
-
-	if (memory_stream != NULL)
-	{
-		memory_stream->buffer = NULL;
-		memory_stream->position = 0;
-		memory_stream->end = 0;
-		memory_stream->size = 0;
-		memory_stream->free_buffer_when_destroyed = free_buffer_when_destroyed;
-	}
-
-	return memory_stream;
+	memory_stream->buffer = NULL;
+	memory_stream->position = 0;
+	memory_stream->end = 0;
+	memory_stream->size = 0;
+	memory_stream->free_buffer_when_destroyed = free_buffer_when_destroyed;
 }
 
 void MemoryStream_Destroy(MemoryStream *memory_stream)
 {
 	if (memory_stream->free_buffer_when_destroyed)
 		free(memory_stream->buffer);
-
-	free(memory_stream);
 }
 
 bool MemoryStream_WriteByte(MemoryStream *memory_stream, unsigned char byte)
@@ -145,20 +136,13 @@ void MemoryStream_Rewind(MemoryStream *memory_stream)
 	memory_stream->position = 0;
 }
 
-ROMemoryStream* ROMemoryStream_Create(const void *data, size_t size)
+void ROMemoryStream_Create(ROMemoryStream *ro_memory_stream, const void *data, size_t size)
 {
-	ROMemoryStream *ro_memory_stream = (ROMemoryStream*)malloc(sizeof(ROMemoryStream));
-
-	if (ro_memory_stream != NULL)
-	{
-		ro_memory_stream->memory_stream.buffer = (unsigned char*)data;
-		ro_memory_stream->memory_stream.position = 0;
-		ro_memory_stream->memory_stream.end = size;
-		ro_memory_stream->memory_stream.size = size;
-		ro_memory_stream->memory_stream.free_buffer_when_destroyed = false;
-	}
-
-	return ro_memory_stream;
+	ro_memory_stream->memory_stream.buffer = (unsigned char*)data;
+	ro_memory_stream->memory_stream.position = 0;
+	ro_memory_stream->memory_stream.end = size;
+	ro_memory_stream->memory_stream.size = size;
+	ro_memory_stream->memory_stream.free_buffer_when_destroyed = false;
 }
 
 void ROMemoryStream_Destroy(ROMemoryStream *ro_memory_stream)

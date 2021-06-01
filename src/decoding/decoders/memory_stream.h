@@ -49,7 +49,7 @@ enum MemoryStream_Origin
 extern "C" {
 #endif
 
-MemoryStream* MemoryStream_Create(bool free_buffer_when_destroyed);
+void MemoryStream_Create(MemoryStream *memory_stream, bool free_buffer_when_destroyed);
 void MemoryStream_Destroy(MemoryStream *memory_stream);
 bool MemoryStream_WriteByte(MemoryStream *memory_stream, unsigned char byte);
 bool MemoryStream_Write(MemoryStream *memory_stream, const void *data, size_t size, size_t count);
@@ -59,7 +59,7 @@ size_t MemoryStream_GetPosition(MemoryStream *memory_stream);
 bool MemoryStream_SetPosition(MemoryStream *memory_stream, ptrdiff_t offset, enum MemoryStream_Origin origin);
 void MemoryStream_Rewind(MemoryStream *memory_stream);
 
-ROMemoryStream* ROMemoryStream_Create(const void *data, size_t size);
+void ROMemoryStream_Create(ROMemoryStream *ro_memory_stream, const void *data, size_t size);
 void ROMemoryStream_Destroy(ROMemoryStream *ro_memory_stream);
 size_t ROMemoryStream_Read(ROMemoryStream *ro_memory_stream, void *output, size_t size, size_t count);
 size_t ROMemoryStream_GetPosition(ROMemoryStream *ro_memory_stream);

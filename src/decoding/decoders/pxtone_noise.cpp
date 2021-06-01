@@ -32,7 +32,7 @@
 
 typedef struct Decoder_PxToneNoise
 {
-	ROMemoryStream *memory_stream;
+	ROMemoryStream ro_memory_stream;
 	void *buffer;
 } Decoder_PxToneNoise;
 
@@ -58,27 +58,20 @@ void* Decoder_PxToneNoise_Create(const unsigned char *data, size_t data_size, bo
 
 				if (pxtn->generate(&desc, &buffer, &buffer_size))
 				{
-					ROMemoryStream *memory_stream = ROMemoryStream_Create(buffer, buffer_size);
+					Decoder_PxToneNoise *decoder = (Decoder_PxToneNoise*)malloc(sizeof(Decoder_PxToneNoise));
 
-					if (memory_stream != NULL)
+					if (decoder != NULL)
 					{
-						Decoder_PxToneNoise *decoder = (Decoder_PxToneNoise*)malloc(sizeof(Decoder_PxToneNoise));
+						ROMemoryStream_Create(&decoder->ro_memory_stream, buffer, buffer_size);
+						decoder->buffer = buffer;
 
-						if (decoder != NULL)
-						{
-							decoder->memory_stream = memory_stream;
-							decoder->buffer = buffer;
+						spec->sample_rate = sample_rate;
+						spec->channel_count = CHANNEL_COUNT;
+						spec->is_complex = false;
 
-							spec->sample_rate = sample_rate;
-							spec->channel_count = CHANNEL_COUNT;
-							spec->is_complex = false;
+						delete pxtn;
 
-							delete pxtn;
-
-							return decoder;
-						}
-
-						ROMemoryStream_Destroy(memory_stream);
+						return decoder;
 					}
 
 					free(buffer);
@@ -96,7 +89,7 @@ void Decoder_PxToneNoise_Destroy(void *decoder_void)
 {
 	Decoder_PxToneNoise *decoder = (Decoder_PxToneNoise*)decoder_void;
 
-	ROMemoryStream_Destroy(decoder->memory_stream);
+	ROMemoryStream_Destroy(&decoder->ro_memory_stream);
 	free(decoder->buffer);
 	free(decoder);
 }
@@ -105,12 +98,12 @@ void Decoder_PxToneNoise_Rewind(void *decoder_void)
 {
 	Decoder_PxToneNoise *decoder = (Decoder_PxToneNoise*)decoder_void;
 
-	ROMemoryStream_Rewind(decoder->memory_stream);
+	ROMemoryStream_Rewind(&decoder->ro_memory_stream);
 }
 
 size_t Decoder_PxToneNoise_GetSamples(void *decoder_void, short *buffer, size_t frames_to_do)
 {
 	Decoder_PxToneNoise *decoder = (Decoder_PxToneNoise*)decoder_void;
 
-	return ROMemoryStream_Read(decoder->memory_stream, buffer, sizeof(int16_t) * CHANNEL_COUNT, frames_to_do);
+	return ROMemoryStream_Read(&decoder->ro_memory_stream, buffer, sizeof(int16_t) * CHANNEL_COUNT, frames_to_do);
 }
