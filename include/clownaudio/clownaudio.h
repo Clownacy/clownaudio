@@ -133,7 +133,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_SoundSetVolume(ClownAudio_SoundID sound_id, un
 CLOWNAUDIO_EXPORT void ClownAudio_SoundSetLoop(ClownAudio_SoundID sound_id, bool loop);
 
 /// Sets the sound's speed. Full speed is 0x10000, half-speed is 0x8000, and double-speed is 0x20000.
-/// Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct, otherwise this function will silently fail.
+/// Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct, otherwise this function might silently fail.
 CLOWNAUDIO_EXPORT void ClownAudio_SoundSetSpeed(ClownAudio_SoundID sound_id, unsigned long speed);
 
 /// Make sound fade to the specified volume over the specified duration, measured in milliseconds.
