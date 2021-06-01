@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 					   " r                - Rewind sound\n"
 					   " o [duration]     - Fade-out sound (milliseconds)\n"
 					   " i [duration]     - Fade-in sound (milliseconds)\n"
-					   " u [rate]         - Set sound speed (1.0 = 1x, 2.0 = 2x, etc.)\n"
+					   " u [speed]        - Set sound speed (1.0 = 1x, 2.0 = 2x, etc.)\n"
 					   " p                - Pause/unpause sound\n"
 					   " v [left] [right] - Set sound volume (0.0 = silence, 1.0 = full volume, etc.)\n"
 				);
