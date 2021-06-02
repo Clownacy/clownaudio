@@ -649,17 +649,19 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 		ClownAudio_Sound *next_sound = sound->next_playing;
 
 		long *output_buffer_pointer = output_buffer;
+		const long *output_buffer_end = output_buffer += frames_to_do * CHANNEL_COUNT;
 
-		size_t frames_done = 0;
-		for (size_t sub_frames_done; frames_done < frames_to_do; frames_done += sub_frames_done)
+		size_t samples_to_do;
+		while ((samples_to_do = output_buffer_end - output_buffer_pointer) != 0)
 		{
 			short read_buffer[0x1000];
 
-			const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
-			sub_frames_done = sound->pipeline.GetSamples(sound->pipeline.decoder, read_buffer, sub_frames_to_do);
+			const size_t sub_frames_to_do = MIN(COUNT_OF(read_buffer), samples_to_do) / CHANNEL_COUNT;
+			const size_t sub_frames_done = sound->pipeline.GetSamples(sound->pipeline.decoder, read_buffer, sub_frames_to_do);
 
 			short *read_buffer_pointer = read_buffer;
 
+			// Choose from multiple codepaths
 			if (sound->fade_countdown != 0)
 			{
 				// Slow path which performs fading and volume adjustments
@@ -699,19 +701,15 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 				}
 			}
 
-			if (sub_frames_done < sub_frames_to_do)
+			if (sub_frames_done < sub_frames_to_do) // Sound finished
 			{
-				frames_done += sub_frames_done;
+				if (sound->destroy_when_done)
+					DestroySound(mixer, sound);
+				else
+					PauseSound(mixer, sound);
+
 				break;
 			}
-		}
-
-		if (frames_done < frames_to_do)	// Sound finished
-		{
-			if (sound->destroy_when_done)
-				DestroySound(mixer, sound);
-			else
-				PauseSound(mixer, sound);
 		}
 
 		sound = next_sound;
