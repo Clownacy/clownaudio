@@ -623,8 +623,20 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFade(ClownAudio_Mixer *mixer, Clown
 
 	if (sound != NULL)
 	{
-		sound->fade_countdown = MAX(1, (mixer->sample_rate * duration) / 1000); // Convert duration from milliseconds to audio frames
-		sound->fade_volume_delta = (((long)volume << 16) - (long)sound->fade_volume_accumulator) / (long)sound->fade_countdown;
+		sound->fade_countdown = (mixer->sample_rate * duration) / 1000; // Convert duration from milliseconds to audio frames
+
+		if (sound->fade_countdown <= 1)
+		{
+			// Just update the volume immediately here
+			sound->fade_countdown = 0;
+			sound->fade_volume_accumulator = volume << 16;
+			UpdateSoundVolume(sound);
+		}
+		else
+		{
+			// Finish setting-up to fade in the mixer
+			sound->fade_volume_delta = (((long)volume << 16) - (long)sound->fade_volume_accumulator) / (long)sound->fade_countdown;
+		}
 	}
 }
 
