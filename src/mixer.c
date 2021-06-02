@@ -660,19 +660,43 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 
 			short *read_buffer_pointer = read_buffer;
 
-			for (size_t i = 0; i < sub_frames_done; ++i)
+			if (sound->fade_countdown != 0)
 			{
-				// Update fade volume if needed
-				if (sound->fade_countdown != 0)
+				// Slow path which performs fading and volume adjustments
+				for (size_t i = 0; i < sub_frames_done; ++i)
 				{
-					--sound->fade_countdown;
-					sound->fade_volume_accumulator += sound->fade_volume_delta;
-					UpdateSoundVolume(sound);
-				}
+					// Update fade volume if needed
+					if (sound->fade_countdown != 0)
+					{
+						--sound->fade_countdown;
+						sound->fade_volume_accumulator += sound->fade_volume_delta;
+						UpdateSoundVolume(sound);
+					}
 
-				// Mix data with output, and apply volume
-				*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_left);
-				*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_right);
+					// Mix data with output, and apply volume
+					*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_left);
+					*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_right);
+				}
+			}
+			else if (sound->final_volume_left != 0x100 || sound->final_volume_right != 0x100)
+			{
+				// Fast path which bypasses fading
+				for (size_t i = 0; i < sub_frames_done; ++i)
+				{
+					// Mix data with output, and apply volume
+					*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_left);
+					*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_right);
+				}
+			}
+			else
+			{
+				// Fastest path which bypasses fading and volume adjustments
+				for (size_t i = 0; i < sub_frames_done; ++i)
+				{
+					// Mix data with output
+					*output_buffer_pointer++ += *read_buffer_pointer++;
+					*output_buffer_pointer++ += *read_buffer_pointer++;
+				}
 			}
 
 			if (sub_frames_done < sub_frames_to_do)
