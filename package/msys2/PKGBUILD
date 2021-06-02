@@ -47,7 +47,8 @@ build() {
     -DCLOWNAUDIO_LIBXMPLITE=ON \
     -DCLOWNAUDIO_PXTONE=ON \
     -DCLOWNAUDIO_SNES_SPC=ON \
-    -DCLOWNAUDIO_BACKEND=miniaudio
+    -DCLOWNAUDIO_BACKEND=miniaudio \
+    -Wno-dev
 
   make
 
@@ -71,7 +72,8 @@ build() {
     -DCLOWNAUDIO_LIBXMPLITE=ON \
     -DCLOWNAUDIO_PXTONE=ON \
     -DCLOWNAUDIO_SNES_SPC=ON \
-    -DCLOWNAUDIO_BACKEND=miniaudio
+    -DCLOWNAUDIO_BACKEND=miniaudio \
+    -Wno-dev
 
   make
 }
