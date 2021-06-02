@@ -15,10 +15,10 @@ Supported formats include...
 * SNES SPC
 
 clownaudio is a 'full stack' sound engine, meaning that it handles everything
-from decoding to playback - the user merely has to provide it with sound data to
+from decoding to playback - the user just has to provide it with sound data to
 process.
 
-That said, clownaudio's internals are modular, meaning you can easily extract
+That said, clownaudio's internals are modular, so you can easily extract
 its mixer and use it as part of your own audio system if needed.
 
 
@@ -50,8 +50,8 @@ for individual formats, to allow the user a choice between standard libraries
 
 ## Playback backends
 
-In addition, clownaudio can utilise one of the following libraries to provide
-audio-playback:
+In addition, clownaudio can utilise one of the following libraries to handle
+audio playback:
 
 | Library   | Licence             | Built-in |
 |-----------|---------------------|----------|
