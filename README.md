@@ -76,6 +76,10 @@ The CLI example's `Makefile` demonstrates linking clownaudio with `pkg-config`,
 and its `CMakeLists.txt` file demonstrates linking with `find_package` and
 embedding with `add_subdirectory`.
 
+An effort is made to keep clownaudio's build system requirements simple, so that
+projects wishing to embed its source files directly and bypass its CMake build
+system can do so. See the CLI example's `Makefile.old` for an example of this.
+
 `PKGBUILD` files for MSYS2 and Arch Linux are provided in the `packages`
 directory.
 
