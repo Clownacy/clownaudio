@@ -35,7 +35,7 @@
 
 typedef struct Decoder_libFLAC
 {
-	ROMemoryStream *memory_stream;
+	ROMemoryStream ro_memory_stream;
 	FLAC__StreamDecoder *flac_stream_decoder;
 	DecoderSpec *spec;
 
@@ -58,7 +58,7 @@ static FLAC__StreamDecoderReadStatus fread_wrapper(const FLAC__StreamDecoder *fl
 
 	FLAC__StreamDecoderReadStatus status = FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 
-	*count = ROMemoryStream_Read(decoder->memory_stream, output, sizeof(FLAC__byte), *count);
+	*count = ROMemoryStream_Read(&decoder->ro_memory_stream, output, sizeof(FLAC__byte), *count);
 
 	if (*count == 0)
 		status = FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
@@ -72,7 +72,7 @@ static FLAC__StreamDecoderSeekStatus fseek_wrapper(const FLAC__StreamDecoder *fl
 
 	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
-	return ROMemoryStream_SetPosition(decoder->memory_stream, offset, MEMORYSTREAM_START) ? FLAC__STREAM_DECODER_SEEK_STATUS_OK : FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
+	return ROMemoryStream_SetPosition(&decoder->ro_memory_stream, offset, MEMORYSTREAM_START) ? FLAC__STREAM_DECODER_SEEK_STATUS_OK : FLAC__STREAM_DECODER_SEEK_STATUS_ERROR;
 }
 
 static FLAC__StreamDecoderTellStatus ftell_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__uint64 *offset, void *user)
@@ -81,7 +81,7 @@ static FLAC__StreamDecoderTellStatus ftell_wrapper(const FLAC__StreamDecoder *fl
 
 	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
-	*offset = ROMemoryStream_GetPosition(decoder->memory_stream);
+	*offset = ROMemoryStream_GetPosition(&decoder->ro_memory_stream);
 
 	return FLAC__STREAM_DECODER_TELL_STATUS_OK;
 }
@@ -92,12 +92,12 @@ static FLAC__StreamDecoderLengthStatus GetSize(const FLAC__StreamDecoder *flac_s
 
 	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
-	const size_t old_offset = ROMemoryStream_GetPosition(decoder->memory_stream);
+	const size_t old_offset = ROMemoryStream_GetPosition(&decoder->ro_memory_stream);
 
-	ROMemoryStream_SetPosition(decoder->memory_stream, 0, MEMORYSTREAM_END);
-	*length = ROMemoryStream_GetPosition(decoder->memory_stream);
+	ROMemoryStream_SetPosition(&decoder->ro_memory_stream, 0, MEMORYSTREAM_END);
+	*length = ROMemoryStream_GetPosition(&decoder->ro_memory_stream);
 
-	ROMemoryStream_SetPosition(decoder->memory_stream, old_offset, MEMORYSTREAM_START);
+	ROMemoryStream_SetPosition(&decoder->ro_memory_stream, old_offset, MEMORYSTREAM_START);
 
 	return FLAC__STREAM_DECODER_LENGTH_STATUS_OK;
 }
@@ -108,12 +108,12 @@ static FLAC__bool CheckEOF(const FLAC__StreamDecoder *flac_stream_decoder, void 
 
 	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
-	const size_t offset = ROMemoryStream_GetPosition(decoder->memory_stream);
+	const size_t offset = ROMemoryStream_GetPosition(&decoder->ro_memory_stream);
 
-	ROMemoryStream_SetPosition(decoder->memory_stream, 0, MEMORYSTREAM_END);
-	const size_t size = ROMemoryStream_GetPosition(decoder->memory_stream);
+	ROMemoryStream_SetPosition(&decoder->ro_memory_stream, 0, MEMORYSTREAM_END);
+	const size_t size = ROMemoryStream_GetPosition(&decoder->ro_memory_stream);
 
-	ROMemoryStream_SetPosition(decoder->memory_stream, offset, MEMORYSTREAM_START);
+	ROMemoryStream_SetPosition(&decoder->ro_memory_stream, offset, MEMORYSTREAM_START);
 
 	return (offset == size);
 }
@@ -188,24 +188,21 @@ void* Decoder_libFLAC_Create(const unsigned char *data, size_t data_size, bool l
 
 		if (decoder->flac_stream_decoder != NULL)
 		{
-			decoder->memory_stream = ROMemoryStream_Create(data, data_size);
+			ROMemoryStream_Create(&decoder->ro_memory_stream, data, data_size);
 
-			if (decoder->memory_stream != NULL)
+			if (FLAC__stream_decoder_init_stream(decoder->flac_stream_decoder, fread_wrapper, fseek_wrapper, ftell_wrapper, GetSize, CheckEOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
 			{
-				if (FLAC__stream_decoder_init_stream(decoder->flac_stream_decoder, fread_wrapper, fseek_wrapper, ftell_wrapper, GetSize, CheckEOF, WriteCallback, MetadataCallback, ErrorCallback, decoder) == FLAC__STREAM_DECODER_INIT_STATUS_OK)
-				{
-					decoder->error = false;
-					decoder->spec = spec;
-					FLAC__stream_decoder_process_until_end_of_metadata(decoder->flac_stream_decoder);
+				decoder->error = false;
+				decoder->spec = spec;
+				FLAC__stream_decoder_process_until_end_of_metadata(decoder->flac_stream_decoder);
 
-					if (!decoder->error)
-						return decoder;
+				if (!decoder->error)
+					return decoder;
 
-					FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
-				}
-
-				ROMemoryStream_Destroy(decoder->memory_stream);
+				FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
 			}
+
+			ROMemoryStream_Destroy(&decoder->ro_memory_stream);
 
 			FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
 		}
@@ -222,7 +219,7 @@ void Decoder_libFLAC_Destroy(void *decoder_void)
 
 	FLAC__stream_decoder_finish(decoder->flac_stream_decoder);
 	FLAC__stream_decoder_delete(decoder->flac_stream_decoder);
-	ROMemoryStream_Destroy(decoder->memory_stream);
+	ROMemoryStream_Destroy(&decoder->ro_memory_stream);
 	free(decoder->block_buffer);
 	free(decoder);
 }

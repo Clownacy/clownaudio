@@ -33,6 +33,7 @@ typedef struct Decoder_libVorbis
 {
 	OggVorbis_File vorbis_file;
 	unsigned int channel_count;
+	ROMemoryStream ro_memory_stream;
 } Decoder_libVorbis;
 
 static size_t fread_wrapper(void *output, size_t size, size_t count, void *file)
@@ -88,34 +89,31 @@ void* Decoder_libVorbis_Create(const unsigned char *data, size_t data_size, bool
 	(void)loop;	// This is ignored in simple decoders
 	(void)wanted_spec;
 
-	ROMemoryStream *memory_stream = ROMemoryStream_Create(data, data_size);
+	Decoder_libVorbis *decoder = (Decoder_libVorbis*)malloc(sizeof(Decoder_libVorbis));
 
-	if (memory_stream != NULL)
+	if (decoder != NULL)
 	{
+		ROMemoryStream_Create(&decoder->ro_memory_stream, data, data_size);
+
 		OggVorbis_File vorbis_file;
 
-		if (ov_open_callbacks(memory_stream, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
+		if (ov_open_callbacks(&decoder->ro_memory_stream, &vorbis_file, NULL, 0, ov_callback_memory) == 0)
 		{
-			Decoder_libVorbis *decoder = (Decoder_libVorbis*)malloc(sizeof(Decoder_libVorbis));
+			vorbis_info *v_info = ov_info(&vorbis_file, -1);
 
-			if (decoder != NULL)
-			{
-				vorbis_info *v_info = ov_info(&vorbis_file, -1);
+			decoder->vorbis_file = vorbis_file;
+			decoder->channel_count = v_info->channels;
 
-				decoder->vorbis_file = vorbis_file;
-				decoder->channel_count = v_info->channels;
+			spec->sample_rate = v_info->rate;
+			spec->channel_count = v_info->channels;
+			spec->is_complex = false;
 
-				spec->sample_rate = v_info->rate;
-				spec->channel_count = v_info->channels;
-				spec->is_complex = false;
-
-				return decoder;
-			}
-
-			ov_clear(&vorbis_file);
+			return decoder;
 		}
 
-		ROMemoryStream_Destroy(memory_stream);
+		ROMemoryStream_Destroy(&decoder->ro_memory_stream);
+
+		free(decoder);
 	}
 
 	return NULL;
