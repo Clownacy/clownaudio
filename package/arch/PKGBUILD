@@ -28,7 +28,6 @@ build() {
 
   cmake .. \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=ON \
     -DCLOWNAUDIO_CPP=OFF \
     -DCLOWNAUDIO_LIBVORBIS=ON \

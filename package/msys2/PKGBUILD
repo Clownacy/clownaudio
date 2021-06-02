@@ -33,7 +33,6 @@ build() {
   ${MINGW_PREFIX}/bin/cmake .. \
     -G"MSYS Makefiles" \
     -DCMAKE_INSTALL_PREFIX=${MINGW_PREFIX} \
-    -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF \
     -DCLOWNAUDIO_CPP=OFF \
     -DCLOWNAUDIO_LIBVORBIS=ON \
