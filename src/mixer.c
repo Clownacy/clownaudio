@@ -644,24 +644,29 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 {
 	ClownAudio_Sound *sound = mixer->playing_list_head;
 
+	// Linked-list: iterate until it ends
 	while (sound != NULL)
 	{
+		// Cache this for later (`sound` may be freed by then)
 		ClownAudio_Sound *next_sound = sound->next_playing;
 
 		long *output_buffer_pointer = output_buffer;
 		const long *output_buffer_end = output_buffer += frames_to_do * CHANNEL_COUNT;
 
+		// Loop until all requested samples have been written
 		size_t samples_to_do;
 		while ((samples_to_do = output_buffer_end - output_buffer_pointer) != 0)
 		{
+			// We'll be reading into an intermediary (short) buffer, before writing to the final (long) buffer
 			short read_buffer[0x1000];
 
+			// Obtain samples
 			const size_t sub_frames_to_do = MIN(COUNT_OF(read_buffer), samples_to_do) / CHANNEL_COUNT;
 			const size_t sub_frames_done = sound->pipeline.GetSamples(sound->pipeline.decoder, read_buffer, sub_frames_to_do);
 
-			short *read_buffer_pointer = read_buffer;
+			const short *read_buffer_pointer = read_buffer;
 
-			// Choose from multiple codepaths
+			// Choose from multiple mixing codepaths
 			if (sound->fade_countdown != 0)
 			{
 				// Slow path which performs fading and volume adjustments
@@ -675,7 +680,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 						UpdateSoundVolume(sound);
 					}
 
-					// Mix data with output, and apply volume
+					// Mix samples with output, and apply volume
 					*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_left);
 					*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_right);
 				}
@@ -685,7 +690,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 				// Fast path which bypasses fading
 				for (size_t i = 0; i < sub_frames_done; ++i)
 				{
-					// Mix data with output, and apply volume
+					// Mix samples with output, and apply volume
 					*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_left);
 					*output_buffer_pointer++ += SCALE(*read_buffer_pointer++, sound->final_volume_right);
 				}
@@ -695,16 +700,17 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long
 				// Fastest path which bypasses fading and volume adjustments
 				for (size_t i = 0; i < sub_frames_done; ++i)
 				{
-					// Mix data with output
+					// Mix samples with output
 					*output_buffer_pointer++ += *read_buffer_pointer++;
 					*output_buffer_pointer++ += *read_buffer_pointer++;
 				}
 			}
 
-			if (sub_frames_done < sub_frames_to_do) // Sound finished
+			// If we received fewer samples than we requested, then the sound has reached its end
+			if (sub_frames_done < sub_frames_to_do)
 			{
 				if (sound->destroy_when_done)
-					DestroySound(mixer, sound);
+					DestroySound(mixer, sound); // Frees `sound`
 				else
 					PauseSound(mixer, sound);
 
