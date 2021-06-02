@@ -1,4 +1,4 @@
-// (C) 2019-2020 Clownacy
+// (C) 2019-2021 Clownacy
 //
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -45,9 +45,9 @@ typedef struct Decoder_libFLAC
 
 	unsigned int bits_per_sample;
 
-	unsigned char *block_buffer;
-	unsigned long block_buffer_index;
-	unsigned long block_buffer_size;
+	FLAC__int16 *block_buffer;
+	unsigned long block_buffer_index; // Measured in frames
+	unsigned long block_buffer_size;  // Measured in frames
 } Decoder_libFLAC;
 
 static FLAC__StreamDecoderReadStatus fread_wrapper(const FLAC__StreamDecoder *flac_stream_decoder, FLAC__byte *output, size_t *count, void *user)
@@ -124,7 +124,7 @@ static FLAC__StreamDecoderWriteStatus WriteCallback(const FLAC__StreamDecoder *f
 
 	Decoder_libFLAC *decoder = (Decoder_libFLAC*)user;
 
-	FLAC__int16 *block_buffer_pointer = (FLAC__int16*)decoder->block_buffer;
+	FLAC__int16 *block_buffer_pointer = decoder->block_buffer;
 	for (unsigned int i = 0; i < frame->header.blocksize; ++i)
 	{
 		for (unsigned int j = 0; j < frame->header.channels; ++j)
@@ -142,7 +142,7 @@ static FLAC__StreamDecoderWriteStatus WriteCallback(const FLAC__StreamDecoder *f
 	}
 
 	decoder->block_buffer_index = 0;
-	decoder->block_buffer_size = (block_buffer_pointer - (FLAC__int16*)decoder->block_buffer) / decoder->channel_count;
+	decoder->block_buffer_size = (block_buffer_pointer - decoder->block_buffer) / decoder->channel_count;
 
 	return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
@@ -160,7 +160,7 @@ static void MetadataCallback(const FLAC__StreamDecoder *flac_stream_decoder, con
 	decoder->bits_per_sample = metadata->data.stream_info.bits_per_sample;
 
 	// Init block buffer
-	decoder->block_buffer = (unsigned char*)malloc(metadata->data.stream_info.max_blocksize * sizeof(FLAC__int16) * metadata->data.stream_info.channels);
+	decoder->block_buffer = (FLAC__int16*)malloc(metadata->data.stream_info.max_blocksize * sizeof(FLAC__int16) * metadata->data.stream_info.channels);
 	decoder->block_buffer_index = 0;
 	decoder->block_buffer_size = 0;
 }
@@ -243,11 +243,9 @@ size_t Decoder_libFLAC_GetSamples(void *decoder_void, short *buffer, size_t fram
 			return 0;
 	}
 
-	const unsigned int SIZE_OF_FRAME = sizeof(FLAC__int16) * decoder->channel_count;
-
 	const unsigned long block_frames_to_do = MIN(frames_to_do, decoder->block_buffer_size - decoder->block_buffer_index);
 
-	memcpy(buffer, &decoder->block_buffer[decoder->block_buffer_index * SIZE_OF_FRAME], block_frames_to_do * SIZE_OF_FRAME);
+	memcpy(buffer, &decoder->block_buffer[decoder->block_buffer_index * decoder->channel_count], block_frames_to_do * sizeof(FLAC__int16) * decoder->channel_count);
 
 	decoder->block_buffer_index += block_frames_to_do;
 
