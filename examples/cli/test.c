@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 							printf("Setting speed to %f\n", param);
 							fflush(stdout);
 
-							ClownAudio_SoundSetSpeed(instance, param * 0x10000);
+							ClownAudio_SoundSetSpeed(instance, (unsigned long)(param * 0x10000));
 							break;
 						}
 
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
 							printf("Setting volume to %f left, %f right\n", volume_left, volume_right);
 							fflush(stdout);
 
-							ClownAudio_SoundSetVolume(instance, volume_left * 0x100, volume_right * 0x100);
+							ClownAudio_SoundSetVolume(instance, (unsigned short)(volume_left * 0x100), (unsigned short)(volume_right * 0x100));
 							break;
 						}
 					}

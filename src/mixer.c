@@ -201,7 +201,7 @@ static void UnpauseSound(ClownAudio_Mixer *mixer, ClownAudio_Sound *sound)
 
 static void UpdateSoundVolume(ClownAudio_Sound *sound)
 {
-	const unsigned short fade_volume_linear = sound->fade_volume_accumulator >> 16;
+	const unsigned short fade_volume_linear = (unsigned short)sound->fade_volume_accumulator >> 16;
 	const unsigned short fade_volume = SCALE(fade_volume_linear, fade_volume_linear);
 
 	sound->final_volume_left = SCALE(sound->volume_left, fade_volume);
