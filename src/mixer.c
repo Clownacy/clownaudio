@@ -337,7 +337,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundDataUnload(ClownAudio_Mixer *mixer,
 		// Destroy any sounds that use this sound data
 		for (ClownAudio_Sound *sound = sound_data->sound_list_sentinel.next_sibling; sound != NULL; )
 		{
-			ClownAudio_Sound *next_sound = sound->next_playing; // A work-around to avoid using `sound` after it is freed
+			ClownAudio_Sound *next_sound = sound->next_sibling; // A work-around to avoid using `sound` after it is freed
 
 			DestroySound(mixer, sound);
 
