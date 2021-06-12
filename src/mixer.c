@@ -642,7 +642,7 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFade(ClownAudio_Mixer *mixer, Clown
 
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_MixSamples(ClownAudio_Mixer *mixer, long *output_buffer, size_t frames_to_do)
 {
-	const long *output_buffer_end = output_buffer += frames_to_do * CHANNEL_COUNT;
+	const long *output_buffer_end = output_buffer + frames_to_do * CHANNEL_COUNT;
 
 	ClownAudio_Sound *sound = mixer->playing_list_head;
 
