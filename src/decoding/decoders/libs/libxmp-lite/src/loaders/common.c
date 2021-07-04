@@ -42,8 +42,8 @@
 #endif /* LIBXMP_CORE_PLAYER */
 
 #include "xmp.h"
-#include "common.h"
-#include "period.h"
+#include "../common.h"
+#include "../period.h"
 #include "loader.h"
 
 int libxmp_init_instrument(struct module_data *m)
