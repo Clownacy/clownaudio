@@ -2037,6 +2037,8 @@ MA_API const char* ma_version_string(void);
 Logging
 
 **************************************************************************************************************************************************************/
+#ifndef MA_NO_DEVICE_IO
+
 #include <stdarg.h> /* For va_list. */
 
 #if defined(__has_attribute)
@@ -2078,6 +2080,8 @@ MA_API ma_result ma_log_unregister_callback(ma_log* pLog, ma_log_callback callba
 MA_API ma_result ma_log_post(ma_log* pLog, ma_uint32 level, const char* pMessage);
 MA_API ma_result ma_log_postv(ma_log* pLog, ma_uint32 level, const char* pFormat, va_list args);
 MA_API ma_result ma_log_postf(ma_log* pLog, ma_uint32 level, const char* pFormat, ...) MA_ATTRIBUTE_FORMAT(3, 4);
+
+#endif
 
 
 /**************************************************************************************************************************************************************
@@ -8459,6 +8463,8 @@ static ma_result ma_allocation_callbacks_init_copy(ma_allocation_callbacks* pDst
 Logging
 
 **************************************************************************************************************************************************************/
+#ifndef MA_NO_DEVICE_IO
+
 #if defined(MA_DEBUG_OUTPUT)
 
 MA_API const char* ma_log_level_to_string(ma_uint32 logLevel)
@@ -8818,6 +8824,8 @@ MA_API ma_result ma_log_postf(ma_log* pLog, ma_uint32 level, const char* pFormat
 
     return result;
 }
+
+#endif
 
 
 
