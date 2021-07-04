@@ -728,14 +728,15 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_OutputSamples(ClownAudio_Mixer *mixer, s
 	size_t frames_done = 0;
 	while (frames_done < frames_to_do)
 	{
+		// Mix samples into a temporary mix buffer
 		long mix_buffer[0x1000];
 
-		const size_t sub_frames_to_do = MIN(0x1000 / CHANNEL_COUNT, frames_to_do - frames_done);
+		const size_t sub_frames_to_do = MIN(COUNT_OF(mix_buffer) / CHANNEL_COUNT, frames_to_do - frames_done);
 
 		memset(mix_buffer, 0, sub_frames_to_do * sizeof(long) * CHANNEL_COUNT);
 		ClownAudio_Mixer_MixSamples(mixer, mix_buffer, sub_frames_to_do);
 
-		// Clamp samples to 16-bit range
+		// Clamp mixed samples to 16-bit range and write them to output buffer
 		for (size_t i = 0; i < sub_frames_to_do * CHANNEL_COUNT; ++i)
 		{
 			const long mix_sample = mix_buffer[i];
