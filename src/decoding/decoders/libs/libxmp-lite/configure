@@ -620,6 +620,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+CFLAGS_SHARED
 SHARED
 STATIC
 EGREP
@@ -644,6 +645,7 @@ build_os
 build_vendor
 build_cpu
 build
+DARWIN_VERSION
 LD_VERSCRIPT
 target_alias
 host_alias
@@ -2030,6 +2032,7 @@ fi
 if test "${enable_shared+set}" = set; then :
   enableval=$enable_shared;
 fi
+
 
 
 ac_aux_dir=
@@ -3733,7 +3736,7 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 
 
 
-case "$host_cpu" in
+case "${host_cpu}" in
 powerpc64)
   CFLAGS="${CFLAGS} -m64"
   LDFLAGS="${LDFLAGS} -m64"
@@ -3741,10 +3744,81 @@ powerpc64)
 esac
 
 case "${host_os}" in
-cygwin*)
+darwin*)
+  DARWIN_VERSION="`echo ${host_os#darwin}|cut -f1 -d'.'`"
+  if test "${enable_shared}" != no; then
+    CFLAGS="${CFLAGS} -fno-common"
+  fi
+  ;;
+cygwin* | *djgpp | mint* | amigaos* |aros* | morphos*)
   enable_static=yes
   enable_shared=no
   ;;
+esac
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __clang__ defined" >&5
+$as_echo_n "checking for __clang__ defined... " >&6; }
+if ${ac_cv_defined___clang__+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+    #ifdef __clang__
+    int ok;
+    #else
+    choke me
+    #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_defined___clang__=yes
+else
+  ac_cv_defined___clang__=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_defined___clang__" >&5
+$as_echo "$ac_cv_defined___clang__" >&6; }
+  if test $ac_cv_defined___clang__ != "no"; then :
+
+fi
+
+case "${host_os}" in
+ openbsd*) ;;
+ darwin*) LDFLAGS="$LDFLAGS -Wl,-undefined,error" ;;
+   *) if test "$ac_cv_defined___clang__" = "no" || test "${LDFLAGS#*fsanitize}" = "$LDFLAGS"
+    then
+      save_LDFLAGS="$LDFLAGS"
+      LDFLAGS="$LDFLAGS -Wl,--no-undefined"
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+else
+  LDFLAGS="$save_LDFLAGS"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+    fi
+    ;;
 esac
 
 if test "${enable_static}" = yes; then
@@ -3788,10 +3862,11 @@ $as_echo "$ac_cv_defined__WIN32" >&6; }
 
     SHARED=dll
 
-    CFLAGS="${CFLAGS} -DBUILDING_DLL"
+    CFLAGS_SHARED="-DBUILDING_DLL"
 
 else
 
+    CFLAGS_SHARED="-fPIC"
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __APPLE__ defined" >&5
 $as_echo_n "checking for __APPLE__ defined... " >&6; }
@@ -3837,6 +3912,7 @@ else
 fi
 
 fi
+
 fi
 
 if test "${enable_it}" = no; then
@@ -3855,7 +3931,7 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-  int main(){}
+  int main(void){return 0;}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   ac_cv_c_flag_w_all=yes
@@ -3871,6 +3947,35 @@ $as_echo "$ac_cv_c_flag_w_all" >&6; }
   CFLAGS="${CFLAGS} -Wall"
 fi
 
+old_CFLAGS="${CFLAGS}"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether compiler understands -Werror" >&5
+$as_echo_n "checking whether compiler understands -Werror... " >&6; }
+if ${ac_cv_c_flag_w_all+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    oldcflags="${CFLAGS}"
+    CFLAGS="${CFLAGS} -Werror"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+  int main(void){return 0;}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_c_flag_w_all=yes
+else
+  ac_cv_c_flag_w_all=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CFLAGS="${oldcflags}"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_flag_w_all" >&5
+$as_echo "$ac_cv_c_flag_w_all" >&6; }
+  if test "x$ac_cv_c_flag_w_all" = xyes; then :
+  CFLAGS="${CFLAGS} -Werror"
+fi
+
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether compiler understands -xldscope=hidden" >&5
 $as_echo_n "checking whether compiler understands -xldscope=hidden... " >&6; }
@@ -3883,7 +3988,7 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-  int main(){}
+  __global int foo(void) {}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   ac_cv_c_flag_xldscope_hidden=yes
@@ -3896,7 +4001,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_flag_xldscope_hidden" >&5
 $as_echo "$ac_cv_c_flag_xldscope_hidden" >&6; }
   if test "x$ac_cv_c_flag_xldscope_hidden" = xyes; then :
-  LDFLAGS="${LDFLAGS} -xldscope=hidden"
+  CFLAGS="${old_CFLAGS} -xldscope=hidden -DXMP_LDSCOPE_GLOBAL"
 else
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether compiler understands -fvisibility=hidden" >&5
@@ -3910,7 +4015,10 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-    int main(){}
+__attribute__((visibility("default"))) int foo(void);
+__attribute__((visibility("hidden")))  int bar(void);
+int foo(void) { return 0; }
+int bar(void) { return 1; }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   ac_cv_c_flag_f_visibility_hidden=yes
@@ -3923,11 +4031,22 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_flag_f_visibility_hidden" >&5
 $as_echo "$ac_cv_c_flag_f_visibility_hidden" >&6; }
   if test "x$ac_cv_c_flag_f_visibility_hidden" = xyes; then :
-  LDFLAGS="${LDFLAGS} -fvisibility=hidden"
-    LD_VERSCRIPT="-Wl,--version-script,libxmp.map"
+  CFLAGS="${old_CFLAGS} -fvisibility=hidden -DXMP_SYM_VISIBILITY"
+     LD_VERSCRIPT="-Wl,--version-script,libxmp.map"
+else
+  CFLAGS="${old_CFLAGS}"
 fi
 
 fi
+case $host_os in
+    mingw*|cygwin*|emx*|*djgpp|amigaos*|aros*|morphos*)
+	CFLAGS="${old_CFLAGS}"
+	if test $ac_cv_c_flag_f_visibility_hidden = yes; then
+	  { $as_echo "$as_me:${as_lineno-$LINENO}: ignoring -fvisibility flags for $host_os" >&5
+$as_echo "$as_me: ignoring -fvisibility flags for $host_os" >&6;}
+	fi
+	;;
+esac
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether compiler understands -Wunknown-warning-option" >&5
@@ -3941,7 +4060,7 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-  int main(){}
+  int main(void){return 0;}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   ac_cv_c_flag_w_unknown_warning_option=yes
@@ -3969,7 +4088,7 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-  int main(){}
+  int main(void){return 0;}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   ac_cv_c_flag_w_unused_but_set_variable=yes
@@ -3997,7 +4116,7 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-  int main(){}
+  int main(void){return 0;}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   ac_cv_c_flag_w_unused_result=yes
@@ -4025,7 +4144,7 @@ else
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-  int main(){}
+  int main(void){return 0;}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   ac_cv_c_flag_w_array_bounds=yes
@@ -4041,6 +4160,7 @@ $as_echo "$ac_cv_c_flag_w_array_bounds" >&6; }
   CFLAGS="${CFLAGS} -Wno-array-bounds"
 fi
 
+old_LIBS="${LIBS}"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pow in -lm" >&5
 $as_echo_n "checking for pow in -lm... " >&6; }
 if ${ac_cv_lib_m_pow+:} false; then :
@@ -4086,7 +4206,12 @@ _ACEOF
 
 fi
 
-for ac_func in strlcpy strlcat
+case "${host_os}" in
+darwin*|mingw*)
+  LIBS="${old_LIBS}"
+  ;;
+esac
+for ac_func in round powf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -4097,6 +4222,7 @@ _ACEOF
 
 fi
 done
+
 
 ac_config_files="$ac_config_files Makefile"
 

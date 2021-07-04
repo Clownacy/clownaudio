@@ -1,8 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "md5.h"
+#include "../src/md5.h"
 #include "xmp.h"
+
+#ifdef LIBXMP_NO_DEPACKERS
+#define TEST_IT_FILE "test.it"
+#else
+#define TEST_IT_FILE "test.itz"
+#endif
 
 static inline int is_big_endian() {
 	unsigned short w = 0x00ff;
@@ -57,7 +63,7 @@ int main()
 	if (c == NULL)
 		goto err;
 
-	ret = xmp_load_module(c, "test.it");
+	ret = xmp_load_module(c, TEST_IT_FILE);
 	if (ret != 0) {
 		printf("can't load module\n");
 		goto err;
@@ -98,7 +104,7 @@ int main()
 
 	MD5Final(digest, &ctx);
 
-	if (compare_md5(digest, "8ddeaa84bf9d90fd3b3c0a19453d005b") < 0) {
+	if (compare_md5(digest, "769a03855bac202597a581a8628424d5") < 0) {
 		printf("rendering error\n");
 		goto err;
 	}
@@ -110,9 +116,15 @@ int main()
 
 	printf(" pass\n");
 
+	xmp_release_module(c);
+	xmp_free_context(c);
 	exit(0);
 
     err:
 	printf(" fail\n");
+	if (c) {
+		xmp_release_module(c);
+		xmp_free_context(c);
+	}
 	exit(1);
 }

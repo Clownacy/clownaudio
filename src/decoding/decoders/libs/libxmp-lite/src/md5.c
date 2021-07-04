@@ -15,9 +15,7 @@
  * will fill a supplied 16-byte array with the digest.
  */
 
-#include <sys/types.h>
-#include <string.h>
-#include "../src/common.h"
+#include "common.h"
 #include "md5.h"
 
 #define PUT_64BIT_LE(cp, value) do {					\
