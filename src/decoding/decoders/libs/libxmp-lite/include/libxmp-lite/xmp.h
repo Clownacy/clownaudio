@@ -11,6 +11,8 @@ extern "C" {
 #define XMP_VER_MINOR 5
 #define XMP_VER_RELEASE 0
 
+#define LIBXMP_EXPORT
+/*
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # if defined(BUILDING_STATIC)
 #  define LIBXMP_EXPORT
@@ -32,6 +34,7 @@ extern "C" {
 #else
 # define LIBXMP_EXPORT
 #endif
+*/
 
 #if !defined (LIBXMP_EXPORT_VAR)
 # define LIBXMP_EXPORT_VAR LIBXMP_EXPORT
