@@ -550,11 +550,12 @@ int xmp_set_instrument_path(xmp_context opaque, const char *path)
 {
 	struct context_data *ctx = (struct context_data *)opaque;
 	struct module_data *m = &ctx->m;
+	size_t length;
 
 	if (m->instrument_path != NULL)
 		free(m->instrument_path);
 
-	size_t length = strlen(path);
+	length = strlen(path);
 	m->instrument_path = malloc(length + 1);
 
 	if (m->instrument_path == NULL) {

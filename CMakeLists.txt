@@ -389,6 +389,7 @@ if(CLOWNAUDIO_LIBXMPLITE)
 		message(STATUS "Using local libxmp-lite")
 		target_sources(clownaudio PRIVATE
 			"src/decoding/decoders/libs/libxmp-lite/include/libxmp-lite/xmp.h"
+			"src/decoding/decoders/libs/libxmp-lite/src/callbackio.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/common.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/control.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/dataio.c"
@@ -404,9 +405,12 @@ if(CLOWNAUDIO_LIBXMPLITE)
 			"src/decoding/decoders/libs/libxmp-lite/src/list.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/load.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/load_helpers.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/md5.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/md5.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/mdataio.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/memio.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/memio.h"
+			"src/decoding/decoders/libs/libxmp-lite/src/misc.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/mix_all.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/mixer.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/mixer.h"
@@ -421,6 +425,7 @@ if(CLOWNAUDIO_LIBXMPLITE)
 			"src/decoding/decoders/libs/libxmp-lite/src/tempfile.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/virtual.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/virtual.h"
+			"src/decoding/decoders/libs/libxmp-lite/src/win32.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/loaders/common.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/loaders/it.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/loaders/it_load.c"
@@ -437,6 +442,9 @@ if(CLOWNAUDIO_LIBXMPLITE)
 
 		target_include_directories(clownaudio PRIVATE "src/decoding/decoders/libs/libxmp-lite/include/libxmp-lite")
 		target_compile_definitions(clownaudio PRIVATE LIBXMP_CORE_PLAYER=1 LIBXMP_NO_DEPACKERS=1)
+		if(MSVC)
+			target_compile_definitions(clownaudio PRIVATE inline=_inline) # MSVC 6 doesn't have inline
+		endif()
 	endif()
 endif()
 
