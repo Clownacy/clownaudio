@@ -295,7 +295,7 @@ find_package(PkgConfig QUIET)
 
 if(NOT CLOWNAUDIO_MIXER_ONLY)
 	if(CLOWNAUDIO_BACKEND STREQUAL "SDL1")
-		if (NOT PkgConfig_FOUND)
+		if(NOT PkgConfig_FOUND)
 			message(FATAL_ERROR "pkg-config is needed by SDL1, but it couldn't be found")
 		endif()
 
@@ -305,7 +305,7 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 	endif()
 
 	if(CLOWNAUDIO_BACKEND STREQUAL "SDL2")
-		if (NOT PkgConfig_FOUND)
+		if(NOT PkgConfig_FOUND)
 			message(FATAL_ERROR "pkg-config is needed by SDL2, but it couldn't be found")
 		endif()
 
@@ -315,7 +315,7 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 	endif()
 
 	if(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
-		if (NOT PkgConfig_FOUND)
+		if(NOT PkgConfig_FOUND)
 			message(FATAL_ERROR "pkg-config is needed by PortAudio, but it couldn't be found")
 		endif()
 
@@ -326,7 +326,7 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 endif()
 
 if(CLOWNAUDIO_LIBVORBIS)
-	if (NOT PkgConfig_FOUND)
+	if(NOT PkgConfig_FOUND)
 		message(FATAL_ERROR "pkg-config is needed by libvorbis, but it couldn't be found")
 	endif()
 
@@ -336,7 +336,7 @@ if(CLOWNAUDIO_LIBVORBIS)
 endif()
 
 if(CLOWNAUDIO_LIBOPUS)
-	if (NOT PkgConfig_FOUND)
+	if(NOT PkgConfig_FOUND)
 		message(FATAL_ERROR "pkg-config is needed by libopus, but it couldn't be found")
 	endif()
 
@@ -346,7 +346,7 @@ if(CLOWNAUDIO_LIBOPUS)
 endif()
 
 if(CLOWNAUDIO_LIBFLAC)
-	if (NOT PkgConfig_FOUND)
+	if(NOT PkgConfig_FOUND)
 		message(FATAL_ERROR "pkg-config is needed by libflac, but it couldn't be found")
 	endif()
 
@@ -356,7 +356,7 @@ if(CLOWNAUDIO_LIBFLAC)
 endif()
 
 if(CLOWNAUDIO_LIBSNDFILE)
-	if (NOT PkgConfig_FOUND)
+	if(NOT PkgConfig_FOUND)
 		message(FATAL_ERROR "pkg-config is needed by libsndfile, but it couldn't be found")
 	endif()
 
@@ -366,7 +366,7 @@ if(CLOWNAUDIO_LIBSNDFILE)
 endif()
 
 if(CLOWNAUDIO_LIBOPENMPT)
-	if (NOT PkgConfig_FOUND)
+	if(NOT PkgConfig_FOUND)
 		message(FATAL_ERROR "pkg-config is needed by libopenmpt, but it couldn't be found")
 	endif()
 
@@ -376,7 +376,7 @@ if(CLOWNAUDIO_LIBOPENMPT)
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
-	if (PkgConfig_FOUND)
+	if(PkgConfig_FOUND)
 		pkg_check_modules(libxmp-lite IMPORTED_TARGET libxmp-lite)
 	endif()
 
