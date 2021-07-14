@@ -20,6 +20,11 @@
  * THE SOFTWARE.
  */
 
+#ifndef LIBXMP_LOADERS_IT_H
+#define LIBXMP_LOADERS_IT_H
+
+#include "../common.h"
+
 /* IT flags */
 #define IT_STEREO	0x01
 #define IT_VOL_OPT	0x02	/* Not recognized */
@@ -179,3 +184,6 @@ struct it_sample_header {
 	uint8 vit;		/* Vibrato waveform */
 };
 
+extern const struct format_loader libxmp_loader_it;
+
+#endif

@@ -31,7 +31,7 @@ xmp_context xmp_create_context(void)
 {
 	struct context_data *ctx;
 
-	ctx = calloc(1, sizeof(struct context_data));
+	ctx = (struct context_data*)calloc(1, sizeof(struct context_data));
 	if (ctx == NULL) {
 		return NULL;
 	}
@@ -556,7 +556,7 @@ int xmp_set_instrument_path(xmp_context opaque, const char *path)
 		free(m->instrument_path);
 
 	length = strlen(path);
-	m->instrument_path = malloc(length + 1);
+	m->instrument_path = (char*)malloc(length + 1);
 
 	if (m->instrument_path == NULL) {
 		return -XMP_ERROR_SYSTEM;

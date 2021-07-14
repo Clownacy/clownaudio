@@ -264,16 +264,6 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 endif()
 
 
-##########################################################
-# Handle sources that can compile as either C99 or C++98 #
-##########################################################
-
-target_sources(clownaudio PRIVATE ${C_AND_CPP_SOURCES})
-if(CLOWNAUDIO_CPP)
-	set_source_files_properties(${C_AND_CPP_SOURCES} PROPERTIES LANGUAGE CXX)
-endif()
-
-
 #####################
 # Find dependencies #
 #####################
@@ -387,57 +377,60 @@ if(CLOWNAUDIO_LIBXMPLITE)
 	else()
 		# Compile it ourselves
 		message(STATUS "Using local libxmp-lite")
+		list(APPEND C_AND_CPP_SOURCES
+			"src/decoding/decoders/libs/libxmp-lite/src/control.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/dataio.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/effects.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/filter.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/format.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/hio.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/lfo.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/load.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/load_helpers.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/md5.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/memio.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/misc.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/mix_all.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/mixer.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/period.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/player.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/read_event.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/scan.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/smix.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/virtual.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/win32.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/loaders/common.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/loaders/it_load.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/loaders/itsex.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/loaders/mod_load.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/loaders/s3m_load.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/loaders/sample.c"
+			"src/decoding/decoders/libs/libxmp-lite/src/loaders/xm_load.c"
+		)
+
 		target_sources(clownaudio PRIVATE
 			"src/decoding/decoders/libs/libxmp-lite/include/libxmp-lite/xmp.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/callbackio.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/common.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/control.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/dataio.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/effects.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/effects.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/filter.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/format.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/format.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/hio.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/hio.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/lfo.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/lfo.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/list.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/load.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/load_helpers.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/md5.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/md5.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/mdataio.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/memio.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/memio.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/misc.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/mix_all.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/mixer.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/mixer.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/period.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/period.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/player.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/player.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/precomp_lut.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/read_event.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/scan.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/smix.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/tempfile.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/virtual.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/virtual.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/win32.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/loaders/common.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/loaders/it.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/loaders/it_load.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/loaders/itsex.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/loaders/loader.h"
 			"src/decoding/decoders/libs/libxmp-lite/src/loaders/mod.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/loaders/mod_load.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/loaders/s3m.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/loaders/s3m_load.c"
-			"src/decoding/decoders/libs/libxmp-lite/src/loaders/sample.c"
 			"src/decoding/decoders/libs/libxmp-lite/src/loaders/xm.h"
-			"src/decoding/decoders/libs/libxmp-lite/src/loaders/xm_load.c"
 		)
 
 		target_include_directories(clownaudio PRIVATE "src/decoding/decoders/libs/libxmp-lite/include/libxmp-lite")
@@ -446,6 +439,16 @@ if(CLOWNAUDIO_LIBXMPLITE)
 			target_compile_definitions(clownaudio PRIVATE inline=_inline) # MSVC 6 doesn't have inline
 		endif()
 	endif()
+endif()
+
+
+##########################################################
+# Handle sources that can compile as either C99 or C++98 #
+##########################################################
+
+target_sources(clownaudio PRIVATE ${C_AND_CPP_SOURCES})
+if(CLOWNAUDIO_CPP)
+	set_source_files_properties(${C_AND_CPP_SOURCES} PROPERTIES LANGUAGE CXX)
 endif()
 
 
