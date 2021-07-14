@@ -1,6 +1,6 @@
 /*
 Audio playback and capture library. Choice of public domain or MIT-0. See license statements at the end of this file.
-miniaudio - v0.10.36 - 2021-07-03
+miniaudio - v0.10.38 - 2021-07-14
 
 David Reid - mackron@gmail.com
 
@@ -1498,7 +1498,7 @@ extern "C" {
 
 #define MA_VERSION_MAJOR    0
 #define MA_VERSION_MINOR    10
-#define MA_VERSION_REVISION 36
+#define MA_VERSION_REVISION 38
 #define MA_VERSION_STRING   MA_XSTRINGIFY(MA_VERSION_MAJOR) "." MA_XSTRINGIFY(MA_VERSION_MINOR) "." MA_XSTRINGIFY(MA_VERSION_REVISION)
 
 #if defined(_MSC_VER) && !defined(__clang__)
@@ -2037,8 +2037,6 @@ MA_API const char* ma_version_string(void);
 Logging
 
 **************************************************************************************************************************************************************/
-#ifndef MA_NO_DEVICE_IO
-
 #include <stdarg.h> /* For va_list. */
 
 #if defined(__has_attribute)
@@ -2070,7 +2068,9 @@ typedef struct
     ma_log_callback callbacks[MA_MAX_LOG_CALLBACKS];
     ma_uint32 callbackCount;
     ma_allocation_callbacks allocationCallbacks;    /* Need to store these persistently because ma_log_postv() might need to allocate a buffer on the heap. */
+#ifndef MA_NO_THREADING
     ma_mutex lock;  /* For thread safety just to make it easier and safer for the logging implementation. */
+#endif
 } ma_log;
 
 MA_API ma_result ma_log_init(const ma_allocation_callbacks* pAllocationCallbacks, ma_log* pLog);
@@ -2080,8 +2080,6 @@ MA_API ma_result ma_log_unregister_callback(ma_log* pLog, ma_log_callback callba
 MA_API ma_result ma_log_post(ma_log* pLog, ma_uint32 level, const char* pMessage);
 MA_API ma_result ma_log_postv(ma_log* pLog, ma_uint32 level, const char* pFormat, va_list args);
 MA_API ma_result ma_log_postf(ma_log* pLog, ma_uint32 level, const char* pFormat, ...) MA_ATTRIBUTE_FORMAT(3, 4);
-
-#endif
 
 
 /**************************************************************************************************************************************************************
@@ -2750,6 +2748,20 @@ MA_API void ma_interleave_pcm_frames(ma_format format, ma_uint32 channels, ma_ui
 Channel Maps
 
 ************************************************************************************************************************************************************/
+/*
+This is used in the shuffle table to indicate that the channel index is undefined and should be ignored.
+*/
+#define MA_CHANNEL_INDEX_NULL   255
+
+/* Retrieves the channel position of the specified channel based on miniaudio's default channel map. */
+MA_API ma_channel ma_channel_map_get_default_channel(ma_uint32 channelCount, ma_uint32 channelIndex);
+
+/*
+Retrieves the channel position of the specified channel in the given channel map.
+
+The pChannelMap parameter can be null, in which case miniaudio's default channel map will be assumed.
+*/
+MA_API ma_channel ma_channel_map_get_channel(const ma_channel* pChannelMap, ma_uint32 channelCount, ma_uint32 channelIndex);
 
 /*
 Initializes a blank channel map.
@@ -3850,6 +3862,8 @@ struct ma_context
             ma_proc pa_stream_get_device_name;
             ma_proc pa_stream_set_write_callback;
             ma_proc pa_stream_set_read_callback;
+            ma_proc pa_stream_set_suspended_callback;
+            ma_proc pa_stream_is_suspended;
             ma_proc pa_stream_flush;
             ma_proc pa_stream_drain;
             ma_proc pa_stream_is_corked;
@@ -7294,6 +7308,8 @@ Standard Library Stuff
 #define ma_abs(x)                   (((x) > 0) ? (x) : -(x))
 #define ma_clamp(x, lo, hi)         (ma_max(lo, ma_min(x, hi)))
 #define ma_offset_ptr(p, offset)    (((ma_uint8*)(p)) + (offset))
+#define ma_align(x, a)              ((x + (a-1)) & ~(a-1))
+#define ma_align_64(x)              ma_align(x, 8)
 
 #define ma_buffer_frame_capacity(buffer, channels, format) (sizeof(buffer) / ma_get_bytes_per_sample(format) / (channels))
 
@@ -8463,10 +8479,6 @@ static ma_result ma_allocation_callbacks_init_copy(ma_allocation_callbacks* pDst
 Logging
 
 **************************************************************************************************************************************************************/
-#ifndef MA_NO_DEVICE_IO
-
-#if defined(MA_DEBUG_OUTPUT)
-
 MA_API const char* ma_log_level_to_string(ma_uint32 logLevel)
 {
     switch (logLevel)
@@ -8478,6 +8490,8 @@ MA_API const char* ma_log_level_to_string(ma_uint32 logLevel)
         default:                   return "ERROR";
     }
 }
+
+#if defined(MA_DEBUG_OUTPUT)
 
 /* Customize this to use a specific tag in __android_log_print() for debug output messages. */
 #ifndef MA_ANDROID_LOG_TAG
@@ -8517,8 +8531,6 @@ MA_API ma_log_callback ma_log_callback_init(ma_log_callback_proc onLog, void* pU
 
 MA_API ma_result ma_log_init(const ma_allocation_callbacks* pAllocationCallbacks, ma_log* pLog)
 {
-    ma_result result;
-
     if (pLog == NULL) {
         return MA_INVALID_ARGS;
     }
@@ -8527,10 +8539,14 @@ MA_API ma_result ma_log_init(const ma_allocation_callbacks* pAllocationCallbacks
     ma_allocation_callbacks_init_copy(&pLog->allocationCallbacks, pAllocationCallbacks);
 
     /* We need a mutex for thread safety. */
-    result = ma_mutex_init(&pLog->lock);
-    if (result != MA_SUCCESS) {
-        return result;
+    #ifndef MA_NO_THREADING
+    {
+        ma_result result = ma_mutex_init(&pLog->lock);
+        if (result != MA_SUCCESS) {
+            return result;
+        }
     }
+    #endif
     
     /* If we're using debug output, enable it. */
     #if defined(MA_DEBUG_OUTPUT)
@@ -8548,7 +8564,27 @@ MA_API void ma_log_uninit(ma_log* pLog)
         return;
     }
 
+#ifndef MA_NO_THREADING
     ma_mutex_uninit(&pLog->lock);
+#endif
+}
+
+static void ma_log_lock(ma_log* pLog)
+{
+#ifndef MA_NO_THREADING
+    ma_mutex_lock(&pLog->lock);
+#else
+    (void)pLog;
+#endif
+}
+
+static void ma_log_unlock(ma_log* pLog)
+{
+#ifndef MA_NO_THREADING
+    ma_mutex_unlock(&pLog->lock);
+#else
+    (void)pLog;
+#endif
 }
 
 MA_API ma_result ma_log_register_callback(ma_log* pLog, ma_log_callback callback)
@@ -8559,7 +8595,7 @@ MA_API ma_result ma_log_register_callback(ma_log* pLog, ma_log_callback callback
         return MA_INVALID_ARGS;
     }
 
-    ma_mutex_lock(&pLog->lock);
+    ma_log_lock(pLog);
     {
         if (pLog->callbackCount == ma_countof(pLog->callbacks)) {
             result = MA_OUT_OF_MEMORY;  /* Reached the maximum allowed log callbacks. */
@@ -8568,7 +8604,7 @@ MA_API ma_result ma_log_register_callback(ma_log* pLog, ma_log_callback callback
             pLog->callbackCount += 1;
         }
     }
-    ma_mutex_unlock(&pLog->lock);
+    ma_log_unlock(pLog);
 
     return result;
 }
@@ -8579,7 +8615,7 @@ MA_API ma_result ma_log_unregister_callback(ma_log* pLog, ma_log_callback callba
         return MA_INVALID_ARGS;
     }
 
-    ma_mutex_lock(&pLog->lock);
+    ma_log_lock(pLog);
     {
         ma_uint32 iLog;
         for (iLog = 0; iLog < pLog->callbackCount; ) {
@@ -8597,7 +8633,7 @@ MA_API ma_result ma_log_unregister_callback(ma_log* pLog, ma_log_callback callba
             }
         }
     }
-    ma_mutex_unlock(&pLog->lock);
+    ma_log_unlock(pLog);
 
     return MA_SUCCESS;
 }
@@ -8617,7 +8653,7 @@ MA_API ma_result ma_log_post(ma_log* pLog, ma_uint32 level, const char* pMessage
     }
     #endif
 
-    ma_mutex_lock(&pLog->lock);
+    ma_log_lock(pLog);
     {
         ma_uint32 iLog;
         for (iLog = 0; iLog < pLog->callbackCount; iLog += 1) {
@@ -8626,7 +8662,7 @@ MA_API ma_result ma_log_post(ma_log* pLog, ma_uint32 level, const char* pMessage
             }
         }
     }
-    ma_mutex_unlock(&pLog->lock);
+    ma_log_unlock(pLog);
 
     return MA_SUCCESS;
 }
@@ -8739,7 +8775,9 @@ MA_API ma_result ma_log_postv(ma_log* pLog, ma_uint32 level, const char* pFormat
         */
         #if defined(_MSC_VER) && _MSC_VER >= 1200   /* 1200 = VC6 */
         {
+            ma_result result;
             int formattedLen;
+            char* pFormattedMessage = NULL;
             va_list args2;
 
             #if _MSC_VER >= 1800
@@ -8759,14 +8797,10 @@ MA_API ma_result ma_log_postv(ma_log* pLog, ma_uint32 level, const char* pFormat
                 return MA_INVALID_OPERATION;
             }
 
-            char* pFormattedMessage = NULL;
-
             pFormattedMessage = (char*)ma_malloc(formattedLen + 1, &pLog->allocationCallbacks);
             if (pFormattedMessage == NULL) {
                 return MA_OUT_OF_MEMORY;
             }
-
-            ma_result result;
 
             /* We'll get errors on newer versions of Visual Studio if we try to use vsprintf().  */
             #if _MSC_VER >= 1400    /* 1400 = Visual Studio 2005 */
@@ -8826,8 +8860,6 @@ MA_API ma_result ma_log_postf(ma_log* pLog, ma_uint32 level, const char* pFormat
 
     return result;
 }
-
-#endif
 
 
 
@@ -21707,6 +21739,7 @@ to check for type safety. We cannot do this when linking at run time because the
 #define MA_PA_ERR_ACCESS                               PA_ERR_ACCESS
 #define MA_PA_ERR_INVALID                              PA_ERR_INVALID
 #define MA_PA_ERR_NOENTITY                             PA_ERR_NOENTITY
+#define MA_PA_ERR_NOTSUPPORTED                         PA_ERR_NOTSUPPORTED
 
 #define MA_PA_CHANNELS_MAX                             PA_CHANNELS_MAX
 #define MA_PA_RATE_MAX                                 PA_RATE_MAX
@@ -21902,12 +21935,14 @@ typedef pa_sink_info_cb_t       ma_pa_sink_info_cb_t;
 typedef pa_source_info_cb_t     ma_pa_source_info_cb_t;
 typedef pa_stream_success_cb_t  ma_pa_stream_success_cb_t;
 typedef pa_stream_request_cb_t  ma_pa_stream_request_cb_t;
+typedef pa_stream_notify_cb_t   ma_pa_stream_notify_cb_t;
 typedef pa_free_cb_t            ma_pa_free_cb_t;
 #else
 #define MA_PA_OK                                       0
 #define MA_PA_ERR_ACCESS                               1
 #define MA_PA_ERR_INVALID                              2
 #define MA_PA_ERR_NOENTITY                             5
+#define MA_PA_ERR_NOTSUPPORTED                         19
 
 #define MA_PA_CHANNELS_MAX                             32
 #define MA_PA_RATE_MAX                                 384000
@@ -22181,6 +22216,7 @@ typedef void (* ma_pa_sink_info_cb_t)     (ma_pa_context* c, const ma_pa_sink_in
 typedef void (* ma_pa_source_info_cb_t)   (ma_pa_context* c, const ma_pa_source_info* i, int eol, void* userdata);
 typedef void (* ma_pa_stream_success_cb_t)(ma_pa_stream* s, int success, void* userdata);
 typedef void (* ma_pa_stream_request_cb_t)(ma_pa_stream* s, size_t nbytes, void* userdata);
+typedef void (* ma_pa_stream_notify_cb_t) (ma_pa_stream* s, void* userdata);
 typedef void (* ma_pa_free_cb_t)          (void* p);
 #endif
 
@@ -22232,6 +22268,8 @@ typedef ma_pa_operation*         (* ma_pa_stream_set_buffer_attr_proc)         (
 typedef const char*              (* ma_pa_stream_get_device_name_proc)         (ma_pa_stream* s);
 typedef void                     (* ma_pa_stream_set_write_callback_proc)      (ma_pa_stream* s, ma_pa_stream_request_cb_t cb, void* userdata);
 typedef void                     (* ma_pa_stream_set_read_callback_proc)       (ma_pa_stream* s, ma_pa_stream_request_cb_t cb, void* userdata);
+typedef void                     (* ma_pa_stream_set_suspended_callback_proc)  (ma_pa_stream* s, ma_pa_stream_notify_cb_t cb, void* userdata);
+typedef int                      (* ma_pa_stream_is_suspended_proc)            (const ma_pa_stream* s);
 typedef ma_pa_operation*         (* ma_pa_stream_flush_proc)                   (ma_pa_stream* s, ma_pa_stream_success_cb_t cb, void* userdata);
 typedef ma_pa_operation*         (* ma_pa_stream_drain_proc)                   (ma_pa_stream* s, ma_pa_stream_success_cb_t cb, void* userdata);
 typedef int                      (* ma_pa_stream_is_corked_proc)               (ma_pa_stream* s);
@@ -23104,6 +23142,36 @@ static void ma_device_on_write__pulse(ma_pa_stream* pStream, size_t byteCount, v
     }
 }
 
+static void ma_device_on_suspended__pulse(ma_pa_stream* pStream, void* pUserData)
+{
+    ma_device* pDevice = (ma_device*)pUserData;
+    int suspended;
+
+    (void)pStream;
+
+    suspended = ((ma_pa_stream_is_suspended_proc)pDevice->pContext->pulse.pa_stream_is_suspended)(pStream);
+    ma_log_postf(ma_device_get_log(pDevice), MA_LOG_LEVEL_DEBUG, "[Pulse] Device suspended state changed. pa_stream_is_suspended() returned %d.\n", suspended);
+
+    if (suspended < 0) {
+        return;
+    }
+
+    if (suspended == 1) {
+        ma_log_post(ma_device_get_log(pDevice), MA_LOG_LEVEL_DEBUG, "[Pulse] Device suspended state changed. Suspended.\n");
+        
+        /* Locking this behind MA_DEBUG_OUTPUT for the moment while this is still in an experimental state. */
+        #if defined(MA_DEBUG_OUTPUT)
+        {
+            if (pDevice->onStop) {
+                pDevice->onStop(pDevice);
+            }
+        }
+        #endif
+    } else {
+        ma_log_post(ma_device_get_log(pDevice), MA_LOG_LEVEL_DEBUG, "[Pulse] Device suspended state changed. Resumed.\n");
+    }   
+}
+
 static ma_result ma_device_init__pulse(ma_device* pDevice, const ma_device_config* pConfig, ma_device_descriptor* pDescriptorPlayback, ma_device_descriptor* pDescriptorCapture)
 {
     /*
@@ -23322,6 +23390,9 @@ static ma_result ma_device_init__pulse(ma_device* pDevice, const ma_device_confi
         device state of MA_STATE_UNINITIALIZED.
         */
         ((ma_pa_stream_set_write_callback_proc)pDevice->pContext->pulse.pa_stream_set_write_callback)((ma_pa_stream*)pDevice->pulse.pStreamPlayback, ma_device_on_write__pulse, pDevice);
+
+        /* State callback for checking when the device has been corked. */
+        ((ma_pa_stream_set_suspended_callback_proc)pDevice->pContext->pulse.pa_stream_set_suspended_callback)((ma_pa_stream*)pDevice->pulse.pStreamPlayback, ma_device_on_suspended__pulse, pDevice);
 
 
         /* Connect after we've got all of our internal state set up. */
@@ -23643,6 +23714,8 @@ static ma_result ma_context_init__pulse(ma_context* pContext, const ma_context_c
     pContext->pulse.pa_stream_get_device_name          = (ma_proc)ma_dlsym(pContext, pContext->pulse.pulseSO, "pa_stream_get_device_name");
     pContext->pulse.pa_stream_set_write_callback       = (ma_proc)ma_dlsym(pContext, pContext->pulse.pulseSO, "pa_stream_set_write_callback");
     pContext->pulse.pa_stream_set_read_callback        = (ma_proc)ma_dlsym(pContext, pContext->pulse.pulseSO, "pa_stream_set_read_callback");
+    pContext->pulse.pa_stream_set_suspended_callback   = (ma_proc)ma_dlsym(pContext, pContext->pulse.pulseSO, "pa_stream_set_suspended_callback");
+    pContext->pulse.pa_stream_is_suspended             = (ma_proc)ma_dlsym(pContext, pContext->pulse.pulseSO, "pa_stream_is_suspended");
     pContext->pulse.pa_stream_flush                    = (ma_proc)ma_dlsym(pContext, pContext->pulse.pulseSO, "pa_stream_flush");
     pContext->pulse.pa_stream_drain                    = (ma_proc)ma_dlsym(pContext, pContext->pulse.pulseSO, "pa_stream_drain");
     pContext->pulse.pa_stream_is_corked                = (ma_proc)ma_dlsym(pContext, pContext->pulse.pulseSO, "pa_stream_is_corked");
@@ -23703,6 +23776,8 @@ static ma_result ma_context_init__pulse(ma_context* pContext, const ma_context_c
     ma_pa_stream_get_device_name_proc          _pa_stream_get_device_name         = pa_stream_get_device_name;
     ma_pa_stream_set_write_callback_proc       _pa_stream_set_write_callback      = pa_stream_set_write_callback;
     ma_pa_stream_set_read_callback_proc        _pa_stream_set_read_callback       = pa_stream_set_read_callback;
+    ma_pa_stream_set_suspended_callback_proc   _pa_stream_set_suspended_callback  = pa_stream_set_suspended_callback;
+    ma_pa_stream_is_suspended_proc             _pa_stream_is_suspended            = pa_stream_is_suspended;
     ma_pa_stream_flush_proc                    _pa_stream_flush                   = pa_stream_flush;
     ma_pa_stream_drain_proc                    _pa_stream_drain                   = pa_stream_drain;
     ma_pa_stream_is_corked_proc                _pa_stream_is_corked               = pa_stream_is_corked;
@@ -23762,6 +23837,8 @@ static ma_result ma_context_init__pulse(ma_context* pContext, const ma_context_c
     pContext->pulse.pa_stream_get_device_name          = (ma_proc)_pa_stream_get_device_name;
     pContext->pulse.pa_stream_set_write_callback       = (ma_proc)_pa_stream_set_write_callback;
     pContext->pulse.pa_stream_set_read_callback        = (ma_proc)_pa_stream_set_read_callback;
+    pContext->pulse.pa_stream_set_suspended_callback   = (ma_proc)_pa_stream_set_suspended_callback;
+    pContext->pulse.pa_stream_is_suspended             = (ma_proc)_pa_stream_is_suspended;
     pContext->pulse.pa_stream_flush                    = (ma_proc)_pa_stream_flush;
     pContext->pulse.pa_stream_drain                    = (ma_proc)_pa_stream_drain;
     pContext->pulse.pa_stream_is_corked                = (ma_proc)_pa_stream_is_corked;
@@ -31398,8 +31475,11 @@ static ma_result ma_device_init__opensl(ma_device* pDevice, const ma_device_conf
     SLDataLocator_AndroidSimpleBufferQueue queue;
     SLresult resultSL;
     size_t bufferSizeInBytes;
-    SLInterfaceID itfIDs1[1];
-    const SLboolean itfIDsRequired1[] = {SL_BOOLEAN_TRUE};
+    SLInterfaceID itfIDs[2];
+    const SLboolean itfIDsRequired[] = {
+        SL_BOOLEAN_TRUE,    /* SL_IID_ANDROIDSIMPLEBUFFERQUEUE */
+        SL_BOOLEAN_FALSE    /* SL_IID_ANDROIDCONFIGURATION */
+    };
 #endif
 
     MA_ASSERT(g_maOpenSLInitCounter > 0); /* <-- If you trigger this it means you've either not initialized the context, or you've uninitialized it and then attempted to initialize a new device. */
@@ -31417,7 +31497,8 @@ static ma_result ma_device_init__opensl(ma_device* pDevice, const ma_device_conf
     queues).
     */
 #ifdef MA_ANDROID
-    itfIDs1[0] = (SLInterfaceID)pDevice->pContext->opensl.SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
+    itfIDs[0] = (SLInterfaceID)pDevice->pContext->opensl.SL_IID_ANDROIDSIMPLEBUFFERQUEUE;
+    itfIDs[1] = (SLInterfaceID)pDevice->pContext->opensl.SL_IID_ANDROIDCONFIGURATION;
 
     /* No exclusive mode with OpenSL|ES. */
     if (((pConfig->deviceType == ma_device_type_playback || pConfig->deviceType == ma_device_type_duplex) && pDescriptorPlayback->shareMode == ma_share_mode_exclusive) ||
@@ -31453,7 +31534,7 @@ static ma_result ma_device_init__opensl(ma_device* pDevice, const ma_device_conf
         sink.pLocator = &queue;
         sink.pFormat  = (SLDataFormat_PCM*)&pcm;
 
-        resultSL = (*g_maEngineSL)->CreateAudioRecorder(g_maEngineSL, (SLObjectItf*)&pDevice->opensl.pAudioRecorderObj, &source, &sink, 1, itfIDs1, itfIDsRequired1);
+        resultSL = (*g_maEngineSL)->CreateAudioRecorder(g_maEngineSL, (SLObjectItf*)&pDevice->opensl.pAudioRecorderObj, &source, &sink, ma_countof(itfIDs), itfIDs, itfIDsRequired);
         if (resultSL == SL_RESULT_CONTENT_UNSUPPORTED) {
             /* Unsupported format. Fall back to something safer and try again. If this fails, just abort. */
             pcm.formatType    = SL_DATAFORMAT_PCM;
@@ -31462,7 +31543,7 @@ static ma_result ma_device_init__opensl(ma_device* pDevice, const ma_device_conf
             pcm.bitsPerSample = 16;
             pcm.containerSize = pcm.bitsPerSample;  /* Always tightly packed for now. */
             pcm.channelMask   = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
-            resultSL = (*g_maEngineSL)->CreateAudioRecorder(g_maEngineSL, (SLObjectItf*)&pDevice->opensl.pAudioRecorderObj, &source, &sink, 1, itfIDs1, itfIDsRequired1);
+            resultSL = (*g_maEngineSL)->CreateAudioRecorder(g_maEngineSL, (SLObjectItf*)&pDevice->opensl.pAudioRecorderObj, &source, &sink, ma_countof(itfIDs), itfIDs, itfIDsRequired);
         }
 
         if (resultSL != SL_RESULT_SUCCESS) {
@@ -31567,7 +31648,7 @@ static ma_result ma_device_init__opensl(ma_device* pDevice, const ma_device_conf
         sink.pLocator = &outmixLocator;
         sink.pFormat  = NULL;
 
-        resultSL = (*g_maEngineSL)->CreateAudioPlayer(g_maEngineSL, (SLObjectItf*)&pDevice->opensl.pAudioPlayerObj, &source, &sink, 1, itfIDs1, itfIDsRequired1);
+        resultSL = (*g_maEngineSL)->CreateAudioPlayer(g_maEngineSL, (SLObjectItf*)&pDevice->opensl.pAudioPlayerObj, &source, &sink, ma_countof(itfIDs), itfIDs, itfIDsRequired);
         if (resultSL == SL_RESULT_CONTENT_UNSUPPORTED) {
             /* Unsupported format. Fall back to something safer and try again. If this fails, just abort. */
             pcm.formatType = SL_DATAFORMAT_PCM;
@@ -31576,7 +31657,7 @@ static ma_result ma_device_init__opensl(ma_device* pDevice, const ma_device_conf
             pcm.bitsPerSample = 16;
             pcm.containerSize = pcm.bitsPerSample;  /* Always tightly packed for now. */
             pcm.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT;
-            resultSL = (*g_maEngineSL)->CreateAudioPlayer(g_maEngineSL, (SLObjectItf*)&pDevice->opensl.pAudioPlayerObj, &source, &sink, 1, itfIDs1, itfIDsRequired1);
+            resultSL = (*g_maEngineSL)->CreateAudioPlayer(g_maEngineSL, (SLObjectItf*)&pDevice->opensl.pAudioPlayerObj, &source, &sink, ma_countof(itfIDs), itfIDs, itfIDsRequired);
         }
 
         if (resultSL != SL_RESULT_SUCCESS) {
@@ -40202,6 +40283,10 @@ static ma_bool32 ma_is_spatial_channel_position(ma_channel channelPosition)
         return MA_FALSE;
     }
 
+    if (channelPosition >= MA_CHANNEL_AUX_0 && channelPosition <= MA_CHANNEL_AUX_31) {
+        return MA_FALSE;
+    }
+
     for (i = 0; i < 6; ++i) {   /* Each side of a cube. */
         if (g_maChannelPlaneRatios[channelPosition][i] != 0) {
             return MA_TRUE;
@@ -41869,6 +41954,134 @@ MA_API ma_uint64 ma_data_converter_get_output_latency(const ma_data_converter* p
 Channel Maps
 
 **************************************************************************************************************************************************************/
+MA_API ma_channel ma_channel_map_get_default_channel(ma_uint32 channelCount, ma_uint32 channelIndex)
+{
+    if (channelCount == 0 || channelIndex >= channelCount) {
+        return MA_CHANNEL_NONE;
+    }
+
+    /* This is the Microsoft channel map. Based off the speaker configurations mentioned here: https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/content/ksmedia/ns-ksmedia-ksaudio_channel_config */
+    switch (channelCount)
+    {
+        case 0: return MA_CHANNEL_NONE; 
+
+        case 1:
+        {
+            return MA_CHANNEL_MONO;
+        } break;
+
+        case 2:
+        {
+            switch (channelIndex) {
+                case 0: return MA_CHANNEL_FRONT_LEFT;
+                case 1: return MA_CHANNEL_FRONT_RIGHT;
+            }
+        } break;
+
+        case 3: /* No defined, but best guess. */
+        {
+            switch (channelIndex) {
+                case 0: return MA_CHANNEL_FRONT_LEFT;
+                case 1: return MA_CHANNEL_FRONT_RIGHT;
+                case 2: return MA_CHANNEL_FRONT_CENTER;
+            }
+        } break;
+
+        case 4:
+        {
+            switch (channelIndex) {
+            #ifndef MA_USE_QUAD_MICROSOFT_CHANNEL_MAP
+                /* Surround. Using the Surround profile has the advantage of the 3rd channel (MA_CHANNEL_FRONT_CENTER) mapping nicely with higher channel counts. */
+                case 0: return MA_CHANNEL_FRONT_LEFT;
+                case 1: return MA_CHANNEL_FRONT_RIGHT;
+                case 2: return MA_CHANNEL_FRONT_CENTER;
+                case 3: return MA_CHANNEL_BACK_CENTER;
+            #else
+                /* Quad. */
+                case 0: return MA_CHANNEL_FRONT_LEFT;
+                case 1: return MA_CHANNEL_FRONT_RIGHT;
+                case 2: return MA_CHANNEL_BACK_LEFT;
+                case 3: return MA_CHANNEL_BACK_RIGHT;
+            #endif
+            }
+        } break;
+
+        case 5: /* Not defined, but best guess. */
+        {
+            switch (channelIndex) {
+                case 0: return MA_CHANNEL_FRONT_LEFT;
+                case 1: return MA_CHANNEL_FRONT_RIGHT;
+                case 2: return MA_CHANNEL_FRONT_CENTER;
+                case 3: return MA_CHANNEL_BACK_LEFT;
+                case 4: return MA_CHANNEL_BACK_RIGHT;
+            }
+        } break;
+
+        case 6:
+        {
+            switch (channelIndex) {
+                case 0: return MA_CHANNEL_FRONT_LEFT;
+                case 1: return MA_CHANNEL_FRONT_RIGHT;
+                case 2: return MA_CHANNEL_FRONT_CENTER;
+                case 3: return MA_CHANNEL_LFE;
+                case 4: return MA_CHANNEL_SIDE_LEFT;
+                case 5: return MA_CHANNEL_SIDE_RIGHT;
+            }
+        } break;
+
+        case 7: /* Not defined, but best guess. */
+        {
+            switch (channelIndex) {
+                case 0: return MA_CHANNEL_FRONT_LEFT;
+                case 1: return MA_CHANNEL_FRONT_RIGHT;
+                case 2: return MA_CHANNEL_FRONT_CENTER;
+                case 3: return MA_CHANNEL_LFE;
+                case 4: return MA_CHANNEL_BACK_CENTER;
+                case 5: return MA_CHANNEL_SIDE_LEFT;
+                case 6: return MA_CHANNEL_SIDE_RIGHT;
+            }
+        } break;
+
+        case 8:
+        default:
+        {
+            switch (channelIndex) {
+                case 0: return MA_CHANNEL_FRONT_LEFT;
+                case 1: return MA_CHANNEL_FRONT_RIGHT;
+                case 2: return MA_CHANNEL_FRONT_CENTER;
+                case 3: return MA_CHANNEL_LFE;
+                case 4: return MA_CHANNEL_BACK_LEFT;
+                case 5: return MA_CHANNEL_BACK_RIGHT;
+                case 6: return MA_CHANNEL_SIDE_LEFT;
+                case 7: return MA_CHANNEL_SIDE_RIGHT;
+            }
+        } break;
+    }
+
+    if (channelCount > 8) {
+        if (channelIndex < 32) {    /* We have 32 AUX channels. */
+            return (ma_channel)(MA_CHANNEL_AUX_0 + (channelIndex - 8));
+        }
+    }
+
+    /* Getting here means we don't know how to map the channel position so just return MA_CHANNEL_NONE. */
+    return MA_CHANNEL_NONE;
+}
+
+MA_API ma_channel ma_channel_map_get_channel(const ma_channel* pChannelMap, ma_uint32 channelCount, ma_uint32 channelIndex)
+{
+    if (pChannelMap == NULL) {
+        return ma_channel_map_get_default_channel(channelCount, channelIndex);
+    } else {
+        if (channelIndex >= channelCount) {
+            return MA_CHANNEL_NONE;
+        }
+
+        return pChannelMap[channelIndex];
+    }
+}
+
+
 MA_API void ma_channel_map_init_blank(ma_uint32 channels, ma_channel* pChannelMap)
 {
     if (pChannelMap == NULL) {
@@ -41986,8 +42199,8 @@ static void ma_get_standard_channel_map_alsa(ma_uint32 channels, ma_channel* pCh
 
         case 2:
         {
-            pChannelMap[0] = MA_CHANNEL_LEFT;
-            pChannelMap[1] = MA_CHANNEL_RIGHT;
+            pChannelMap[0] = MA_CHANNEL_FRONT_LEFT;
+            pChannelMap[1] = MA_CHANNEL_FRONT_RIGHT;
         } break;
 
         case 3:
@@ -42073,8 +42286,8 @@ static void ma_get_standard_channel_map_rfc3551(ma_uint32 channels, ma_channel* 
 
         case 2:
         {
-            pChannelMap[0] = MA_CHANNEL_LEFT;
-            pChannelMap[1] = MA_CHANNEL_RIGHT;
+            pChannelMap[0] = MA_CHANNEL_FRONT_LEFT;
+            pChannelMap[1] = MA_CHANNEL_FRONT_RIGHT;
         } break;
 
         case 3:
@@ -42136,8 +42349,8 @@ static void ma_get_standard_channel_map_flac(ma_uint32 channels, ma_channel* pCh
 
         case 2:
         {
-            pChannelMap[0] = MA_CHANNEL_LEFT;
-            pChannelMap[1] = MA_CHANNEL_RIGHT;
+            pChannelMap[0] = MA_CHANNEL_FRONT_LEFT;
+            pChannelMap[1] = MA_CHANNEL_FRONT_RIGHT;
         } break;
 
         case 3:
@@ -42224,8 +42437,8 @@ static void ma_get_standard_channel_map_vorbis(ma_uint32 channels, ma_channel* p
 
         case 2:
         {
-            pChannelMap[0] = MA_CHANNEL_LEFT;
-            pChannelMap[1] = MA_CHANNEL_RIGHT;
+            pChannelMap[0] = MA_CHANNEL_FRONT_LEFT;
+            pChannelMap[1] = MA_CHANNEL_FRONT_RIGHT;
         } break;
 
         case 3:
@@ -42311,8 +42524,8 @@ static void ma_get_standard_channel_map_sound4(ma_uint32 channels, ma_channel* p
 
         case 2:
         {
-            pChannelMap[0] = MA_CHANNEL_LEFT;
-            pChannelMap[1] = MA_CHANNEL_RIGHT;
+            pChannelMap[0] = MA_CHANNEL_FRONT_LEFT;
+            pChannelMap[1] = MA_CHANNEL_FRONT_RIGHT;
         } break;
 
         case 3:
@@ -42398,8 +42611,8 @@ static void ma_get_standard_channel_map_sndio(ma_uint32 channels, ma_channel* pC
 
         case 2:
         {
-            pChannelMap[0] = MA_CHANNEL_LEFT;
-            pChannelMap[1] = MA_CHANNEL_RIGHT;
+            pChannelMap[0] = MA_CHANNEL_FRONT_LEFT;
+            pChannelMap[1] = MA_CHANNEL_FRONT_RIGHT;
         } break;
 
         case 3:
@@ -42547,7 +42760,7 @@ MA_API ma_bool32 ma_channel_map_equal(ma_uint32 channels, const ma_channel* pCha
     }
 
     for (iChannel = 0; iChannel < channels; ++iChannel) {
-        if (pChannelMapA[iChannel] != pChannelMapB[iChannel]) {
+        if (ma_channel_map_get_channel(pChannelMapA, channels, iChannel) != ma_channel_map_get_channel(pChannelMapB, channels, iChannel)) {
             return MA_FALSE;
         }
     }
@@ -42558,6 +42771,11 @@ MA_API ma_bool32 ma_channel_map_equal(ma_uint32 channels, const ma_channel* pCha
 MA_API ma_bool32 ma_channel_map_blank(ma_uint32 channels, const ma_channel* pChannelMap)
 {
     ma_uint32 iChannel;
+
+    /* A null channel map is equivalent to the default channel map. */
+    if (pChannelMap == NULL) {
+        return MA_FALSE;
+    }
 
     for (iChannel = 0; iChannel < channels; ++iChannel) {
         if (pChannelMap[iChannel] != MA_CHANNEL_NONE) {
@@ -42573,7 +42791,7 @@ MA_API ma_bool32 ma_channel_map_contains_channel_position(ma_uint32 channels, co
     ma_uint32 iChannel;
 
     for (iChannel = 0; iChannel < channels; ++iChannel) {
-        if (pChannelMap[iChannel] == channelPosition) {
+        if (ma_channel_map_get_channel(pChannelMap, channels, iChannel) == channelPosition) {
             return MA_TRUE;
         }
     }
@@ -50120,6 +50338,14 @@ static ma_result ma_decoder_init__internal(ma_decoder_read_proc onRead, ma_decod
             }
         }
 
+        /*
+        If we get to this point and we still haven't found a decoder, and the caller has requested a
+        specific encoding format, there's no hope for it. Abort.
+        */
+        if (pConfig->encodingFormat != ma_encoding_format_unknown) {
+            return MA_NO_BACKEND;
+        }
+
     #ifdef MA_HAS_WAV
         if (result != MA_SUCCESS) {
             result = ma_decoder_init_wav__internal(pConfig, pDecoder);
@@ -50637,6 +50863,26 @@ MA_API ma_result ma_decoder_init_vfs(ma_vfs* pVFS, const char* pFilePath, const 
 
     if (result != MA_SUCCESS) {
         /* Getting here means we weren't able to initialize a decoder of a specific encoding format. */
+
+        /*
+        We use trial and error to open a decoder. We prioritize custom decoders so that if they
+        implement the same encoding format they take priority over the built-in decoders.
+        */
+        if (result != MA_SUCCESS) {
+            result = ma_decoder_init_custom__internal(&config, pDecoder);
+            if (result != MA_SUCCESS) {
+                ma_decoder__on_seek_vfs(pDecoder, 0, ma_seek_origin_start);
+            }
+        }
+
+        /*
+        If we get to this point and we still haven't found a decoder, and the caller has requested a
+        specific encoding format, there's no hope for it. Abort.
+        */
+        if (config.encodingFormat != ma_encoding_format_unknown) {
+            return MA_NO_BACKEND;
+        }
+
     #ifdef MA_HAS_WAV
         if (result != MA_SUCCESS && ma_path_extension_equal(pFilePath, "wav")) {
             result = ma_decoder_init_wav__internal(&config, pDecoder);
@@ -50823,6 +51069,26 @@ MA_API ma_result ma_decoder_init_vfs_w(ma_vfs* pVFS, const wchar_t* pFilePath, c
 
     if (result != MA_SUCCESS) {
         /* Getting here means we weren't able to initialize a decoder of a specific encoding format. */
+
+        /*
+        We use trial and error to open a decoder. We prioritize custom decoders so that if they
+        implement the same encoding format they take priority over the built-in decoders.
+        */
+        if (result != MA_SUCCESS) {
+            result = ma_decoder_init_custom__internal(&config, pDecoder);
+            if (result != MA_SUCCESS) {
+                ma_decoder__on_seek_vfs(pDecoder, 0, ma_seek_origin_start);
+            }
+        }
+
+        /*
+        If we get to this point and we still haven't found a decoder, and the caller has requested a
+        specific encoding format, there's no hope for it. Abort.
+        */
+        if (config.encodingFormat != ma_encoding_format_unknown) {
+            return MA_NO_BACKEND;
+        }
+
     #ifdef MA_HAS_WAV
         if (result != MA_SUCCESS && ma_path_extension_equal_w(pFilePath, L"wav")) {
             result = ma_decoder_init_wav__internal(&config, pDecoder);
@@ -69127,6 +69393,16 @@ The following miscellaneous changes have also been made.
 /*
 REVISION HISTORY
 ================
+v0.10.38 - 2021-07-14
+  - Fix a linking error when MA_DEBUG_OUTPUT is not enabled.
+  - Fix an error where ma_log_postv() does not return a value.
+  - OpenSL: Fix a bug with setting of stream types and recording presets.
+
+0.10.37 - 2021-07-06
+  - Fix a bug with log message formatting.
+  - Fix build when compiling with MA_NO_THREADING.
+  - Minor updates to channel mapping.
+
 0.10.36 - 2021-07-03
   - Add support for custom decoding backends.
   - Fix some bugs with the Vorbis decoder.
