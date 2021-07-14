@@ -74,13 +74,13 @@ endif()
 #####################
 
 if(CLOWNAUDIO_LIBVORBIS)
-	target_compile_definitions(clownaudio PRIVATE USE_LIBVORBIS)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBVORBIS)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libvorbis.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/libvorbis.h")
 endif()
 
 if(CLOWNAUDIO_STB_VORBIS)
-	target_compile_definitions(clownaudio PRIVATE USE_STB_VORBIS)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_STB_VORBIS)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/stb_vorbis.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/stb_vorbis.h")
 
@@ -94,25 +94,25 @@ if(CLOWNAUDIO_STB_VORBIS)
 endif()
 
 if(CLOWNAUDIO_DR_MP3)
-	target_compile_definitions(clownaudio PRIVATE USE_DR_MP3)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_DR_MP3)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/dr_mp3.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/dr_mp3.h")
 endif()
 
 if(CLOWNAUDIO_LIBOPUS)
-	target_compile_definitions(clownaudio PRIVATE USE_LIBOPUS)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBOPUS)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libopus.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/libopus.h")
 endif()
 
 if(CLOWNAUDIO_LIBFLAC)
-	target_compile_definitions(clownaudio PRIVATE USE_LIBFLAC)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBFLAC)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libflac.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/libflac.h")
 endif()
 
 if(CLOWNAUDIO_DR_FLAC)
-	target_compile_definitions(clownaudio PRIVATE USE_DR_FLAC)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_DR_FLAC)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/dr_flac.c")
 	target_sources(clownaudio PRIVATE
 		"src/decoding/decoders/dr_flac.h"
@@ -121,7 +121,7 @@ if(CLOWNAUDIO_DR_FLAC)
 endif()
 
 if(CLOWNAUDIO_DR_WAV)
-	target_compile_definitions(clownaudio PRIVATE USE_DR_WAV)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_DR_WAV)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/dr_wav.c")
 	target_sources(clownaudio PRIVATE
 		"src/decoding/decoders/dr_wav.h"
@@ -130,25 +130,25 @@ if(CLOWNAUDIO_DR_WAV)
 endif()
 
 if(CLOWNAUDIO_LIBSNDFILE)
-	target_compile_definitions(clownaudio PRIVATE USE_LIBSNDFILE)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBSNDFILE)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libsndfile.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/libsndfile.h")
 endif()
 
 if(CLOWNAUDIO_LIBOPENMPT)
-	target_compile_definitions(clownaudio PRIVATE USE_LIBOPENMPT)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBOPENMPT)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libopenmpt.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/libopenmpt.h")
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)
-	target_compile_definitions(clownaudio PRIVATE USE_LIBXMPLITE)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBXMPLITE)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libxmp-lite.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/libxmp-lite.h")
 endif()
 
 if(CLOWNAUDIO_PXTONE)
-	target_compile_definitions(clownaudio PRIVATE USE_PXTONE)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_PXTONE)
 	target_sources(clownaudio PRIVATE
 		"src/decoding/decoders/pxtone.cpp"
 		"src/decoding/decoders/pxtone.h"
@@ -200,7 +200,7 @@ if(CLOWNAUDIO_PXTONE)
 endif()
 
 if(CLOWNAUDIO_SNES_SPC)
-	target_compile_definitions(clownaudio PRIVATE USE_SNES_SPC)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_SNES_SPC)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/snes_spc.c")
 	target_sources(clownaudio PRIVATE
 		"src/decoding/decoders/snes_spc.h"

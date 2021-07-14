@@ -27,41 +27,41 @@
 #include "decoders/common.h"
 #include "predecoder.h"
 
-#ifdef USE_LIBVORBIS
+#ifdef CLOWNAUDIO_LIBVORBIS
 #include "decoders/libvorbis.h"
 #endif
-#ifdef USE_STB_VORBIS
+#ifdef CLOWNAUDIO_STB_VORBIS
 #include "decoders/stb_vorbis.h"
 #endif
-#ifdef USE_DR_MP3
+#ifdef CLOWNAUDIO_DR_MP3
 #include "decoders/dr_mp3.h"
 #endif
-#ifdef USE_LIBOPUS
+#ifdef CLOWNAUDIO_LIBOPUS
 #include "decoders/libopus.h"
 #endif
-#ifdef USE_LIBFLAC
+#ifdef CLOWNAUDIO_LIBFLAC
 #include "decoders/libflac.h"
 #endif
-#ifdef USE_DR_FLAC
+#ifdef CLOWNAUDIO_DR_FLAC
 #include "decoders/dr_flac.h"
 #endif
-#ifdef USE_DR_WAV
+#ifdef CLOWNAUDIO_DR_WAV
 #include "decoders/dr_wav.h"
 #endif
-#ifdef USE_LIBSNDFILE
+#ifdef CLOWNAUDIO_LIBSNDFILE
 #include "decoders/libsndfile.h"
 #endif
-#ifdef USE_LIBOPENMPT
+#ifdef CLOWNAUDIO_LIBOPENMPT
 #include "decoders/libopenmpt.h"
 #endif
-#ifdef USE_LIBXMPLITE
+#ifdef CLOWNAUDIO_LIBXMPLITE
 #include "decoders/libxmp-lite.h"
 #endif
-#ifdef USE_PXTONE
+#ifdef CLOWNAUDIO_PXTONE
 #include "decoders/pxtone.h"
 #include "decoders/pxtone_noise.h"
 #endif
-#ifdef USE_SNES_SPC
+#ifdef CLOWNAUDIO_SNES_SPC
 #include "decoders/snes_spc.h"
 #endif
 
@@ -106,43 +106,43 @@ struct DecoderSelectorData
 };
 
 static const DecoderFunctions decoder_function_list[] = {
-#ifdef USE_LIBVORBIS
+#ifdef CLOWNAUDIO_LIBVORBIS
 	DECODER_FUNCTIONS(libVorbis),
 #endif
-#ifdef USE_STB_VORBIS
+#ifdef CLOWNAUDIO_STB_VORBIS
 	DECODER_FUNCTIONS(STB_Vorbis),
 #endif
-#ifdef USE_DR_MP3
+#ifdef CLOWNAUDIO_DR_MP3
 	DECODER_FUNCTIONS(DR_MP3),
 #endif
-#ifdef USE_LIBOPUS
+#ifdef CLOWNAUDIO_LIBOPUS
 	DECODER_FUNCTIONS(libOpus),
 #endif
-#ifdef USE_LIBFLAC
+#ifdef CLOWNAUDIO_LIBFLAC
 	DECODER_FUNCTIONS(libFLAC),
 #endif
-#ifdef USE_DR_FLAC
+#ifdef CLOWNAUDIO_DR_FLAC
 	DECODER_FUNCTIONS(DR_FLAC),
 #endif
-#ifdef USE_DR_WAV
+#ifdef CLOWNAUDIO_DR_WAV
 	DECODER_FUNCTIONS(DR_WAV),
 #endif
-#ifdef USE_LIBSNDFILE
+#ifdef CLOWNAUDIO_LIBSNDFILE
 	DECODER_FUNCTIONS(libSndfile),
 #endif
-#ifdef USE_LIBOPENMPT
+#ifdef CLOWNAUDIO_LIBOPENMPT
 	DECODER_FUNCTIONS(libOpenMPT),
 #endif
-#ifdef USE_LIBXMPLITE
+#ifdef CLOWNAUDIO_LIBXMPLITE
 	DECODER_FUNCTIONS(libXMPLite),
 #endif
-#ifdef USE_PXTONE
+#ifdef CLOWNAUDIO_PXTONE
 	DECODER_FUNCTIONS(PxTone),
 #endif
-#ifdef USE_PXTONE
+#ifdef CLOWNAUDIO_PXTONE
 	DECODER_FUNCTIONS(PxToneNoise),
 #endif
-#ifdef USE_SNES_SPC
+#ifdef CLOWNAUDIO_SNES_SPC
 	DECODER_FUNCTIONS(SNES_SPC),
 #endif
 };
