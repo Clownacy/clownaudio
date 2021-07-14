@@ -1,8 +1,6 @@
 #ifndef LIBXMP_LOADERS_XM_H
 #define LIBXMP_LOADERS_XM_H
 
-#include "../common.h"
-
 #define XM_EVENT_PACKING 0x80
 #define XM_EVENT_PACK_MASK 0x7f
 #define XM_EVENT_NOTE_FOLLOWS 0x01

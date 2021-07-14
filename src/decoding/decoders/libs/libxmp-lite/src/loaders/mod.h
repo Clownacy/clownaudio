@@ -23,8 +23,6 @@
 #ifndef LIBXMP_LOADERS_MOD_H
 #define LIBXMP_LOADERS_MOD_H
 
-#include "../common.h"
-
 struct mod_instrument {
 	uint8 name[22];		/* Instrument name */
 	uint16 size;		/* Sample length in 16-bit words */

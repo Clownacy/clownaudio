@@ -23,8 +23,6 @@
 #ifndef LIBXMP_LOADERS_S3M_H
 #define LIBXMP_LOADERS_S3M_H
 
-#include "../common.h"
-
 /* S3M packed pattern macros */
 #define S3M_EOR		0	/* End of row */
 #define S3M_CH_MASK	0x1f	/* Channel */
