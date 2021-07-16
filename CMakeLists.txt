@@ -21,11 +21,7 @@ endif()
 
 # Figure out if we need a C compiler, a C++ compiler, or both
 if(CLOWNAUDIO_CPP)
-	if(CLOWNAUDIO_LIBXMPLITE)
-		set(LANGUAGES C CXX)
-	else()
-		set(LANGUAGES CXX)
-	endif()
+	set(LANGUAGES CXX)
 else()
 	if(CLOWNAUDIO_PXTONE OR CLOWNAUDIO_SNES_SPC)
 		set(LANGUAGES C CXX)
