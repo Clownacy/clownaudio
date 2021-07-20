@@ -21,7 +21,7 @@ ifneq ($(RELEASE),)
 else
   CFLAGS = -Og -ggdb3
 endif
-ALL_CFLAGS = -std=c99 -MMD -MP -MF $@.d -DCLOWNAUDIO_EXPORT= -DCLOWNAUDIO_NO_EXPORT= -I$(CLOWNAUDIO_DIR)/../include $(CFLAGS)
+ALL_CFLAGS = -std=gnu99 -MMD -MP -MF $@.d -DCLOWNAUDIO_EXPORT= -DCLOWNAUDIO_NO_EXPORT= -I$(CLOWNAUDIO_DIR)/../include $(CFLAGS)
 
 ifneq ($(RELEASE),)
   CXXFLAGS = -O2 -flto
