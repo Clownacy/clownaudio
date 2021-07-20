@@ -11,6 +11,7 @@ option(CLOWNAUDIO_DR_FLAC "Enable the dr_flac decoder backend" ON)
 option(CLOWNAUDIO_DR_WAV "Enable the dr_wav decoder backend" ON)
 option(CLOWNAUDIO_LIBSNDFILE "Enable the libsndfile decoder backend" OFF)
 option(CLOWNAUDIO_LIBOPENMPT "Enable the libopenmpt decoder backend" OFF)
+option(CLOWNAUDIO_LIBXMP "Enable the libxmp decoder backend" OFF)
 option(CLOWNAUDIO_LIBXMPLITE "Enable the libxmp-lite decoder backend" OFF)
 option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
 option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
@@ -137,7 +138,7 @@ if(CLOWNAUDIO_LIBOPENMPT)
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/libopenmpt.h")
 endif()
 
-if(CLOWNAUDIO_LIBXMPLITE)
+if(CLOWNAUDIO_LIBXMP OR CLOWNAUDIO_LIBXMPLITE)
 	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBXMPLITE)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libxmp-lite.c")
 	target_sources(clownaudio PRIVATE "src/decoding/decoders/libxmp-lite.h")
@@ -359,6 +360,240 @@ if(CLOWNAUDIO_LIBOPENMPT)
 	pkg_check_modules(libopenmpt REQUIRED IMPORTED_TARGET libopenmpt)
 	target_link_libraries(clownaudio PRIVATE PkgConfig::libopenmpt)
 	set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} libopenmpt")
+endif()
+
+if(CLOWNAUDIO_LIBXMP)
+	if(PkgConfig_FOUND)
+		pkg_check_modules(libxmp IMPORTED_TARGET libxmp)
+	endif()
+
+	if(libxmp_FOUND)
+		message(STATUS "Using system libxmp")
+		target_link_libraries(clownaudio PRIVATE PkgConfig::libxmp)
+		set(PKG_CONFIG_REQUIRES "${PKG_CONFIG_REQUIRES} libxmp")
+	else()
+		# Compile it ourselves
+		message(STATUS "Using local libxmp")
+		list(APPEND C_AND_CPP_SOURCES
+			"src/decoding/decoders/libs/libxmp/src/control.c"
+			"src/decoding/decoders/libs/libxmp/src/dataio.c"
+			"src/decoding/decoders/libs/libxmp/src/effects.c"
+			"src/decoding/decoders/libs/libxmp/src/extras.c"
+			"src/decoding/decoders/libs/libxmp/src/filter.c"
+			"src/decoding/decoders/libs/libxmp/src/format.c"
+			"src/decoding/decoders/libs/libxmp/src/hio.c"
+			"src/decoding/decoders/libs/libxmp/src/hmn_extras.c"
+			"src/decoding/decoders/libs/libxmp/src/lfo.c"
+			"src/decoding/decoders/libs/libxmp/src/load.c"
+			"src/decoding/decoders/libs/libxmp/src/load_helpers.c"
+			"src/decoding/decoders/libs/libxmp/src/md5.c"
+			"src/decoding/decoders/libs/libxmp/src/med_extras.c"
+			"src/decoding/decoders/libs/libxmp/src/memio.c"
+			"src/decoding/decoders/libs/libxmp/src/misc.c"
+			"src/decoding/decoders/libs/libxmp/src/mix_all.c"
+			"src/decoding/decoders/libs/libxmp/src/mix_paula.c"
+			"src/decoding/decoders/libs/libxmp/src/mixer.c"
+			"src/decoding/decoders/libs/libxmp/src/mkstemp.c"
+			"src/decoding/decoders/libs/libxmp/src/period.c"
+			"src/decoding/decoders/libs/libxmp/src/player.c"
+			"src/decoding/decoders/libs/libxmp/src/read_event.c"
+			"src/decoding/decoders/libs/libxmp/src/scan.c"
+			"src/decoding/decoders/libs/libxmp/src/smix.c"
+			"src/decoding/decoders/libs/libxmp/src/tempfile.c"
+			"src/decoding/decoders/libs/libxmp/src/virtual.c"
+			"src/decoding/decoders/libs/libxmp/src/win32.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/arcfs.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/bunzip2.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/crc32.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/depacker.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/gunzip.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/inflate.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/mmcmp.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/muse.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/oxm.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/ppdepack.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/ptpopen.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/readlzw.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/readrle.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/s404_dec.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/unarc.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/uncompress.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/unlha.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/unlzx.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/unsqsh.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/unxz.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/unzip.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/vorbis.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xfd.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xfd_link.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xfnmatch.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xz_dec_lzma2.c"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xz_dec_stream.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/669_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/abk_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/amf_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/arch_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/asif.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/asylum_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/chip_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/coco_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/common.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/dbm_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/digi_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/dt_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/emod_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/far_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/flt_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/fnk_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/gal4_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/gal5_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/gdm_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/hmn_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/ice_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/iff.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/imf_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/ims_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/it_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/itsex.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/liq_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/masi_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mdl_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/med2_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/med3_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/med4_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mfp_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mgt_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mmd_common.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mmd1_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mmd3_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mod_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mtm_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/no_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/okt_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/psm_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/pt3_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/ptm_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/pw_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/rtm_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/s3m_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/sample.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/sfx_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/st_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/stim_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/stm_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/stx_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/sym_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/ult_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/umx_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/voltable.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/xm_load.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/ac1d.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/di.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/eureka.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/fc-m.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/fuchs.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/fuzzac.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/gmc.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/heatseek.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/hrt.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/ksm.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/mp.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/noiserun.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/novotrade.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/np1.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/np2.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/np3.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/p40.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/p61a.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pha.c"
+#			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pm.c"
+#			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pm01.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pm10c.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pm18a.c"
+#			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pm20.c"
+#			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pm40.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pp10.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pp21.c"
+#			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/pp30.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/prowiz.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/prun1.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/prun2.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/ptktable.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/skyt.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/starpack.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/tdd.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/theplayer.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/titanics.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/tp1.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/tp3.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/tuning.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/unic.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/unic2.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/wn.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/xann.c"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/zen.c"
+		)
+		if(WIN32)
+			list(APPEND C_AND_CPP_SOURCES
+				"src/decoding/decoders/libs/libxmp/src/win32.c"
+			)
+		endif()
+
+		target_sources(clownaudio PRIVATE
+			"src/decoding/decoders/libs/libxmp/include/xmp.h"
+			"src/decoding/decoders/libs/libxmp/src/callbackio.h"
+			"src/decoding/decoders/libs/libxmp/src/common.h"
+			"src/decoding/decoders/libs/libxmp/src/effects.h"
+			"src/decoding/decoders/libs/libxmp/src/extras.h"
+			"src/decoding/decoders/libs/libxmp/src/fmopl.h"
+			"src/decoding/decoders/libs/libxmp/src/format.h"
+			"src/decoding/decoders/libs/libxmp/src/hio.h"
+			"src/decoding/decoders/libs/libxmp/src/hmn_extras.h"
+			"src/decoding/decoders/libs/libxmp/src/lfo.h"
+			"src/decoding/decoders/libs/libxmp/src/list.h"
+			"src/decoding/decoders/libs/libxmp/src/md5.h"
+			"src/decoding/decoders/libs/libxmp/src/mdataio.h"
+			"src/decoding/decoders/libs/libxmp/src/med_extras.h"
+			"src/decoding/decoders/libs/libxmp/src/memio.h"
+			"src/decoding/decoders/libs/libxmp/src/mixer.h"
+			"src/decoding/decoders/libs/libxmp/src/paula.h"
+			"src/decoding/decoders/libs/libxmp/src/period.h"
+			"src/decoding/decoders/libs/libxmp/src/player.h"
+			"src/decoding/decoders/libs/libxmp/src/precomp_blep.h"
+			"src/decoding/decoders/libs/libxmp/src/precomp_lut.h"
+			"src/decoding/decoders/libs/libxmp/src/tempfile.h"
+			"src/decoding/decoders/libs/libxmp/src/virtual.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/crc32.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/depacker.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/inflate.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/ptpopen.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/readhuff.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/readlzw.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/readrle.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/vorbis.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xfnmatch.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xz.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xz_config.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xz_lzma2.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xz_private.h"
+			"src/decoding/decoders/libs/libxmp/src/depackers/xz_stream.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/asif.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/iff.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/it.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/loader.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/med.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/mod.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/s3m.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/xm.h"
+			"src/decoding/decoders/libs/libxmp/src/loaders/prowizard/prowiz.h"
+		)
+
+		target_include_directories(clownaudio PRIVATE "src/decoding/decoders/libs/libxmp/include")
+		target_compile_definitions(clownaudio PRIVATE)
+		if(MSVC)
+			target_compile_definitions(clownaudio PRIVATE inline=_inline PATH_MAX=1024) # MSVC 6 doesn't have inline
+		endif()
+	endif()
 endif()
 
 if(CLOWNAUDIO_LIBXMPLITE)

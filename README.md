@@ -38,7 +38,8 @@ open-source libraries, dubbed 'decoding backends'. These libraries include...
 | dr_wav      | WAV                                                                 | Public-domain/MIT-0               | Yes      |
 | libsndfile  | Various (includes Ogg Vorbis, FLAC, WAV, AIFF, and others)          | LGPL 2.1                          | No       |
 | libopenmpt  | Various (includes .mod, .it, .xm, .s3m, .mptm, and **many** others) | BSD                               | No       |
-| libxmp-lite | .mod, .it, .xm, .s3m                                                | MIT                               | Yes      |
+| libopenmpt  | Various (includes .mod, .it, .xm, .s3m, and **many** others)        | LGPL 2.1                          | Yes      |
+| libxmp      | .mod, .it, .xm, .s3m                                                | MIT                               | Yes      |
 | PxTone      | PxTone Music/PxTone Noise                                           | Custom (appears to be permissive) | Yes      |
 | snes_spc    | SNES SPC                                                            | LGPL 2.1                          | Yes      |
 
