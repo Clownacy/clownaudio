@@ -16,7 +16,7 @@
 //    misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 
-#include "libxmp-lite.h"
+#include "libxmp.h"
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -35,16 +35,16 @@
 #define SAMPLE_RATE 48000
 #define CHANNEL_COUNT 2
 
-typedef struct Decoder_libXMPLite
+typedef struct Decoder_libXMP
 {
 	xmp_context context;
 	bool loop;
 	struct xmp_frame_info frame_info;
 	size_t buffer_done;
 	size_t buffer_size;
-} Decoder_libXMPLite;
+} Decoder_libXMP;
 
-void* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
+void* Decoder_libXMP_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
 	(void)wanted_spec;
 
@@ -56,7 +56,7 @@ void* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, boo
 
 		xmp_start_player(context, sample_rate, 0);
 
-		Decoder_libXMPLite *decoder = (Decoder_libXMPLite*)malloc(sizeof(Decoder_libXMPLite));
+		Decoder_libXMP *decoder = (Decoder_libXMP*)malloc(sizeof(Decoder_libXMP));
 
 		if (decoder != NULL)
 		{
@@ -81,9 +81,9 @@ void* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, boo
 	return NULL;
 }
 
-void Decoder_libXMPLite_Destroy(void *decoder_void)
+void Decoder_libXMP_Destroy(void *decoder_void)
 {
-	Decoder_libXMPLite *decoder = (Decoder_libXMPLite*)decoder_void;
+	Decoder_libXMP *decoder = (Decoder_libXMP*)decoder_void;
 
 	xmp_end_player(decoder->context);
 	xmp_release_module(decoder->context);
@@ -91,9 +91,9 @@ void Decoder_libXMPLite_Destroy(void *decoder_void)
 	free(decoder);
 }
 
-void Decoder_libXMPLite_Rewind(void *decoder_void)
+void Decoder_libXMP_Rewind(void *decoder_void)
 {
-	Decoder_libXMPLite *decoder = (Decoder_libXMPLite*)decoder_void;
+	Decoder_libXMP *decoder = (Decoder_libXMP*)decoder_void;
 
 	xmp_restart_module(decoder->context);
 
@@ -101,9 +101,9 @@ void Decoder_libXMPLite_Rewind(void *decoder_void)
 	decoder->buffer_size = 0;
 }
 
-size_t Decoder_libXMPLite_GetSamples(void *decoder_void, short *buffer, size_t frames_to_do)
+size_t Decoder_libXMP_GetSamples(void *decoder_void, short *buffer, size_t frames_to_do)
 {
-	Decoder_libXMPLite *decoder = (Decoder_libXMPLite*)decoder_void;
+	Decoder_libXMP *decoder = (Decoder_libXMP*)decoder_void;
 
 	size_t frames_done = 0;
 	while (frames_done != frames_to_do)

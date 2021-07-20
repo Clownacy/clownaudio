@@ -54,8 +54,8 @@
 #ifdef CLOWNAUDIO_LIBOPENMPT
 #include "decoders/libopenmpt.h"
 #endif
-#ifdef CLOWNAUDIO_LIBXMPLITE
-#include "decoders/libxmp-lite.h"
+#ifdef CLOWNAUDIO_LIBXMP
+#include "decoders/libxmp.h"
 #endif
 #ifdef CLOWNAUDIO_PXTONE
 #include "decoders/pxtone.h"
@@ -133,8 +133,8 @@ static const DecoderFunctions decoder_function_list[] = {
 #ifdef CLOWNAUDIO_LIBOPENMPT
 	DECODER_FUNCTIONS(libOpenMPT),
 #endif
-#ifdef CLOWNAUDIO_LIBXMPLITE
-	DECODER_FUNCTIONS(libXMPLite),
+#ifdef CLOWNAUDIO_LIBXMP
+	DECODER_FUNCTIONS(libXMP),
 #endif
 #ifdef CLOWNAUDIO_PXTONE
 	DECODER_FUNCTIONS(PxTone),

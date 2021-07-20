@@ -16,8 +16,8 @@
 //    misrepresented as being the original software.
 // 3. This notice may not be removed or altered from any source distribution.
 
-#ifndef DECODER_LIBXMPLITE_H
-#define DECODER_LIBXMPLITE_H
+#ifndef DECODER_LIBXMP_H
+#define DECODER_LIBXMP_H
 
 #ifndef __cplusplus
 #include <stdbool.h>
@@ -26,9 +26,9 @@
 
 #include "common.h"
 
-void* Decoder_libXMPLite_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
-void Decoder_libXMPLite_Destroy(void *decoder);
-void Decoder_libXMPLite_Rewind(void *decoder);
-size_t Decoder_libXMPLite_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
+void* Decoder_libXMP_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec);
+void Decoder_libXMP_Destroy(void *decoder);
+void Decoder_libXMP_Rewind(void *decoder);
+size_t Decoder_libXMP_GetSamples(void *decoder, short *buffer, size_t frames_to_do);
 
-#endif // DECODER_LIBXMPLITE_H
+#endif // DECODER_LIBXMP_H

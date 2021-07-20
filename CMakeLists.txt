@@ -139,9 +139,9 @@ if(CLOWNAUDIO_LIBOPENMPT)
 endif()
 
 if(CLOWNAUDIO_LIBXMP OR CLOWNAUDIO_LIBXMPLITE)
-	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBXMPLITE)
-	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libxmp-lite.c")
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/libxmp-lite.h")
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_LIBXMP)
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/libxmp.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/libxmp.h")
 endif()
 
 if(CLOWNAUDIO_PXTONE)
