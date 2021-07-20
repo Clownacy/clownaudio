@@ -426,12 +426,12 @@ obj/clownaudio/%.cpp.o: $(CLOWNAUDIO_DIR)/%.cpp
 obj/libxmp/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp/%
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -I$(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp/src -DPATH_MAX=1024 $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -DPATH_MAX=1024 $< -o $@ -c
 
 obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -I$(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/src -DLIBXMP_CORE_PLAYER=1 -DLIBXMP_NO_DEPACKERS=1 $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -DLIBXMP_CORE_PLAYER=1 -DLIBXMP_NO_DEPACKERS=1 $< -o $@ -c
 
 obj/pxtone/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/pxtone/%
 	$(info Compiling $<)
