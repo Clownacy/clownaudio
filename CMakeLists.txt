@@ -229,7 +229,7 @@ endif()
 if(NOT CLOWNAUDIO_MIXER_ONLY)
 	if(CLOWNAUDIO_BACKEND STREQUAL "miniaudio")
 		list(APPEND C_AND_CPP_SOURCES "src/playback/miniaudio.c")
-		target_compile_definitions(clownaudio PRIVATE MINIAUDIO_ENABLE_DEVICE_IO)
+		target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_MINIAUDIO_ENABLE_DEVICE_IO)
 
 		include(CheckLibraryExists)
 
@@ -712,7 +712,7 @@ endif()
 set_target_properties(clownaudio PROPERTIES
 	C_STANDARD 99
 	C_EXTENSIONS ON
-	CXX_STANDARD 11
+	CXX_STANDARD 11 # C++11 is required by PxTone
 	CXX_EXTENSIONS ON
 )
 
