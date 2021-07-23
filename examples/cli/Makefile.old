@@ -17,21 +17,21 @@ BACKEND = miniaudio
 CLOWNAUDIO_DIR = ../../src
 
 ifneq ($(RELEASE),)
-  CFLAGS = -O2 -flto
+  CFLAGS = -O2 -DNDEBUG
 else
-  CFLAGS = -Og -ggdb3
+  CFLAGS = -Og -ggdb3 -fsanitize=address
 endif
 ALL_CFLAGS = -std=gnu99 -MMD -MP -MF $@.d -DCLOWNAUDIO_EXPORT= -DCLOWNAUDIO_NO_EXPORT= -I$(CLOWNAUDIO_DIR)/../include $(CFLAGS)
 
 ifneq ($(RELEASE),)
-  CXXFLAGS = -O2 -flto
+  CXXFLAGS = -O2 -DNDEBUG
 else
-  CXXFLAGS = -Og -ggdb3
+  CXXFLAGS = -Og -ggdb3 -fsanitize=address
 endif
 ALL_CXXFLAGS = -std=c++98 -MMD -MP -MF $@.d -DCLOWNAUDIO_EXPORT= -DCLOWNAUDIO_NO_EXPORT= -I$(CLOWNAUDIO_DIR)/../include$(CXXFLAGS)
 
 ifneq ($(RELEASE),)
-  LDFLAGS = -s
+  LDFLAGS =
 else
   LDFLAGS =
 endif
