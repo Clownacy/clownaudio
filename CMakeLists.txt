@@ -423,7 +423,6 @@ if(CLOWNAUDIO_LIBXMP)
 			"src/decoding/decoders/libs/libxmp/src/depackers/unsqsh.c"
 			"src/decoding/decoders/libs/libxmp/src/depackers/unxz.c"
 			"src/decoding/decoders/libs/libxmp/src/depackers/unzip.c"
-			"src/decoding/decoders/libs/libxmp/src/depackers/vorbis.c"
 			"src/decoding/decoders/libs/libxmp/src/depackers/xfd.c"
 			"src/decoding/decoders/libs/libxmp/src/depackers/xfd_link.c"
 			"src/decoding/decoders/libs/libxmp/src/depackers/xfnmatch.c"
@@ -536,6 +535,12 @@ if(CLOWNAUDIO_LIBXMP)
 		if(WIN32)
 			list(APPEND C_AND_CPP_SOURCES
 				"src/decoding/decoders/libs/libxmp/src/win32.c"
+			)
+		endif()
+		if(NOT CLOWNAUDIO_STB_VORBIS)
+			# Conflicts with clownaudio's copy of stb_vorbis
+			list(APPEND C_AND_CPP_SOURCES
+				"src/decoding/decoders/libs/libxmp/src/depackers/vorbis.c"
 			)
 		endif()
 
