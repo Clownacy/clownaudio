@@ -21,14 +21,14 @@ ifneq ($(RELEASE),)
 else
   CFLAGS = -Og -ggdb3 -fsanitize=address
 endif
-ALL_CFLAGS = -std=gnu99 -MMD -MP -MF $@.d -DCLOWNAUDIO_EXPORT= -DCLOWNAUDIO_NO_EXPORT= -I$(CLOWNAUDIO_DIR)/../include $(CFLAGS)
+ALL_CFLAGS = -MMD -MP -MF $@.d -DCLOWNAUDIO_EXPORT= -DCLOWNAUDIO_NO_EXPORT= -I$(CLOWNAUDIO_DIR)/../include $(CFLAGS)
 
 ifneq ($(RELEASE),)
   CXXFLAGS = -O2 -DNDEBUG
 else
   CXXFLAGS = -Og -ggdb3 -fsanitize=address
 endif
-ALL_CXXFLAGS = -std=c++98 -MMD -MP -MF $@.d -DCLOWNAUDIO_EXPORT= -DCLOWNAUDIO_NO_EXPORT= -I$(CLOWNAUDIO_DIR)/../include $(CXXFLAGS)
+ALL_CXXFLAGS = -MMD -MP -MF $@.d -DCLOWNAUDIO_EXPORT= -DCLOWNAUDIO_NO_EXPORT= -I$(CLOWNAUDIO_DIR)/../include $(CXXFLAGS)
 
 ifneq ($(RELEASE),)
   LDFLAGS =
@@ -221,7 +221,6 @@ LIBXMP_SOURCES = \
   src/depackers/unsqsh.c \
   src/depackers/unxz.c \
   src/depackers/unzip.c \
-  src/depackers/vorbis.c \
   src/depackers/xfd.c \
   src/depackers/xfd_link.c \
   src/depackers/xfnmatch.c \
@@ -326,6 +325,12 @@ LIBXMP_SOURCES = \
   src/loaders/prowizard/xann.c \
   src/loaders/prowizard/zen.c
 
+ifneq ($(USE_STB_VORBIS), true)
+  # Conflicts with clownaudio's copy of stb_vorbis
+  LIBXMPLITE_SOURCES += \
+      src/depackers/vorbis.c
+endif
+
 LIBXMPLITE_SOURCES = \
   src/virtual.c \
   src/format.c \
@@ -411,27 +416,27 @@ all: test
 obj/test.o: test.c
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -I. -I../include $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -std=c99 -Wall -Wextra -pedantic -I. -I../include $< -o $@ -c
 
 obj/clownaudio/%.c.o: $(CLOWNAUDIO_DIR)/%.c
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -I. -I../include $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -std=c99 -Wall -Wextra -pedantic -I. -I../include $< -o $@ -c
 
 obj/clownaudio/%.cpp.o: $(CLOWNAUDIO_DIR)/%.cpp
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) -Wall -Wextra -pedantic -I. -I../include $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 -Wall -Wextra -pedantic -I. -I../include $< -o $@ -c
 
 obj/libxmp/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp/%
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -DPATH_MAX=1024 $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -std=gnu99 -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -Wno-implicit-fallthrough -Wno-missing-field-initializers -Wno-unused-but-set-variable -DPATH_MAX=1024 $< -o $@ -c
 
 obj/libxmp-lite/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/libxmp-lite/%
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CC) $(ALL_CFLAGS) -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -DLIBXMP_CORE_PLAYER=1 -DLIBXMP_NO_DEPACKERS=1 $< -o $@ -c
+	@$(CC) $(ALL_CFLAGS) -std=c99 -Wall -Wextra -pedantic -Wno-unused-parameter -Wno-sign-compare -Wno-maybe-uninitialized -DLIBXMP_CORE_PLAYER -DLIBXMP_NO_DEPACKERS $< -o $@ -c
 
 obj/pxtone/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/pxtone/%
 	$(info Compiling $<)
@@ -441,7 +446,7 @@ obj/pxtone/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/pxtone/%
 obj/spc/%.o: $(CLOWNAUDIO_DIR)/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/%
 	$(info Compiling $<)
 	@mkdir -p $(@D)
-	@$(CXX) $(ALL_CXXFLAGS) $< -o $@ -c
+	@$(CXX) $(ALL_CXXFLAGS) -std=c++98 $< -o $@ -c
 
 test: $(OBJECTS)
 	$(info Linking $@)
