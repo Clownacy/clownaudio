@@ -665,7 +665,7 @@ if(CLOWNAUDIO_LIBXMPLITE)
 		)
 
 		target_include_directories(clownaudio PRIVATE "src/decoding/decoders/libs/libxmp-lite/include/libxmp-lite")
-		target_compile_definitions(clownaudio PRIVATE LIBXMP_CORE_PLAYER=1 LIBXMP_NO_DEPACKERS=1)
+		target_compile_definitions(clownaudio PRIVATE LIBXMP_CORE_PLAYER LIBXMP_NO_DEPACKERS)
 		if(MSVC)
 			target_compile_definitions(clownaudio PRIVATE inline=_inline) # MSVC 6 doesn't have inline
 		endif()
