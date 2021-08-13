@@ -30,6 +30,12 @@
 #define MA_NO_FLAC
 #define MA_NO_MP3
 #define MA_NO_GENERATION
+
+#ifndef CLOWNAUDIO_MINIAUDIO_ENABLE_DEVICE_IO
+ #define MA_NO_DEVICE_IO
+ #define MA_NO_THREADING
+#endif
+
 #include "../miniaudio.h"
 
 struct ClownAudio_Stream
