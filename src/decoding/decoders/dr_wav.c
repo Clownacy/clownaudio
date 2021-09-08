@@ -26,6 +26,8 @@
 
 #define DR_WAV_IMPLEMENTATION
 #define DR_WAV_NO_STDIO
+#define DRWAV_API static
+#define DRWAV_PRIVATE static
 #include "libs/dr_wav.h"
 
 #include "common.h"

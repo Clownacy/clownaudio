@@ -25,6 +25,8 @@
 
 #define DR_FLAC_IMPLEMENTATION
 #define DR_FLAC_NO_STDIO
+#define DRFLAC_API static
+#define DRFLAC_PRIVATE static
 #include "libs/dr_flac.h"
 
 #include "common.h"

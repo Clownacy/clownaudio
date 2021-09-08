@@ -26,6 +26,8 @@
 
 #define DR_MP3_IMPLEMENTATION
 #define DR_MP3_NO_STDIO
+#define DRMP3_API static
+#define DRMP3_PRIVATE static
 #include "libs/dr_mp3.h"
 
 #include "common.h"
