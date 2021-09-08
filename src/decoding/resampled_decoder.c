@@ -125,7 +125,7 @@ size_t ResampledDecoder_GetSamples(void *resampled_decoder_void, short *buffer, 
 			resampled_decoder->buffer_end = resampled_decoder->next_stage.GetSamples(resampled_decoder->next_stage.decoder, resampled_decoder->buffer, RESAMPLE_BUFFER_SIZE / resampled_decoder->in_channel_count);
 
 			if (resampled_decoder->buffer_end == 0)
-				return frames_done;	// Sample end
+				break;	// Sample end
 		}
 
 		ma_uint64 frames_in = resampled_decoder->buffer_end - resampled_decoder->buffer_done;
@@ -136,7 +136,7 @@ size_t ResampledDecoder_GetSamples(void *resampled_decoder_void, short *buffer, 
 		frames_done += (size_t)frames_out;
 	}
 
-	return frames_to_do;
+	return frames_done;
 }
 
 void ResampledDecoder_SetLoop(void *resampled_decoder_void, bool loop)
