@@ -415,7 +415,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Sound* ClownAudio_Mixer_SoundCreate(ClownAudio_Mixe
 
 		void *resampled_decoders[2] = {NULL, NULL};
 
-		for (unsigned int i = 0; i < 2; ++i)
+		for (size_t i = 0; i < 2; ++i)
 		{
 			if (decoder_selectors[i] != NULL)
 			{
