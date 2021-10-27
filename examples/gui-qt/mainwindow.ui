@@ -79,7 +79,7 @@
           <item row="0" column="1">
            <widget class="QPushButton" name="pushButton_File1Open">
             <property name="text">
-             <string>Open file</string>
+             <string>Browse</string>
             </property>
            </widget>
           </item>
@@ -93,7 +93,7 @@
           <item row="1" column="1">
            <widget class="QPushButton" name="pushButton_File2Open">
             <property name="text">
-             <string>Open file</string>
+             <string>Browse</string>
             </property>
            </widget>
           </item>
