@@ -14,6 +14,17 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
+	struct SoundMetadata
+	{
+		ClownAudio_SoundID id;
+		ClownAudio_SoundData *data;
+		unsigned short master_volume;
+		unsigned short left_volume;
+		unsigned short right_volume;
+		unsigned long speed;
+		bool paused;
+	};
+
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
@@ -53,19 +64,11 @@ private slots:
 	void on_horizontalSlider_Speed_valueChanged(int value);
 
 private:
-	struct SoundMetadata
-	{
-		ClownAudio_SoundID id;
-		ClownAudio_SoundData *data;
-		unsigned short master_volume;
-		unsigned short left_volume;
-		unsigned short right_volume;
-		unsigned long speed;
-		bool paused;
-	};
-
 	Ui::MainWindow *ui;
 
 	static void UpdateSoundVolume(SoundMetadata *sound_metadata);
 };
+
+Q_DECLARE_METATYPE(MainWindow::SoundMetadata*)
+
 #endif // MAINWINDOW_H
