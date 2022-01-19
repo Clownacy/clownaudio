@@ -80,7 +80,11 @@ endif()
 if(CLOWNAUDIO_STB_VORBIS)
 	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_STB_VORBIS)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/stb_vorbis.c")
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/stb_vorbis.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/stb_vorbis.h"
+		"src/decoding/decoders/libs/stb_vorbis.c"
+	)
+	set_source_files_properties("src/decoding/decoders/libs/stb_vorbis.c" PROPERTIES HEADER_FILE_ONLY ON) # Avoid compiling this file
 
 	find_library(LIBM m)
 	if(LIBM)
@@ -92,7 +96,10 @@ endif()
 if(CLOWNAUDIO_DR_MP3)
 	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_DR_MP3)
 	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/dr_mp3.c")
-	target_sources(clownaudio PRIVATE "src/decoding/decoders/dr_mp3.h")
+	target_sources(clownaudio PRIVATE
+		"src/decoding/decoders/dr_mp3.h"
+		"src/decoding/decoders/libs/dr_mp3.h"
+	)
 endif()
 
 if(CLOWNAUDIO_LIBOPUS)

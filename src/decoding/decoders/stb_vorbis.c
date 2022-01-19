@@ -23,7 +23,6 @@
 #endif
 #include <stddef.h>
 
-#define STB_VORBIS_IMPLEMENTATION
 #define STB_VORBIS_NO_STDIO
 #define STB_VORBIS_NO_PUSHDATA_API
 
