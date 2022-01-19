@@ -142,9 +142,9 @@ void* ResampledDecoder_Create(DecoderStage *next_stage, bool dynamic_sample_rate
 			ma_data_converter_config config = ma_data_converter_config_init(ma_format_s16, ma_format_s16, child_spec->channel_count, wanted_spec->channel_count, child_spec->sample_rate, wanted_spec->sample_rate == 0 ? child_spec->sample_rate : wanted_spec->sample_rate);
 
 			if (dynamic_sample_rate)
-				config.resampling.allowDynamicSampleRate = MA_TRUE;
+				config.allowDynamicSampleRate = MA_TRUE;
 
-			if (ma_data_converter_init(&config, &resampled_decoder->converter) == MA_SUCCESS)
+			if (ma_data_converter_init(&config, NULL, &resampled_decoder->converter) == MA_SUCCESS)
 			{
 				resampled_decoder->in_sample_rate = child_spec->sample_rate;
 				resampled_decoder->out_sample_rate = wanted_spec->sample_rate;
@@ -170,7 +170,7 @@ void ResampledDecoder_Destroy(void *resampled_decoder_void)
 
 #ifdef CLOWNAUDIO_CLOWNRESAMPLER
 #else
-	ma_data_converter_uninit(&resampled_decoder->converter);
+	ma_data_converter_uninit(&resampled_decoder->converter, NULL);
 #endif
 	resampled_decoder->next_stage.Destroy(resampled_decoder->next_stage.decoder);
 	free(resampled_decoder);
