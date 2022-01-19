@@ -48,6 +48,7 @@ list(APPEND C_AND_CPP_SOURCES
 target_sources(clownaudio PRIVATE
 	"include/clownaudio/mixer.h"
 	"src/miniaudio.h"
+	"src/decoding/clownresampler.h"
 	"src/decoding/decoder_selector.h"
 	"src/decoding/predecoder.h"
 	"src/decoding/resampled_decoder.h"

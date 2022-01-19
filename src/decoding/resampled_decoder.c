@@ -1,4 +1,4 @@
-// (C) 2019-2021 Clownacy
+// (C) 2019-2022 Clownacy
 //
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -18,33 +18,47 @@
 
 #include "resampled_decoder.h"
 
+#define USE_CLOWNRESAMPLER
+
 #ifndef __cplusplus
 #include <stdbool.h>
 #endif
 #include <stddef.h>
 #include <stdlib.h>
 
-#define MA_NO_DECODING
-#define MA_NO_ENCODING
-#define MA_NO_WAV
-#define MA_NO_FLAC
-#define MA_NO_MP3
-#define MA_NO_GENERATION
+#ifdef USE_CLOWNRESAMPLER
+ #define CLOWNRESAMPLER_IMPLEMENTATION
+ #define CLOWNRESAMPLER_API static
+ #include "clownresampler.h"
+#else
+ #define MA_NO_DECODING
+ #define MA_NO_ENCODING
+ #define MA_NO_WAV
+ #define MA_NO_FLAC
+ #define MA_NO_MP3
+ #define MA_NO_GENERATION
 
-#ifndef MINIAUDIO_ENABLE_DEVICE_IO
- #define MA_NO_DEVICE_IO
- #define MA_NO_THREADING
+ #ifndef MINIAUDIO_ENABLE_DEVICE_IO
+  #define MA_NO_DEVICE_IO
+  #define MA_NO_THREADING
+ #endif
+
+ #include "../miniaudio.h"
 #endif
-
-#include "../miniaudio.h"
 
 #include "decoders/common.h"
 
+#ifdef USE_CLOWNRESAMPLER
+#else
 #define RESAMPLE_BUFFER_SIZE 0x1000
+#endif
 
 typedef struct ResampledDecoder
 {
 	DecoderStage next_stage;
+#ifdef USE_CLOWNRESAMPLER
+	ClownResampler_HighLevel_State clownresampler_state;
+#else
 	ma_data_converter converter;
 	unsigned long in_sample_rate;
 	unsigned long out_sample_rate;
@@ -53,7 +67,17 @@ typedef struct ResampledDecoder
 	short buffer[RESAMPLE_BUFFER_SIZE];
 	size_t buffer_end;
 	size_t buffer_done;
+#endif
 } ResampledDecoder;
+
+#ifdef USE_CLOWNRESAMPLER
+static size_t ResamplerCallback(void *user_data, short *buffer, size_t buffer_size)
+{
+	ResampledDecoder *resampled_decoder = (ResampledDecoder*)user_data;
+
+	return resampled_decoder->next_stage.GetSamples(resampled_decoder->next_stage.decoder, buffer, buffer_size);
+}
+#endif
 
 void* ResampledDecoder_Create(DecoderStage *next_stage, bool dynamic_sample_rate, const DecoderSpec *wanted_spec, const DecoderSpec *child_spec)
 {
@@ -68,6 +92,11 @@ void* ResampledDecoder_Create(DecoderStage *next_stage, bool dynamic_sample_rate
 		{
 			resampled_decoder->next_stage = *next_stage;
 
+			/* TODO - Channel count conversion */
+		#ifdef USE_CLOWNRESAMPLER
+			ClownResampler_HighLevel_Init(&resampled_decoder->clownresampler_state, 2, wanted_spec->sample_rate == 0 ? 1.0f : (float)child_spec->sample_rate / (float)wanted_spec->sample_rate);
+			return resampled_decoder;
+		#else
 			ma_data_converter_config config = ma_data_converter_config_init(ma_format_s16, ma_format_s16, child_spec->channel_count, wanted_spec->channel_count, child_spec->sample_rate, wanted_spec->sample_rate == 0 ? child_spec->sample_rate : wanted_spec->sample_rate);
 
 			if (dynamic_sample_rate)
@@ -84,6 +113,7 @@ void* ResampledDecoder_Create(DecoderStage *next_stage, bool dynamic_sample_rate
 
 				return resampled_decoder;
 			}
+		#endif
 
 			free(resampled_decoder);
 		}
@@ -98,7 +128,10 @@ void ResampledDecoder_Destroy(void *resampled_decoder_void)
 {
 	ResampledDecoder *resampled_decoder = (ResampledDecoder*)resampled_decoder_void;
 
+#ifdef USE_CLOWNRESAMPLER
+#else
 	ma_data_converter_uninit(&resampled_decoder->converter);
+#endif
 	resampled_decoder->next_stage.Destroy(resampled_decoder->next_stage.decoder);
 	free(resampled_decoder);
 }
@@ -114,6 +147,9 @@ size_t ResampledDecoder_GetSamples(void *resampled_decoder_void, short *buffer, 
 {
 	ResampledDecoder *resampled_decoder = (ResampledDecoder*)resampled_decoder_void;
 
+#ifdef USE_CLOWNRESAMPLER
+	return ClownResampler_HighLevel_Resample(&resampled_decoder->clownresampler_state, buffer, frames_to_do, ResamplerCallback, resampled_decoder);
+#else
 	size_t frames_done = 0;
 
 	while (frames_done != frames_to_do)
@@ -137,6 +173,7 @@ size_t ResampledDecoder_GetSamples(void *resampled_decoder_void, short *buffer, 
 	}
 
 	return frames_done;
+#endif
 }
 
 void ResampledDecoder_SetLoop(void *resampled_decoder_void, bool loop)
@@ -150,5 +187,9 @@ void ResampledDecoder_SetSpeed(void *resampled_decoder_void, unsigned long speed
 {
 	ResampledDecoder *resampled_decoder = (ResampledDecoder*)resampled_decoder_void;
 
+#ifdef USE_CLOWNRESAMPLER
+	ClownResampler_HighLevel_Init(&resampled_decoder->clownresampler_state, 2, speed / 32767.0f);
+#else
 	ma_data_converter_set_rate(&resampled_decoder->converter, (resampled_decoder->in_sample_rate * speed) >> 16, resampled_decoder->out_sample_rate);
+#endif
 }
