@@ -81,7 +81,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 		config.playback.format = ma_format_s16;
 		config.playback.channels = 2;
 		config.sampleRate = 0;	// Use native sample rate
-		config.noPreZeroedOutputBuffer = MA_TRUE;
+		config.noPreSilencedOutputBuffer = MA_TRUE;
 		//config.performanceProfile = ma_performance_profile_conservative; // Use 100ms callback instead of 10ms
 		config.dataCallback = Callback;
 		config.pUserData = stream;
