@@ -40,7 +40,7 @@
 
 #define SCALE(x, scale) (((x) * (scale)) / 0x100)
 
-#define COUNT_OF(array) (sizeof(array) / sizeof(*array))
+#define COUNT_OF(array) (sizeof(array) / sizeof(*(array)))
 
 struct ClownAudio_Mixer
 {
