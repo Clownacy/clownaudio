@@ -147,6 +147,7 @@ CLOWNRESAMPLER_API size_t ClownResampler_HighLevel_Resample(ClownResampler_HighL
 #define CLOWNRESAMPLER_COUNT_OF(x) (sizeof(x) / sizeof(*(x)))
 #define CLOWNRESAMPLER_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define CLOWNRESAMPLER_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define CLOWNRESAMPLER_CLAMP(x, min, max) (CLOWNRESAMPLER_MIN((max), CLOWNRESAMPLER_MAX((min), (x))))
 
 static float ClownResampler_LanczosKernel(float x)
 {
@@ -243,7 +244,6 @@ CLOWNRESAMPLER_API void ClownResampler_LowLevel_Resample(ClownResampler_LowLevel
 			size_t i;
 
 			float samples[CLOWNRESAMPLER_MAXIMUM_CHANNELS] = {0.0f}; /* Sample accumulators */
-			float level = 0.0f; /* Used for normalisation */
 
 			/* Calculate the bounds of the kernel convolution. */
 			const size_t min = (size_t)(resampler->position - resampler->stretched_kernel_radius + 1.0f); /* Essentially rounding up (with an acceptable slight margin of error) */
@@ -257,17 +257,14 @@ CLOWNRESAMPLER_API void ClownResampler_LowLevel_Resample(ClownResampler_LowLevel
 				/* The distance between the frames being output and the frames being read are the parameter to the Lanczos kernel. */
 				const float kernel_value = ClownResampler_LanczosKernel(((float)i - resampler->position) * resampler->inverse_kernel_scale);
 
-				/* Accumulate the kernel values so we can determine how much to normalise the samples later on. */
-				level += kernel_value;
-
 				/* Modulate the samples with the kernel and add it to the accumulator. */
 				for (current_channel = 0; current_channel < resampler->channels; ++current_channel)
 					samples[current_channel] += (float)input_buffer[i * resampler->channels + current_channel] * kernel_value;
 			}
 
-			/* Perform normalisation and output samples. */
+			/* Perform clamping and output samples. */
 			for (current_channel = 0; current_channel < resampler->channels; ++current_channel)
-				*output_buffer_pointer++ = (short)(samples[current_channel] / level);
+				*output_buffer_pointer++ = (short)CLOWNRESAMPLER_CLAMP(samples[current_channel], -32768.0f, 32767.0f);
 		}
 
 		/* Increment input buffer position. */
