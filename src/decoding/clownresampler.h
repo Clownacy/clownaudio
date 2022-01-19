@@ -1,4 +1,5 @@
-/* Public-domain single-header library for resampling audio. Made by Clownacy. */
+/* Public-domain C89 single-file library for resampling audio.
+   Made by Clownacy. */
 
 #ifndef CLOWNRESAMPLER_H
 #define CLOWNRESAMPLER_H
@@ -152,11 +153,11 @@ static float ClownResampler_LanczosKernel(float x)
 	const float kernel_radius = (float)CLOWNRESAMPLER_KERNEL_RADIUS;
 
 	assert(x != 0.0f);
-/*	if (x == 0.0f)
+	/*if (x == 0.0f)
 		return 1.0f;*/
 
 	assert(fabsf(x) <= kernel_radius * 1.001f); /* A slight margin of rounding error */
-/*	if (fabsf(x) > kernel_radius)
+	/*if (fabsf(x) > kernel_radius)
 		return 0.0f;*/
 
 	const float x_times_pi = x * 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679f; /* 100 digits should be good enough */
