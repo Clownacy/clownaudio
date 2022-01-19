@@ -226,8 +226,10 @@ CLOWNRESAMPLER_API void ClownResampler_LowLevel_Resample(ClownResampler_LowLevel
 		/* Check if we've reached the end of the output buffer. */
 		else if (output_buffer_pointer >= output_buffer_end)
 		{
-			resampler->position -= position_integer - resampler->integer_stretched_kernel_radius;
-			*total_input_frames -= position_integer - resampler->integer_stretched_kernel_radius;
+			const size_t position_minus_bias = position_integer - resampler->integer_stretched_kernel_radius;
+
+			resampler->position -= position_minus_bias;
+			*total_input_frames -= position_minus_bias;
 			break;
 		}
 
