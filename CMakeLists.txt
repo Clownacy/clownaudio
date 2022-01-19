@@ -15,6 +15,7 @@ option(CLOWNAUDIO_LIBXMP "Enable the libxmp decoder backend" OFF)
 option(CLOWNAUDIO_LIBXMPLITE "Enable the libxmp-lite decoder backend" OFF)
 option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
 option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
+option(CLOWNAUDIO_CLOWNRESAMPLER "Enable the experimental new resampler" ON)
 option(CLOWNAUDIO_MIXER_ONLY "Disables playback capabilities" OFF)
 if(NOT CLOWNAUDIO_MIXER_ONLY)
 	set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
@@ -36,7 +37,6 @@ project(clownaudio VERSION 0.4 DESCRIPTION "Stereo audio engine supporting vario
 add_library(clownaudio)
 
 list(APPEND C_AND_CPP_SOURCES
-	"src/miniaudio.c"
 	"src/mixer.c"
 	"src/decoding/decoder_selector.c"
 	"src/decoding/predecoder.c"
@@ -47,7 +47,6 @@ list(APPEND C_AND_CPP_SOURCES
 
 target_sources(clownaudio PRIVATE
 	"include/clownaudio/mixer.h"
-	"src/miniaudio.h"
 	"src/decoding/clownresampler.h"
 	"src/decoding/decoder_selector.h"
 	"src/decoding/predecoder.h"
@@ -225,6 +224,21 @@ if(CLOWNAUDIO_SNES_SPC)
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.cpp"
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.h"
 	)
+endif()
+
+
+##############
+# Resampling #
+##############
+
+if(CLOWNAUDIO_CLOWNRESAMPLER)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_CLOWNRESAMPLER)
+	target_sources(clownaudio PRIVATE "src/decoding/clownresampler.h")
+endif()
+
+if(NOT CLOWNAUDIO_CLOWNRESAMPLER OR (NOT CLOWNAUDIO_MIXER_ONLY AND CLOWNAUDIO_BACKEND STREQUAL "miniaudio"))
+	list(APPEND C_AND_CPP_SOURCES "src/miniaudio.c")
+	target_sources(clownaudio PRIVATE "src/miniaudio.h")
 endif()
 
 
