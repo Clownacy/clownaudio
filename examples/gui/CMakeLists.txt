@@ -4,7 +4,7 @@ option(SUBDIRECTORY "Use clownaudio as a subdirectory, instead of an external pa
 
 project(clownaudio_test LANGUAGES C CXX)
 
-add_executable(test
+add_executable(test WIN32
 	"test.cpp"
 	"glad/include/glad/glad.h"
 	"glad/include/KHR/khrplatform.h"

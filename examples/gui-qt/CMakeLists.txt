@@ -47,7 +47,7 @@ else()
             ${PROJECT_SOURCES}
         )
     else()
-        add_executable(clownaudio_test
+        add_executable(clownaudio_test WIN32
             ${PROJECT_SOURCES}
         )
     endif()
