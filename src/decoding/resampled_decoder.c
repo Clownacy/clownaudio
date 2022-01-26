@@ -132,16 +132,16 @@ void* ResampledDecoder_Create(DecoderStage *next_stage, bool dynamic_sample_rate
 		{
 			resampled_decoder->next_stage = *next_stage;
 			resampled_decoder->in_sample_rate = child_spec->sample_rate;
-			resampled_decoder->out_sample_rate = wanted_spec->sample_rate;
+			resampled_decoder->out_sample_rate = wanted_spec->sample_rate == 0 ? child_spec->sample_rate : wanted_spec->sample_rate;
 			resampled_decoder->in_channel_count = child_spec->channel_count;
 			resampled_decoder->out_channel_count = wanted_spec->channel_count;
 
 			/* TODO - Channel count conversion */
 		#ifdef CLOWNAUDIO_CLOWNRESAMPLER
-			ClownResampler_HighLevel_Init(&resampled_decoder->clownresampler_state, resampled_decoder->out_channel_count, child_spec->sample_rate, wanted_spec->sample_rate == 0 ? child_spec->sample_rate : wanted_spec->sample_rate);
+			ClownResampler_HighLevel_Init(&resampled_decoder->clownresampler_state, resampled_decoder->out_channel_count, resampled_decoder->in_sample_rate, resampled_decoder->out_sample_rate);
 			return resampled_decoder;
 		#else
-			ma_data_converter_config config = ma_data_converter_config_init(ma_format_s16, ma_format_s16, child_spec->channel_count, wanted_spec->channel_count, child_spec->sample_rate, wanted_spec->sample_rate == 0 ? child_spec->sample_rate : wanted_spec->sample_rate);
+			ma_data_converter_config config = ma_data_converter_config_init(ma_format_s16, ma_format_s16, child_spec->channel_count, wanted_spec->channel_count, resampled_decoder->in_sample_rate, resampled_decoder->out_sample_rate);
 
 			if (dynamic_sample_rate)
 				config.allowDynamicSampleRate = MA_TRUE;
