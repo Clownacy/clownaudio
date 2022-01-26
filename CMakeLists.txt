@@ -47,7 +47,6 @@ list(APPEND C_AND_CPP_SOURCES
 
 target_sources(clownaudio PRIVATE
 	"include/clownaudio/mixer.h"
-	"src/decoding/clownresampler.h"
 	"src/decoding/decoder_selector.h"
 	"src/decoding/predecoder.h"
 	"src/decoding/resampled_decoder.h"
@@ -233,7 +232,7 @@ endif()
 
 if(CLOWNAUDIO_CLOWNRESAMPLER)
 	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_CLOWNRESAMPLER)
-	target_sources(clownaudio PRIVATE "src/decoding/clownresampler.h")
+	target_sources(clownaudio PRIVATE "src/decoding/clownresampler/clownresampler.h")
 endif()
 
 if(NOT CLOWNAUDIO_CLOWNRESAMPLER OR (NOT CLOWNAUDIO_MIXER_ONLY AND CLOWNAUDIO_BACKEND STREQUAL "miniaudio"))

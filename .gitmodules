@@ -1,0 +1,3 @@
+[submodule "src/decoding/clownresampler"]
+	path = src/decoding/clownresampler
+	url = https://github.com/Clownacy/clownresampler

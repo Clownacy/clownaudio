@@ -27,7 +27,7 @@
 #ifdef CLOWNAUDIO_CLOWNRESAMPLER
  #define CLOWNRESAMPLER_IMPLEMENTATION
  #define CLOWNRESAMPLER_API static
- #include "clownresampler.h"
+ #include "clownresampler/clownresampler.h"
 #else
  #define MA_NO_DECODING
  #define MA_NO_ENCODING
