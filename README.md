@@ -30,7 +30,7 @@ open-source libraries, dubbed 'decoding backends'. These libraries include...
 | Library     | Format                                                              | Licence                           | Built-in |
 |-------------|---------------------------------------------------------------------|-----------------------------------|----------|
 | libvorbis   | Ogg Vorbis                                                          | BSD                               | No       |
-| stb_vorbis  | Ogg Vorbis                                                          | Public-domain/MIT-0               | Yes      |
+| stb_vorbis  | Ogg Vorbis                                                          | Public-domain/MIT                 | Yes      |
 | dr_mp3      | MP3                                                                 | Public-domain/MIT-0               | Yes      |
 | libopus     | Opus                                                                | BSD                               | No       |
 | libFLAC     | FLAC                                                                | BSD                               | No       |
