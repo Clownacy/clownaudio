@@ -239,9 +239,14 @@ void ResampledDecoder_SetSpeed(void *resampled_decoder_void, unsigned long speed
 {
 	ResampledDecoder *resampled_decoder = (ResampledDecoder*)resampled_decoder_void;
 
+	/* Perform a fixed-point multiplication in a way that prevents overflow. */
+	const unsigned long upper_multiply = resampled_decoder->in_sample_rate * (speed >> 16);
+	const unsigned long lower_multiply = resampled_decoder->in_sample_rate * (speed & 0xFFFF);
+	const unsigned long in_sample_rate_scaled = upper_multiply + (lower_multiply >> 16);
+
 #ifdef CLOWNAUDIO_CLOWNRESAMPLER
-	ClownResampler_HighLevel_Init(&resampled_decoder->clownresampler_state, resampled_decoder->out_channel_count, (resampled_decoder->in_sample_rate * speed) >> 16, resampled_decoder->out_sample_rate);
+	ClownResampler_HighLevel_Init(&resampled_decoder->clownresampler_state, resampled_decoder->out_channel_count, in_sample_rate_scaled, resampled_decoder->out_sample_rate);
 #else
-	ma_data_converter_set_rate(&resampled_decoder->converter, (resampled_decoder->in_sample_rate * speed) >> 16, resampled_decoder->out_sample_rate);
+	ma_data_converter_set_rate(&resampled_decoder->converter, in_sample_rate_scaled, resampled_decoder->out_sample_rate);
 #endif
 }
