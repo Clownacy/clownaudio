@@ -613,7 +613,11 @@ if(CLOWNAUDIO_LIBXMP)
 		target_include_directories(clownaudio PRIVATE "src/decoding/decoders/libs/libxmp/include")
 		target_compile_definitions(clownaudio PRIVATE)
 		if(MSVC)
-			target_compile_definitions(clownaudio PRIVATE inline=_inline PATH_MAX=1024) # MSVC 6 doesn't have inline
+			if(MSVC_VERSION LESS 1300)
+				target_compile_definitions(clownaudio PRIVATE inline=_inline) # MSVC 6 doesn't have inline (TODO: remove this when updating to libxmp 4.6.0)
+			endif()
+
+			target_compile_definitions(clownaudio PRIVATE PATH_MAX=1024) # TODO: remove this when updating to libxmp 4.6.0
 		endif()
 	endif()
 endif()
@@ -688,8 +692,8 @@ if(CLOWNAUDIO_LIBXMPLITE)
 
 		target_include_directories(clownaudio PRIVATE "src/decoding/decoders/libs/libxmp-lite/include/libxmp-lite")
 		target_compile_definitions(clownaudio PRIVATE LIBXMP_CORE_PLAYER LIBXMP_NO_DEPACKERS)
-		if(MSVC)
-			target_compile_definitions(clownaudio PRIVATE inline=_inline) # MSVC 6 doesn't have inline
+		if(MSVC AND MSVC_VERSION LESS 1300)
+			target_compile_definitions(clownaudio PRIVATE inline=_inline) # MSVC 6 doesn't have inline (TODO: remove this when updating to libxmp 4.6.0)
 		endif()
 	endif()
 endif()
