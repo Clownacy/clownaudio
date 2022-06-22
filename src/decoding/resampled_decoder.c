@@ -69,6 +69,9 @@ typedef struct ResampledDecoder
 } ResampledDecoder;
 
 #ifdef CLOWNAUDIO_CLOWNRESAMPLER
+static ClownResampler_Precomputed clownresampler_precomputed;
+static bool clownresampler_precomputed_done;
+
 static size_t ResamplerCallback(void *user_data, short *buffer, size_t buffer_size)
 {
 	ResampledDecoder *resampled_decoder = (ResampledDecoder*)user_data;
@@ -121,6 +124,15 @@ static size_t ResamplerCallback(void *user_data, short *buffer, size_t buffer_si
 
 void* ResampledDecoder_Create(DecoderStage *next_stage, bool dynamic_sample_rate, const DecoderSpec *wanted_spec, const DecoderSpec *child_spec)
 {
+#ifdef CLOWNAUDIO_CLOWNRESAMPLER
+	if (!clownresampler_precomputed_done)
+	{
+		clownresampler_precomputed_done = true;
+
+		ClownResampler_Precompute(&clownresampler_precomputed);
+	}
+#endif
+
 //	DecoderSpec child_spec;
 //	void *decoder = DecoderSelector_Create(data, loop, wanted_spec, &child_spec);
 
@@ -188,7 +200,7 @@ size_t ResampledDecoder_GetSamples(void *resampled_decoder_void, short *buffer, 
 	ResampledDecoder *resampled_decoder = (ResampledDecoder*)resampled_decoder_void;
 
 #ifdef CLOWNAUDIO_CLOWNRESAMPLER
-	return ClownResampler_HighLevel_Resample(&resampled_decoder->clownresampler_state, buffer, frames_to_do, ResamplerCallback, resampled_decoder);
+	return ClownResampler_HighLevel_Resample(&resampled_decoder->clownresampler_state, &clownresampler_precomputed, buffer, frames_to_do, ResamplerCallback, resampled_decoder);
 #else
 	size_t frames_done = 0;
 
