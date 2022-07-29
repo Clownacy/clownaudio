@@ -207,6 +207,7 @@ void MainWindow::on_pushButton_CreateSound_clicked()
 		sound_metadata->left_volume = 0x100;
 		sound_metadata->right_volume = 0x100;
 		sound_metadata->speed = 0x10000;
+		sound_metadata->low_pass_filter_sample_rate = 48000;
 		sound_metadata->paused = true;
 
 		// Add sound (and metadata) to list widget
@@ -258,6 +259,7 @@ void MainWindow::on_listWidget_Sounds_itemSelectionChanged()
 		ui->horizontalSlider_LeftVolume->setValue(sound_metadata->left_volume);
 		ui->horizontalSlider_RightVolume->setValue(sound_metadata->right_volume);
 		ui->horizontalSlider_Speed->setValue(sound_metadata->speed);
+		ui->horizontalSlider_LowPassFilter->setValue(sound_metadata->low_pass_filter_sample_rate);
 	}
 }
 
@@ -347,5 +349,16 @@ void MainWindow::on_horizontalSlider_Speed_valueChanged(int value)
 	sound_metadata->speed = value;
 
 	ClownAudio_SoundSetSpeed(sound_metadata->id, value);
+}
+
+
+void MainWindow::on_horizontalSlider_LowPassFilter_valueChanged(int value)
+{
+	QListWidgetItem *item = ui->listWidget_Sounds->currentItem();
+	SoundMetadata *sound_metadata = item->data(Qt::UserRole).value<SoundMetadata*>();
+
+	sound_metadata->low_pass_filter_sample_rate = value;
+
+	ClownAudio_SoundSetLowPassFilter(sound_metadata->id, value);
 }
 

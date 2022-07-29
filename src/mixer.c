@@ -617,6 +617,20 @@ CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundSetSpeed(ClownAudio_Mixer *mixer, C
 	}
 }
 
+CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundSetLowPassFilter(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned long low_pass_filter_sample_rate)
+{
+	ClownAudio_Sound *sound = FindSound(mixer, sound_id);
+
+	if (sound != NULL)
+	{
+		if (sound->resampled_decoders[0] != NULL)
+			ResampledDecoder_SetLowPassFilter(sound->resampled_decoders[0], low_pass_filter_sample_rate);
+
+		if (sound->resampled_decoders[1] != NULL)
+			ResampledDecoder_SetLowPassFilter(sound->resampled_decoders[1], low_pass_filter_sample_rate);
+	}
+}
+
 CLOWNAUDIO_EXPORT void ClownAudio_Mixer_SoundFade(ClownAudio_Mixer *mixer, ClownAudio_SoundID sound_id, unsigned short volume, unsigned int duration)
 {
 	ClownAudio_Sound *sound = FindSound(mixer, sound_id);

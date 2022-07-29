@@ -32,5 +32,6 @@ void ResampledDecoder_Rewind(void *resampled_decoder);
 size_t ResampledDecoder_GetSamples(void *resampled_decoder, short *buffer, size_t frames_to_do);
 void ResampledDecoder_SetLoop(void *resampled_decoder, bool loop);
 void ResampledDecoder_SetSpeed(void *resampled_decoder, unsigned long speed);
+void ResampledDecoder_SetLowPassFilter(void *resampled_decoder, unsigned long low_pass_filter_sample_rate);
 
 #endif

@@ -136,6 +136,9 @@ CLOWNAUDIO_EXPORT void ClownAudio_SoundSetLoop(ClownAudio_SoundID sound_id, bool
 /// Note: the sound must have been created with `dynamic_sample_rate` enabled in the configuration struct, otherwise this function might silently fail.
 CLOWNAUDIO_EXPORT void ClownAudio_SoundSetSpeed(ClownAudio_SoundID sound_id, unsigned long speed);
 
+/// Set the low-pass filter cut-off point. Remember that the frequency is half of the sample rate.
+CLOWNAUDIO_EXPORT void ClownAudio_SoundSetLowPassFilter(ClownAudio_SoundID sound_id, unsigned long low_pass_filter_sample_rate);
+
 /// Make sound fade to the specified volume over the specified duration, measured in milliseconds.
 /// Volume is linear and ranges from 0 (silence) to 0x100 (full volume). Exceeding 0x100 will amplify the volume.
 /// Note that this volume is separate from the one set with ClownAudio_SetSoundVolume, and in fact stacks with it.

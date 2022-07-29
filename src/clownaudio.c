@@ -164,3 +164,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_SoundSetSpeed(ClownAudio_SoundID sound_id, uns
 	ClownAudio_Mixer_SoundSetSpeed(mixer, sound_id, speed);
 	ClownAudio_StreamUnlock(stream);
 }
+
+CLOWNAUDIO_EXPORT void ClownAudio_SoundSetLowPassFilter(ClownAudio_SoundID sound_id, unsigned long low_pass_filter_sample_rate)
+{
+	ClownAudio_StreamLock(stream);
+	ClownAudio_Mixer_SoundSetLowPassFilter(mixer, sound_id, low_pass_filter_sample_rate);
+	ClownAudio_StreamUnlock(stream);
+}

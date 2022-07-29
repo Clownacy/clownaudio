@@ -22,6 +22,7 @@ public:
 		unsigned short left_volume;
 		unsigned short right_volume;
 		unsigned long speed;
+		unsigned long low_pass_filter_sample_rate;
 		bool paused;
 	};
 
@@ -62,6 +63,8 @@ private slots:
 	void on_horizontalSlider_RightVolume_valueChanged(int value);
 
 	void on_horizontalSlider_Speed_valueChanged(int value);
+
+	void on_horizontalSlider_LowPassFilter_valueChanged(int value);
 
 private:
 	Ui::MainWindow *ui;
