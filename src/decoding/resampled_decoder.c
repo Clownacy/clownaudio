@@ -74,7 +74,7 @@ typedef struct ResampledDecoder
 static ClownResampler_Precomputed clownresampler_precomputed;
 static bool clownresampler_precomputed_done;
 
-static size_t ResamplerCallback(void *user_data, short *buffer, size_t buffer_size)
+static size_t ResamplerCallback(const void *user_data, short *buffer, size_t buffer_size)
 {
 	ResampledDecoder *resampled_decoder = (ResampledDecoder*)user_data;
 
