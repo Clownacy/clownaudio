@@ -140,6 +140,13 @@ CLOWNAUDIO_EXPORT bool ClownAudio_StreamDestroy(ClownAudio_Stream *stream)
 		if (cubeb_stream_stop(stream->cubeb_stream_pointer) == CUBEB_OK)
 		{
 			cubeb_stream_destroy(stream->cubeb_stream_pointer);
+
+		#ifdef _WIN32
+			CloseHandle(stream->mutex_handle);
+		#else
+			pthread_mutex_destroy(&stream->pthread_mutex);
+		#endif
+
 			free(stream);
 		}
 		else
