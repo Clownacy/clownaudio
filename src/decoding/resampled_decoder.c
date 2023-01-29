@@ -251,7 +251,7 @@ void ResampledDecoder_SetSpeed(void *resampled_decoder_void, unsigned long speed
 #ifdef CLOWNAUDIO_CLOWNRESAMPLER
 	ClownResampler_HighLevel_Init(&resampled_decoder->clownresampler_state, resampled_decoder->out_channel_count, resampled_decoder->in_sample_rate_scaled, resampled_decoder->out_sample_rate, resampled_decoder->low_pass_filter_sample_rate);
 #else
-	ma_data_converter_set_rate(&resampled_decoder->converter, in_sample_rate_scaled, resampled_decoder->out_sample_rate);
+	ma_data_converter_set_rate(&resampled_decoder->converter, resampled_decoder->in_sample_rate_scaled, resampled_decoder->out_sample_rate);
 #endif
 }
 
@@ -264,6 +264,6 @@ void ResampledDecoder_SetLowPassFilter(void *resampled_decoder_void, unsigned lo
 #ifdef CLOWNAUDIO_CLOWNRESAMPLER
 	ClownResampler_HighLevel_Init(&resampled_decoder->clownresampler_state, resampled_decoder->out_channel_count, resampled_decoder->in_sample_rate_scaled, resampled_decoder->out_sample_rate, resampled_decoder->low_pass_filter_sample_rate);
 #else
-	ma_data_converter_set_rate(&resampled_decoder->converter, in_sample_rate_scaled, resampled_decoder->out_sample_rate);
+	ma_data_converter_set_rate(&resampled_decoder->converter, resampled_decoder->in_sample_rate_scaled, resampled_decoder->out_sample_rate);
 #endif
 }
