@@ -7,3 +7,6 @@
 /examples/gui/obj
 /examples/gui/test
 /examples/gui/test.exe
+
+# macOS junk files
+.DS_Store
