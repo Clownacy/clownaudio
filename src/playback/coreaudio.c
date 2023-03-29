@@ -75,9 +75,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 
 	defaultOutputComponent = AudioComponentFindNext(NULL, &defaultOutputDescription);
 	if (defaultOutputComponent == NULL)
-	{
 		success = false;
-	}
 
 	return success;
 }
@@ -207,15 +205,11 @@ CLOWNAUDIO_EXPORT bool ClownAudio_StreamResume(ClownAudio_Stream *stream)
 CLOWNAUDIO_EXPORT void ClownAudio_StreamLock(ClownAudio_Stream *stream)
 {
 	if (stream != NULL)
-	{
 		pthread_mutex_lock(&stream->pthread_mutex);
-	}
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_StreamUnlock(ClownAudio_Stream *stream)
 {
 	if (stream != NULL)
-	{
 		pthread_mutex_unlock(&stream->pthread_mutex);
-	}
 }
