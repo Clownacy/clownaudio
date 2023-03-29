@@ -302,11 +302,13 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 		find_library(AUDIOUNIT_LIBRARY AudioUnit)
 		find_library(COREAUDIO_LIBRARY CoreAudio)
 		find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+		find_library(CORESERVICES_LIBRARY CoreServices)
 		target_link_libraries(clownaudio PRIVATE
 			"${AUDIOTOOLBOX_LIBRARY}"
 			"${AUDIOUNIT_LIBRARY}"
 			"${COREAUDIO_LIBRARY}"
 			"${COREFOUNDATION_LIBRARY}"
+			"${CORESERVICES_LIBRARY}"
 		)
 	endif()
 endif()
