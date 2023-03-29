@@ -51,6 +51,8 @@ struct ClownAudio_Stream
 	pthread_mutex_t pthread_mutex;
 };
 
+static AudioComponent defaultOutputComponent;
+
 static OSStatus Callback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData)
 {
 	ClownAudio_Stream *stream = (ClownAudio_Stream*)inRefCon;
@@ -61,13 +63,28 @@ static OSStatus Callback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFla
 
 CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 {
-	// TODO: Should anything be here?
-	return true;
+	// Find the default output AudioUnit
+	AudioComponentDescription defaultOutputDescription;
+	bool success = true;
+
+	defaultOutputDescription.componentType = kAudioUnitType_Output;
+	defaultOutputDescription.componentSubType = kAudioUnitSubType_DefaultOutput;
+	defaultOutputDescription.componentManufacturer = kAudioUnitManufacturer_Apple;
+	defaultOutputDescription.componentFlags = 0;
+	defaultOutputDescription.componentFlagsMask = 0;
+
+	defaultOutputComponent = AudioComponentFindNext(NULL, &defaultOutputDescription);
+	if (defaultOutputComponent == NULL)
+	{
+		success = false;
+	}
+
+	return success;
 }
 
 CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 {
-	// TODO: Should anything be here?
+	defaultOutputComponent = NULL;
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *sample_rate, void (*user_callback)(void *user_data, short *output_buffer, size_t frames_to_do))
@@ -76,16 +93,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 
 	if (stream != NULL)
 	{
-		// Find the default output AudioUnit
-		AudioComponentDescription defaultOutputDescription;
-		AudioComponent defaultOutputComponent;
-		defaultOutputDescription.componentType = kAudioUnitType_Output;
-		defaultOutputDescription.componentSubType = kAudioUnitSubType_DefaultOutput;
-		defaultOutputDescription.componentManufacturer = kAudioUnitManufacturer_Apple;
-		defaultOutputDescription.componentFlags = 0;
-		defaultOutputDescription.componentFlagsMask = 0;
-
-		defaultOutputComponent = AudioComponentFindNext(NULL, &defaultOutputDescription);
 		if (defaultOutputComponent != NULL)
 		{
 			// Create a new instance of the default output AudioUnit
