@@ -103,7 +103,9 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 				AudioStreamBasicDescription want;
 				want.mFormatID = kAudioFormatLinearPCM;
 				want.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked
-			#if !defined(MAC_OS_X_VERSION_10_2) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_2
+			#if defined(__ppc64__) || defined(__ppc__)
+				                    | kAudioFormatFlagIsBigEndian
+			#elif !defined(MAC_OS_X_VERSION_10_2) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_2
 				                    | kAudioFormatFlagsNativeEndian
 			#endif
 				                    ;
