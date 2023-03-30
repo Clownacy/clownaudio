@@ -29,7 +29,7 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <AvailabilityMacros.h>
 
 #if !defined(MAC_OS_X_VERSION_10_6) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6
-// These deprecated Carbon APIs were replaced with equivalent functions and types in macOS 10.6
+/* These deprecated Carbon APIs were replaced with equivalent functions and types in macOS 10.6 */
 #include <CoreServices/CoreServices.h>
 #define AudioComponent Component
 #define AudioComponentDescription ComponentDescription
@@ -58,7 +58,7 @@ static OSStatus Callback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFla
 
 	ClownAudio_Stream *stream = (ClownAudio_Stream*)inRefCon;
 
-	// Because the stream is interleaved, there is only one buffer
+	/* Because the stream is interleaved, there is only one buffer */
 	stream->user_callback(stream->user_data, (short*)ioData->mBuffers[0].mData, inNumberFrames);
 
 	return 0;
@@ -66,7 +66,7 @@ static OSStatus Callback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFla
 
 CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 {
-	// Find the default output AudioUnit
+	/* Find the default output AudioUnit */
 	AudioComponentDescription default_output_description;
 	bool success = true;
 
@@ -97,12 +97,12 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 	{
 		if (default_output_component != NULL)
 		{
-			// Create a new instance of the default output AudioUnit
+			/* Create a new instance of the default output AudioUnit */
 			OSStatus error = AudioComponentInstanceNew(default_output_component, &stream->audio_unit);
 
 			if (!error)
 			{
-				// Use a suitable output format
+				/* Use a suitable output format */
 				AudioStreamBasicDescription want;
 				want.mFormatID = kAudioFormatLinearPCM;
 				want.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked
@@ -110,34 +110,34 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 				                    | kAudioFormatFlagIsBigEndian
 			#endif
 				                    ;
-				// TODO: Get default sample rate
+				/* TODO: Get default sample rate */
 				want.mSampleRate = (float) *sample_rate;
-				// 16 bit output
+				/* 16 bit output */
 				want.mBitsPerChannel = sizeof(short) * 8;
 				want.mChannelsPerFrame = CLOWNAUDIO_STREAM_CHANNEL_COUNT;
-				// kAudioFormatLinearPCM doesn't use packets
+				/* kAudioFormatLinearPCM doesn't use packets */
 				want.mFramesPerPacket = 1;
-				// Bytes per channel * channels per frame
+				/* Bytes per channel * channels per frame */
 				want.mBytesPerFrame = (want.mBitsPerChannel / 8) * want.mChannelsPerFrame;
-				// Bytes per frame * frames per packet
+				/* Bytes per frame * frames per packet */
 				want.mBytesPerPacket = want.mBytesPerFrame * want.mFramesPerPacket;
 
 				error = AudioUnitSetProperty(stream->audio_unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &want, sizeof(AudioStreamBasicDescription));
 
 				if (!error)
 				{
-					// Set the AudioUnit output callback
+					/* Set the AudioUnit output callback */
 					AURenderCallbackStruct callback;
-					// Callback function
+					/* Callback function */
 					callback.inputProc = Callback;
-					// User data
+					/* User data */
 					callback.inputProcRefCon = stream;
 
 					error = AudioUnitSetProperty(stream->audio_unit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct));
 
 					if (!error)
 					{
-						// Initialize the configured AudioUnit instance
+						/* Initialize the configured AudioUnit instance */
 						error = AudioUnitInitialize(stream->audio_unit);
 
 						if (!error)
