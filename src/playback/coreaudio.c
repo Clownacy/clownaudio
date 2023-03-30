@@ -52,11 +52,11 @@ static AudioComponent default_output_component;
 
 static OSStatus Callback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData)
 {
+	ClownAudio_Stream *stream = (ClownAudio_Stream*)inRefCon;
+
 	(void)ioActionFlags;
 	(void)inTimeStamp;
 	(void)inBusNumber;
-
-	ClownAudio_Stream *stream = (ClownAudio_Stream*)inRefCon;
 
 	/* Because the stream is interleaved, there is only one buffer */
 	stream->user_callback(stream->user_data, (short*)ioData->mBuffers[0].mData, inNumberFrames);
