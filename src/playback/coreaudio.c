@@ -103,8 +103,6 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 				want.mFormatFlags = kLinearPCMFormatFlagIsSignedInteger | kLinearPCMFormatFlagIsPacked
 			#if defined(__ppc64__) || defined(__ppc__)
 				                    | kAudioFormatFlagIsBigEndian
-			#elif !defined(MAC_OS_X_VERSION_10_2) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_2
-				                    | kAudioFormatFlagsNativeEndian
 			#endif
 				                    ;
 				// TODO: Get default sample rate
