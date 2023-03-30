@@ -55,9 +55,15 @@ static AudioComponent defaultOutputComponent;
 
 static OSStatus Callback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData)
 {
+	(void)ioActionFlags;
+	(void)inTimeStamp;
+	(void)inBusNumber;
+
 	ClownAudio_Stream *stream = (ClownAudio_Stream*)inRefCon;
+
 	// Because the stream is interleaved, there is only one buffer
 	stream->user_callback(stream->user_data, (short*)ioData->mBuffers[0].mData, inNumberFrames);
+
 	return 0;
 }
 
@@ -74,6 +80,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 	defaultOutputDescription.componentFlagsMask = 0;
 
 	defaultOutputComponent = AudioComponentFindNext(NULL, &defaultOutputDescription);
+
 	if (defaultOutputComponent == NULL)
 		success = false;
 
@@ -95,6 +102,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 		{
 			// Create a new instance of the default output AudioUnit
 			OSStatus error = AudioComponentInstanceNew(defaultOutputComponent, &stream->audioUnit);
+
 			if (!error)
 			{
 				// Use a suitable output format
@@ -118,6 +126,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 				want.mBytesPerPacket = want.mBytesPerFrame * want.mFramesPerPacket;
 
 				error = AudioUnitSetProperty(stream->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &want, sizeof(AudioStreamBasicDescription));
+
 				if (!error)
 				{
 					// Set the AudioUnit output callback
@@ -126,11 +135,14 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 					callback.inputProc = Callback;
 					// User data
 					callback.inputProcRefCon = stream;
+
 					error = AudioUnitSetProperty(stream->audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct));
+
 					if (!error)
 					{
 						// Initialize the configured AudioUnit instance
 						error = AudioUnitInitialize(stream->audioUnit);
+
 						if (!error)
 						{
 							stream->user_callback = user_callback;
@@ -142,9 +154,11 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 						}
 					}
 				}
+
 				AudioComponentInstanceDispose(stream->audioUnit);
 			}
 		}
+
 		free(stream);
 	}
 
@@ -161,12 +175,15 @@ CLOWNAUDIO_EXPORT bool ClownAudio_StreamDestroy(ClownAudio_Stream *stream)
 		success = false;
 
 		error = AudioOutputUnitStop(stream->audioUnit);
+
 		if (!error)
 		{
 			error = AudioUnitUninitialize(stream->audioUnit);
+
 			if (!error)
 			{
 				error = AudioComponentInstanceDispose(stream->audioUnit);
+
 				if (!error)
 				{
 					pthread_mutex_destroy(&stream->pthread_mutex);
@@ -191,12 +208,14 @@ CLOWNAUDIO_EXPORT void ClownAudio_StreamSetCallbackData(ClownAudio_Stream *strea
 CLOWNAUDIO_EXPORT bool ClownAudio_StreamPause(ClownAudio_Stream *stream)
 {
 	OSStatus error = AudioOutputUnitStop(stream->audioUnit);
+
 	return !error;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_StreamResume(ClownAudio_Stream *stream)
 {
 	OSStatus error = AudioOutputUnitStart(stream->audioUnit);
+
 	return !error;
 }
 
