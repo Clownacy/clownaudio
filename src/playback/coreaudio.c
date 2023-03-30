@@ -207,14 +207,20 @@ CLOWNAUDIO_EXPORT void ClownAudio_StreamSetCallbackData(ClownAudio_Stream *strea
 
 CLOWNAUDIO_EXPORT bool ClownAudio_StreamPause(ClownAudio_Stream *stream)
 {
-	OSStatus error = AudioOutputUnitStop(stream->audio_unit);
+	OSStatus error = 0;
+
+	if (stream != NULL)
+		error = AudioOutputUnitStop(stream->audio_unit);
 
 	return !error;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_StreamResume(ClownAudio_Stream *stream)
 {
-	OSStatus error = AudioOutputUnitStart(stream->audio_unit);
+	OSStatus error = 0;
+
+	if (stream != NULL)
+		error = AudioOutputUnitStart(stream->audio_unit);
 
 	return !error;
 }
