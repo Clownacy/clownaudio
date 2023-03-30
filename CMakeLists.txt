@@ -18,7 +18,7 @@ option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
 option(CLOWNAUDIO_CLOWNRESAMPLER "Enable the experimental new resampler" OFF)
 option(CLOWNAUDIO_MIXER_ONLY "Disables playback capabilities" OFF)
 if(NOT CLOWNAUDIO_MIXER_ONLY)
-	set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', and 'PortAudio'")
+	set(CLOWNAUDIO_BACKEND "miniaudio" CACHE STRING "Which playback backend to use: supported options are 'miniaudio', 'SDL1', 'SDL2', 'Cubeb', 'CoreAudio', and 'PortAudio'")
 endif()
 
 # Figure out if we need a C compiler, a C++ compiler, or both
@@ -272,6 +272,11 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 		list(APPEND C_AND_CPP_SOURCES "src/playback/cubeb.c")
 	elseif(CLOWNAUDIO_BACKEND STREQUAL "PortAudio")
 		list(APPEND C_AND_CPP_SOURCES "src/playback/portaudio.c")
+	elseif(CLOWNAUDIO_BACKEND STREQUAL "CoreAudio")
+		if(NOT APPLE)
+			message(FATAL_ERROR "CoreAudio backend can only be used on macOS!")
+		endif()
+		list(APPEND C_AND_CPP_SOURCES "src/playback/coreaudio.c")
 	else()
 		message(FATAL_ERROR "Invalid BACKEND selected")
 	endif()
@@ -290,6 +295,21 @@ if(NOT CLOWNAUDIO_MIXER_ONLY)
 
 		target_link_libraries(clownaudio PRIVATE cubeb::cubeb)
 		list(APPEND STATIC_LIBS cubeb)
+	endif()
+
+	if(CLOWNAUDIO_BACKEND STREQUAL "CoreAudio")
+		find_library(AUDIOTOOLBOX_LIBRARY AudioToolbox)
+		find_library(AUDIOUNIT_LIBRARY AudioUnit)
+		find_library(COREAUDIO_LIBRARY CoreAudio)
+		find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+		find_library(CORESERVICES_LIBRARY CoreServices)
+		target_link_libraries(clownaudio PRIVATE
+			"${AUDIOTOOLBOX_LIBRARY}"
+			"${AUDIOUNIT_LIBRARY}"
+			"${COREAUDIO_LIBRARY}"
+			"${COREFOUNDATION_LIBRARY}"
+			"${CORESERVICES_LIBRARY}"
+		)
 	endif()
 endif()
 

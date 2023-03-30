@@ -57,6 +57,7 @@ audio playback:
 | Library   | Licence             | Built-in |
 |-----------|---------------------|----------|
 | Cubeb     | ISC                 | No       |
+| CoreAudio | zlib                | Yes      |
 | miniaudio | Public-domain/MIT-0 | Yes      |
 | PortAudio | MIT                 | No       |
 | SDL1.2    | LGPL 2.1            | No       |
