@@ -46,12 +46,12 @@ struct ClownAudio_Stream
 	void (*user_callback)(void*, short*, size_t);
 	void *user_data;
 
-	AudioUnit audioUnit;
+	AudioUnit audio_unit;
 
 	pthread_mutex_t pthread_mutex;
 };
 
-static AudioComponent defaultOutputComponent;
+static AudioComponent default_output_component;
 
 static OSStatus Callback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData)
 {
@@ -70,18 +70,18 @@ static OSStatus Callback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFla
 CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 {
 	// Find the default output AudioUnit
-	AudioComponentDescription defaultOutputDescription;
+	AudioComponentDescription default_output_description;
 	bool success = true;
 
-	defaultOutputDescription.componentType = kAudioUnitType_Output;
-	defaultOutputDescription.componentSubType = kAudioUnitSubType_DefaultOutput;
-	defaultOutputDescription.componentManufacturer = kAudioUnitManufacturer_Apple;
-	defaultOutputDescription.componentFlags = 0;
-	defaultOutputDescription.componentFlagsMask = 0;
+	default_output_description.componentType = kAudioUnitType_Output;
+	default_output_description.componentSubType = kAudioUnitSubType_DefaultOutput;
+	default_output_description.componentManufacturer = kAudioUnitManufacturer_Apple;
+	default_output_description.componentFlags = 0;
+	default_output_description.componentFlagsMask = 0;
 
-	defaultOutputComponent = AudioComponentFindNext(NULL, &defaultOutputDescription);
+	default_output_component = AudioComponentFindNext(NULL, &default_output_description);
 
-	if (defaultOutputComponent == NULL)
+	if (default_output_component == NULL)
 		success = false;
 
 	return success;
@@ -89,7 +89,7 @@ CLOWNAUDIO_EXPORT bool ClownAudio_InitPlayback(void)
 
 CLOWNAUDIO_EXPORT void ClownAudio_DeinitPlayback(void)
 {
-	defaultOutputComponent = NULL;
+	default_output_component = NULL;
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *sample_rate, void (*user_callback)(void *user_data, short *output_buffer, size_t frames_to_do))
@@ -98,10 +98,10 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 
 	if (stream != NULL)
 	{
-		if (defaultOutputComponent != NULL)
+		if (default_output_component != NULL)
 		{
 			// Create a new instance of the default output AudioUnit
-			OSStatus error = AudioComponentInstanceNew(defaultOutputComponent, &stream->audioUnit);
+			OSStatus error = AudioComponentInstanceNew(default_output_component, &stream->audio_unit);
 
 			if (!error)
 			{
@@ -125,7 +125,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 				// Bytes per frame * frames per packet
 				want.mBytesPerPacket = want.mBytesPerFrame * want.mFramesPerPacket;
 
-				error = AudioUnitSetProperty(stream->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &want, sizeof(AudioStreamBasicDescription));
+				error = AudioUnitSetProperty(stream->audio_unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &want, sizeof(AudioStreamBasicDescription));
 
 				if (!error)
 				{
@@ -136,12 +136,12 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 					// User data
 					callback.inputProcRefCon = stream;
 
-					error = AudioUnitSetProperty(stream->audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct));
+					error = AudioUnitSetProperty(stream->audio_unit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &callback, sizeof(AURenderCallbackStruct));
 
 					if (!error)
 					{
 						// Initialize the configured AudioUnit instance
-						error = AudioUnitInitialize(stream->audioUnit);
+						error = AudioUnitInitialize(stream->audio_unit);
 
 						if (!error)
 						{
@@ -155,7 +155,7 @@ CLOWNAUDIO_EXPORT ClownAudio_Stream* ClownAudio_StreamCreate(unsigned long *samp
 					}
 				}
 
-				AudioComponentInstanceDispose(stream->audioUnit);
+				AudioComponentInstanceDispose(stream->audio_unit);
 			}
 		}
 
@@ -174,15 +174,15 @@ CLOWNAUDIO_EXPORT bool ClownAudio_StreamDestroy(ClownAudio_Stream *stream)
 		OSStatus error;
 		success = false;
 
-		error = AudioOutputUnitStop(stream->audioUnit);
+		error = AudioOutputUnitStop(stream->audio_unit);
 
 		if (!error)
 		{
-			error = AudioUnitUninitialize(stream->audioUnit);
+			error = AudioUnitUninitialize(stream->audio_unit);
 
 			if (!error)
 			{
-				error = AudioComponentInstanceDispose(stream->audioUnit);
+				error = AudioComponentInstanceDispose(stream->audio_unit);
 
 				if (!error)
 				{
@@ -207,14 +207,14 @@ CLOWNAUDIO_EXPORT void ClownAudio_StreamSetCallbackData(ClownAudio_Stream *strea
 
 CLOWNAUDIO_EXPORT bool ClownAudio_StreamPause(ClownAudio_Stream *stream)
 {
-	OSStatus error = AudioOutputUnitStop(stream->audioUnit);
+	OSStatus error = AudioOutputUnitStop(stream->audio_unit);
 
 	return !error;
 }
 
 CLOWNAUDIO_EXPORT bool ClownAudio_StreamResume(ClownAudio_Stream *stream)
 {
-	OSStatus error = AudioOutputUnitStart(stream->audioUnit);
+	OSStatus error = AudioOutputUnitStart(stream->audio_unit);
 
 	return !error;
 }
