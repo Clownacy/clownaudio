@@ -178,19 +178,24 @@ CLOWNAUDIO_EXPORT bool ClownAudio_StreamDestroy(ClownAudio_Stream *stream)
 
 		if (!error)
 		{
-			error = AudioUnitUninitialize(stream->audio_unit);
+			error = AudioUnitSetProperty(stream->audio_unit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, NULL, 0);
 
 			if (!error)
 			{
-				error = AudioComponentInstanceDispose(stream->audio_unit);
+				error = AudioUnitUninitialize(stream->audio_unit);
 
 				if (!error)
 				{
-					pthread_mutex_destroy(&stream->pthread_mutex);
+					error = AudioComponentInstanceDispose(stream->audio_unit);
 
-					free(stream);
+					if (!error)
+					{
+						pthread_mutex_destroy(&stream->pthread_mutex);
 
-					success = true;
+						free(stream);
+
+						success = true;
+					}
 				}
 			}
 		}
