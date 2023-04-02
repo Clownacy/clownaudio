@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
+include(CMakeDependentOption)
+
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(CLOWNAUDIO_CPP "Compile the library as C++ instead of C, for compilers that don't support C99 but do support C++98" OFF)
 option(CLOWNAUDIO_LIBVORBIS "Enable the libvorbis decoder backend" OFF)
@@ -15,6 +17,8 @@ option(CLOWNAUDIO_LIBXMP "Enable the libxmp decoder backend" OFF)
 option(CLOWNAUDIO_LIBXMPLITE "Enable the libxmp-lite decoder backend" OFF)
 option(CLOWNAUDIO_PXTONE "Enable the PxTone decoder backend" OFF)
 option(CLOWNAUDIO_SNES_SPC "Enable the snes_spc decoder backend" OFF)
+option(CLOWNAUDIO_OSWRAPPER_AUDIO "Enable the oswrapper_audio backend" OFF)
+cmake_dependent_option(CLOWNAUDIO_OSWRAPPER_AUDIO_HINT_RESAMPLE "Hint oswrapper_audio to resample files during decoding" OFF "CLOWNAUDIO_OSWRAPPER_AUDIO" OFF)
 option(CLOWNAUDIO_CLOWNRESAMPLER "Enable the experimental new resampler" OFF)
 option(CLOWNAUDIO_MIXER_ONLY "Disables playback capabilities" OFF)
 if(NOT CLOWNAUDIO_MIXER_ONLY)
@@ -223,6 +227,19 @@ if(CLOWNAUDIO_SNES_SPC)
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.cpp"
 		"src/decoding/decoders/libs/snes_spc-0.9.0/snes_spc/SPC_Filter.h"
 	)
+endif()
+
+if(CLOWNAUDIO_OSWRAPPER_AUDIO)
+	target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_OSWRAPPER_AUDIO)
+	if(CLOWNAUDIO_OSWRAPPER_AUDIO_HINT_RESAMPLE)
+		target_compile_definitions(clownaudio PRIVATE CLOWNAUDIO_OSWRAPPER_AUDIO_HINT_RESAMPLE)
+	endif()
+	list(APPEND C_AND_CPP_SOURCES "src/decoding/decoders/oswrapper_audio.c")
+	target_sources(clownaudio PRIVATE "src/decoding/decoders/oswrapper_audio.h")
+	if(APPLE)
+		find_library(AUDIOTOOLBOX_LIBRARY AudioToolbox)
+		target_link_libraries(clownaudio PRIVATE "${AUDIOTOOLBOX_LIBRARY}")
+	endif()
 endif()
 
 
