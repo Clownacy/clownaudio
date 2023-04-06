@@ -27,6 +27,16 @@
 #include "clownaudio/mixer.h"
 #include "clownaudio/playback.h"
 
+#ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+/* oswrapper_audio requires the COM library on Windows */
+#include <objbase.h>
+#endif
+
+#define OSWRAPPER_AUDIO_NO_LOAD_FROM_PATH
+#include "decoding/decoders/libs/OSWrapper/oswrapper_audio.h"
+#endif
+
 static ClownAudio_Stream *stream;
 static ClownAudio_Mixer *mixer;
 
@@ -54,6 +64,14 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 			{
 				ClownAudio_StreamResume(stream);
 
+			#ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
+			#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+				/* oswrapper_audio requires the COM library on Windows */
+				CoInitializeEx(NULL, COINIT_MULTITHREADED);
+			#endif
+				oswrapper_audio_init();
+			#endif
+
 				return true;
 			}
 
@@ -72,6 +90,13 @@ CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void)
 	ClownAudio_Mixer_Destroy(mixer);
 	ClownAudio_StreamDestroy(stream);
 	ClownAudio_DeinitPlayback();
+
+#ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
+#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+	CoUninitialize();
+#endif
+	oswrapper_audio_uninit();
+#endif
 }
 
 CLOWNAUDIO_EXPORT ClownAudio_SoundData* ClownAudio_SoundDataLoadFromMemory(const unsigned char *file_buffer1, size_t file_size1, const unsigned char *file_buffer2, size_t file_size2, ClownAudio_SoundDataConfig *config)

@@ -239,6 +239,8 @@ if(CLOWNAUDIO_OSWRAPPER_AUDIO)
 	if(APPLE)
 		find_library(AUDIOTOOLBOX_LIBRARY AudioToolbox)
 		target_link_libraries(clownaudio PRIVATE "${AUDIOTOOLBOX_LIBRARY}")
+	elseif(WIN32)
+		target_link_libraries(clownaudio PRIVATE mfplat mfreadwrite shlwapi)
 	endif()
 endif()
 

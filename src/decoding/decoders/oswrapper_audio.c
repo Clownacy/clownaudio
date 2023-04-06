@@ -22,7 +22,6 @@ PERFORMANCE OF THIS SOFTWARE.
 #include <stdlib.h>
 
 #define OSWRAPPER_AUDIO_NO_LOAD_FROM_PATH
-#define OSWRAPPER_AUDIO_STATIC
 #define OSWRAPPER_AUDIO_IMPLEMENTATION
 #include "libs/OSWrapper/oswrapper_audio.h"
 
