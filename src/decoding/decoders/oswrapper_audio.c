@@ -40,14 +40,20 @@ void* Decoder_OSWRAPPER_AUDIO_Create(const unsigned char *data, size_t data_size
 #endif
 		audio_spec->channel_count = wanted_spec->channel_count;
 		audio_spec->bits_per_channel = 16;
+		audio_spec->audio_type = OSWRAPPER_AUDIO_FORMAT_PCM_INTEGER;
 
 		if (oswrapper_audio_load_from_memory(data, data_size, audio_spec))
 		{
-			spec->sample_rate = audio_spec->sample_rate;
-			spec->channel_count = audio_spec->channel_count;
-			spec->is_complex = false;
+			if (audio_spec->audio_type == OSWRAPPER_AUDIO_FORMAT_PCM_INTEGER && audio_spec->bits_per_channel == 16)
+			{
+				spec->sample_rate = audio_spec->sample_rate;
+				spec->channel_count = audio_spec->channel_count;
+				spec->is_complex = false;
 
-			return audio_spec;
+				return audio_spec;
+			}
+
+			oswrapper_audio_free_context(audio_spec);
 		}
 
 		free(audio_spec);
