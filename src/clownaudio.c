@@ -87,7 +87,10 @@ CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void)
 
 #ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
 	if (is_oswrapper_audio_loaded)
+	{
 		oswrapper_audio_uninit();
+		is_oswrapper_audio_loaded = false;
+	}
 #endif
 }
 
