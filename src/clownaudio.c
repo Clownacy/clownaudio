@@ -28,10 +28,9 @@
 #include "clownaudio/playback.h"
 
 #ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
-static bool is_oswrapper_audio_loaded = false;
-
 #define OSWRAPPER_AUDIO_MANAGE_COINIT
 #define OSWRAPPER_AUDIO_NO_LOAD_FROM_PATH
+#include "decoding/decoders/oswrapper_audio.h"
 #include "decoding/decoders/libs/OSWrapper/oswrapper_audio.h"
 #endif
 

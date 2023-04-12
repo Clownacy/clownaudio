@@ -27,8 +27,13 @@ PERFORMANCE OF THIS SOFTWARE.
 
 #include "common.h"
 
+bool is_oswrapper_audio_loaded = false;
+
 void* Decoder_OSWRAPPER_AUDIO_Create(const unsigned char *data, size_t data_size, bool loop, const DecoderSpec *wanted_spec, DecoderSpec *spec)
 {
+	if (!is_oswrapper_audio_loaded)
+		return NULL;
+
 	OSWrapper_audio_spec *audio_spec = (OSWrapper_audio_spec*)calloc(1, sizeof(OSWrapper_audio_spec));
 
 	(void)loop;
