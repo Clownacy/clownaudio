@@ -28,11 +28,9 @@
 #include "clownaudio/playback.h"
 
 #ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-/* oswrapper_audio requires the COM library on Windows */
-#include <objbase.h>
-#endif
+static bool is_oswrapper_audio_loaded = false;
 
+#define OSWRAPPER_AUDIO_MANAGE_COINIT
 #define OSWRAPPER_AUDIO_NO_LOAD_FROM_PATH
 #include "decoding/decoders/libs/OSWrapper/oswrapper_audio.h"
 #endif
@@ -65,11 +63,8 @@ CLOWNAUDIO_EXPORT bool ClownAudio_Init(void)
 				ClownAudio_StreamResume(stream);
 
 			#ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
-			#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-				/* oswrapper_audio requires the COM library on Windows */
-				CoInitializeEx(NULL, COINIT_MULTITHREADED);
-			#endif
-				oswrapper_audio_init();
+				if (oswrapper_audio_init())
+					is_oswrapper_audio_loaded = true;
 			#endif
 
 				return true;
@@ -92,10 +87,8 @@ CLOWNAUDIO_EXPORT void ClownAudio_Deinit(void)
 	ClownAudio_DeinitPlayback();
 
 #ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
-#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
-	CoUninitialize();
-#endif
-	oswrapper_audio_uninit();
+	if (is_oswrapper_audio_loaded)
+		oswrapper_audio_uninit();
 #endif
 }
 
