@@ -64,6 +64,9 @@
 #ifdef CLOWNAUDIO_SNES_SPC
 #include "decoders/snes_spc.h"
 #endif
+#ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
+#include "decoders/oswrapper_audio.h"
+#endif
 
 #define DECODER_FUNCTIONS(name) \
 { \
@@ -144,6 +147,9 @@ static const DecoderFunctions decoder_function_list[] = {
 #endif
 #ifdef CLOWNAUDIO_SNES_SPC
 	DECODER_FUNCTIONS(SNES_SPC),
+#endif
+#ifdef CLOWNAUDIO_OSWRAPPER_AUDIO
+	DECODER_FUNCTIONS(OSWRAPPER_AUDIO),
 #endif
 };
 

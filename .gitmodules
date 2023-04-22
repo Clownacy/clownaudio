@@ -1,3 +1,6 @@
 [submodule "src/decoding/clownresampler"]
 	path = src/decoding/clownresampler
 	url = https://github.com/Clownacy/clownresampler
+[submodule "src/decoding/decoders/libs/OSWrapper"]
+	path = src/decoding/decoders/libs/OSWrapper
+	url = https://github.com/NeRdTheNed/OSWrapper.git
