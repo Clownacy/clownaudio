@@ -201,7 +201,6 @@ if(CLOWNAUDIO_PXTONE)
 		"src/decoding/decoders/libs/pxtone/pxtoneNoise.cpp"
 		"src/decoding/decoders/libs/pxtone/pxtoneNoise.h"
 	)
-	list(APPEND STATIC_LIBS stdc++)
 endif()
 
 if(CLOWNAUDIO_SNES_SPC)

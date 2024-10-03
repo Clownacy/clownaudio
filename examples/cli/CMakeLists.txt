@@ -6,7 +6,7 @@ option(SUBDIRECTORY "Use clownaudio as a subdirectory, instead of an external pa
 if(COMPILE_AS_CPP)
 	set(LANGUAGES CXX)
 else()
-	set(LANGUAGES C)
+	set(LANGUAGES C CXX)
 endif()
 
 project(clownaudio_test LANGUAGES ${LANGUAGES})
