@@ -3,11 +3,17 @@
 
 #ifdef pxINCLUDE_OGGVORBIS
 
+#ifdef pxINCLUDE_STB_VORBIS
+#define STB_VORBIS_HEADER_ONLY
+#include "../stb_vorbis.c"
+#else
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
+#endif
 
 #include "./pxtnPulse_Oggv.h"
 
+#ifndef pxINCLUDE_STB_VORBIS
 typedef struct
 {
     char*   p_buf; // ogg vorbis-data on memory.s
@@ -77,12 +83,27 @@ static int _mclose_dummy( void* p_void )
 	if( !pom ) return -1;
 	return 0;
 }
-
+#endif
 
 bool pxtnPulse_Oggv::_SetInformation()
 {
 	bool b_ret = false;
 
+#ifdef pxINCLUDE_STB_VORBIS
+	stb_vorbis_info vorbis_info;
+	stb_vorbis* const instance = stb_vorbis_open_memory((const unsigned char*)_p_data, _size, NULL, NULL);
+
+	if (instance == NULL)
+		goto End;
+
+	vorbis_info = stb_vorbis_get_info(instance);
+
+	_ch = vorbis_info.channels;
+	_sps2 = vorbis_info.sample_rate;
+	_smp_num = stb_vorbis_stream_length_in_samples(instance);
+
+	stb_vorbis_close(instance);
+#else
 	OVMEM ovmem;
 	ovmem.p_buf = _p_data;
 	ovmem.pos   =       0;
@@ -118,6 +139,7 @@ bool pxtnPulse_Oggv::_SetInformation()
     
     // end.
     ov_clear( &vf );
+#endif
 
 	b_ret = true;
 
@@ -179,6 +201,15 @@ pxtnERR pxtnPulse_Oggv::Decode( pxtnPulse_PCM * p_pcm ) const
 {
 	pxtnERR res = pxtnERR_VOID;
 
+#ifdef pxINCLUDE_STB_VORBIS
+	stb_vorbis_info vorbis_info;
+	stb_vorbis* const instance = stb_vorbis_open_memory((const unsigned char*)_p_data, _size, NULL, NULL);
+
+	if (instance == NULL)
+		goto term;
+
+	vorbis_info = stb_vorbis_get_info(instance);
+#else
 	OggVorbis_File vf;
 	vorbis_info*   vi;
 	ov_callbacks   oc; 
@@ -206,16 +237,27 @@ pxtnERR pxtnPulse_Oggv::Decode( pxtnPulse_PCM * p_pcm ) const
     }
 
     vi    = ov_info( &vf,-1 );	
+#endif
 	{
+#ifndef pxINCLUDE_STB_VORBIS
 		int32_t current_section;
+#endif
 		char    pcmout[ 4096 ] = {0}; //take 4k out of the data segment, not the stack
 		{
+#ifdef pxINCLUDE_STB_VORBIS
+			int32_t smp_num = (int32_t)stb_vorbis_stream_length_in_samples(instance);
+#else
 			int32_t smp_num = (int32_t)ov_pcm_total( &vf, -1 );
+#endif
 			//uint32_t bytes;
 
 			//bytes = vi->channels * 2 * smp_num;
 
+#ifdef pxINCLUDE_STB_VORBIS
+			res = p_pcm->Create( vorbis_info.channels, vorbis_info.sample_rate, 16, smp_num );
+#else
 			res = p_pcm->Create( vi->channels, vi->rate, 16, smp_num );
+#endif
 			if( res != pxtnOK ) goto term;
 		}
 		// decode..
@@ -224,7 +266,11 @@ pxtnERR pxtnPulse_Oggv::Decode( pxtnPulse_PCM * p_pcm ) const
 			uint8_t  *p  = (uint8_t*)p_pcm->get_p_buf_variable();
 			do
 			{
+#ifdef pxINCLUDE_STB_VORBIS
+				ret = stb_vorbis_get_samples_short_interleaved(instance, vorbis_info.channels, (int16_t*)pcmout, 4096 / 2) * vorbis_info.channels * 2;
+#else
 				ret = ov_read( &vf, pcmout, 4096, 0, 2, 1, &current_section );
+#endif
 				if( ret > 0 ) memcpy( p, pcmout, ret ); //fwrite( pcmout, 1, ret, of );
 				p += ret;
 			}
@@ -233,7 +279,11 @@ pxtnERR pxtnPulse_Oggv::Decode( pxtnPulse_PCM * p_pcm ) const
 	}
     
     // end.
+#ifdef pxINCLUDE_STB_VORBIS
+	stb_vorbis_close(instance);
+#else
     ov_clear( &vf );
+#endif
 
 	res = pxtnOK;
 

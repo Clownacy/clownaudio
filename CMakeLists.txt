@@ -202,8 +202,12 @@ if(CLOWNAUDIO_PXTONE)
 		"src/decoding/decoders/libs/pxtone/pxtoneNoise.h"
 	)
 	# Apparently PxTone supports Vorbis-encoded samples.
-	if(CLOWNAUDIO_LIBVORBIS)
+	if(CLOWNAUDIO_LIBVORBIS OR CLOWNAUDIO_STB_VORBIS)
 		target_compile_definitions(clownaudio PRIVATE pxINCLUDE_OGGVORBIS)
+	endif()
+	# Apparently PxTone supports Vorbis-encoded samples.
+	if(CLOWNAUDIO_STB_VORBIS)
+		target_compile_definitions(clownaudio PRIVATE pxINCLUDE_STB_VORBIS)
 	endif()
 endif()
 
