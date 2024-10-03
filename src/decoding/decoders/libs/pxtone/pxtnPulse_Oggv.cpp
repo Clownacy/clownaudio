@@ -83,6 +83,16 @@ static int _mclose_dummy( void* p_void )
 	if( !pom ) return -1;
 	return 0;
 }
+
+static bool IsBigEndian()
+{
+	const union
+	{
+		uint32_t full;
+		uint16_t halves[2];
+	} endian_tester = {0xFFFF0000};
+	return endian_tester.halves[0] == 0xFFFF;
+}
 #endif
 
 bool pxtnPulse_Oggv::_SetInformation()
@@ -269,7 +279,7 @@ pxtnERR pxtnPulse_Oggv::Decode( pxtnPulse_PCM * p_pcm ) const
 #ifdef pxINCLUDE_STB_VORBIS
 				ret = stb_vorbis_get_samples_short_interleaved(instance, vorbis_info.channels, (int16_t*)pcmout, 4096 / 2) * vorbis_info.channels * 2;
 #else
-				ret = ov_read( &vf, pcmout, 4096, 0, 2, 1, &current_section );
+				ret = ov_read( &vf, pcmout, 4096, IsBigEndian(), 2, 1, &current_section );
 #endif
 				if( ret > 0 ) memcpy( p, pcmout, ret ); //fwrite( pcmout, 1, ret, of );
 				p += ret;
