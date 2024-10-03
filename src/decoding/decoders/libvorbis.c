@@ -139,8 +139,12 @@ size_t Decoder_libVorbis_GetSamples(void *decoder_void, short *buffer, size_t fr
 	Decoder_libVorbis *decoder = (Decoder_libVorbis*)decoder_void;
 
 	const size_t size_of_frame = sizeof(ogg_int16_t) * decoder->channel_count;
-	const ogg_uint32_t endian_tester = 0x0000FFFF;
-	const int is_big_endian = *(*ogg_uint16_t)endian_tester != 0;
+	const union
+	{
+		ogg_uint32_t full;
+		ogg_uint16_t halves[2];
+	} endian_tester = {0x0000FFFF};
+	const int is_big_endian = endian_tester.halves[0] != 0;
 
 	return ov_read(&decoder->vorbis_file, (char*)buffer, frames_to_do * size_of_frame, is_big_endian, sizeof(ogg_int16_t), 1, NULL) / size_of_frame;
 }
